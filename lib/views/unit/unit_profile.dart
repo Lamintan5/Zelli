@@ -1,0 +1,1720 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:Zelli/home/tabs/payments.dart';
+import 'package:Zelli/main.dart';
+import 'package:Zelli/models/entities.dart';
+import 'package:Zelli/models/payments.dart';
+import 'package:Zelli/models/users.dart';
+import 'package:Zelli/views/property/activities/leases.dart';
+import 'package:Zelli/views/unit/activities/co_tenants.dart';
+import 'package:Zelli/views/unit/tabs/periods.dart';
+import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
+import 'package:Zelli/widgets/text/text_format.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:get/get.dart';
+import 'package:grouped_list/grouped_list.dart';
+import 'package:intl/intl.dart';
+import 'package:line_icons/line_icon.dart';
+import 'package:showcaseview/showcaseview.dart';
+
+import '../../home/actions/chat/message_screen.dart';
+import '../../home/actions/chat/web_chat.dart';
+import '../../home/tabs/report.dart';
+import '../../models/data.dart';
+import '../../models/messages.dart';
+import '../../models/month_model.dart';
+import '../../models/lease.dart';
+import '../../models/units.dart';
+import '../../utils/colors.dart';
+import '../../widgets/buttons/bottom_call_buttons.dart';
+import '../../widgets/buttons/call_actions/double_call_action.dart';
+import '../../widgets/cards/card_button.dart';
+import '../../widgets/cards/row_button.dart';
+import '../../widgets/dialogs/dialog_add_tenant.dart';
+import '../../widgets/dialogs/dialog_edit_unit.dart';
+import '../../widgets/dialogs/dialog_title.dart';
+import '../../widgets/items/item_pay.dart';
+import '../../widgets/profile_images/user_profile.dart';
+
+class UnitProfile extends StatefulWidget {
+  final UnitModel unit;
+  final UserModel user;
+  final Function reload;
+  final Function removeTenant;
+  final Function removeFromList;
+  final String leasid;
+  const UnitProfile({super.key, required this.unit, required this.reload, required this.removeTenant, required this.removeFromList, required this.user, required this.leasid});
+
+  @override
+  State<UnitProfile> createState() => _UnitProfileState();
+}
+
+class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin {
+  late TabController _tabController;
+  late TextEditingController _search;
+  late TextEditingController _searchPay;
+
+
+  EntityModel entity = EntityModel(eid: "");
+  UnitModel unit = UnitModel(id: "");
+  UserModel currentTenant = UserModel(uid: "");
+  LeaseModel currentLease = LeaseModel(lid: "");
+  MonthModel lastPaid = MonthModel(year: 2000, monthName: "Jan", month: 1, amount: 0, balance: 0);
+
+  List<UserModel> _users = [];
+  List<PaymentsModel> _pay = [];
+  List<PaymentsModel> _filtPay = [];
+  List<PaymentsModel> _current = [];
+  List<PaymentsModel> _rent = [];
+  List<PaymentsModel> _deposit = [];
+  List<MonthModel> _accrue = [];
+  List<MonthModel> monthsList = [];
+  List<LeaseModel> _leases = [];
+  List<String> admin = [];
+
+  final _keyOne = GlobalKey();
+  final _keyTwo = GlobalKey();
+  final _keyThree = GlobalKey();
+
+  int floor = 0;
+  int room = 0;
+
+  double deposit = 0;
+  double rent = 0;
+  double paidDeposit = 0;
+  double depoBalance = 0;
+  double accrued = 0;
+
+  late DateTime startDate;
+  late DateTime endDate;
+
+  String start = "";
+  String end = "";
+  String expanded = "";
+  String lid = "";
+
+  bool _loading = false;
+
+  double _position1 = 20.0;
+  double _position2 = 20.0;
+  double _position3 = 20.0;
+  double _position4 = 20.0;
+
+  String image1 = '';
+  String image2 = '';
+  String image3 = '';
+
+  _getData(){
+    _getUnit();
+    _getEntity();
+    _getUser();
+    _getPayments();
+    _listMonth();
+    _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
+    accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
+    lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0);
+    monthsList.forEach((mnth){
+      print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
+    });
+    setState(() {
+    });
+  }
+
+  _getEntity(){
+    entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test)=> test.eid == unit.eid);
+    admin = entity.admin.toString().split(",");
+  }
+
+  _getUser(){
+    _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
+    _leases = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).toList();
+    currentTenant =  widget.user.uid.isNotEmpty
+        ? widget.user
+        :  _users.firstWhere((test) => test.uid == unit.tid, orElse: () => UserModel(uid: ""));
+
+    _leases = _leases.where((test){
+      bool matchLid = lid.isEmpty || test.lid == unit.lid.toString();
+      bool matchTid = currentTenant.uid.isEmpty || test.tid == currentTenant.uid;
+      bool matchUid = unit.id.toString().isEmpty || test.uid.toString().split(",").first == unit.id.toString();
+      return matchLid && matchUid && matchTid;
+    }).toList();
+    currentLease = _leases.isEmpty? LeaseModel(lid: "", tid: "", start: "", end: "") : _leases.last;
+    start = currentLease.start.toString();
+    end = currentLease.end.toString();
+    // _leases.forEach((e){
+    //   print(e.toJson());
+    // });
+  }
+
+  _getUnit(){
+    unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).firstWhere((test) => test.id==widget.unit.id, orElse: ()=>UnitModel(id: "", title: "N/A", tid: ""));
+    floor = int.parse(unit.floor.toString());
+    room = int.parse(unit.room.toString());
+    deposit = double.parse(unit.deposit.toString());
+    rent = double.parse(unit.price.toString());
+
+  }
+
+  _getPayments(){
+    _pay = myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).toList();
+    _pay = _pay.where((test) => test.uid == unit.id).toList();
+    _current = unit.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid).toList();
+    _deposit = unit.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type == "DEPOSIT").toList();
+    _rent = unit.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type ==  "RENT").toList();
+    paidDeposit = _deposit.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
+    depoBalance = deposit - paidDeposit;
+  }
+
+  _listMonth(){
+    DateTime currentMonth = DateTime.now();
+    DateTime firstRentDate =  _rent.isEmpty
+        ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
+        : DateTime.parse(_rent.first.time.toString().split(",").first);
+    DateTime lastRentDate =  _rent.isEmpty
+        ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
+        : DateTime.parse(_rent.last.time.toString().split(",").last);
+    startDate = DateTime(firstRentDate.year, firstRentDate.month, int.parse(entity.due.toString()));
+    endDate = lastRentDate.month < currentMonth.month
+        ?  DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
+        : DateTime(lastRentDate.year, lastRentDate.month, int.parse(entity.due.toString()));
+    monthsList = generateMonthsList(startDate, endDate);
+  }
+
+  // List<MonthModel> generateMonthsLiasst(DateTime startDate, DateTime endDate) {
+  //   List<MonthModel> monthsList = [];
+  //
+  //   for (DateTime date = startDate;
+  //   date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
+  //   date = DateTime(date.year, date.month + 1, date.day)) {
+  //
+  //     double totalAmountPaid = 0;
+  //     double balance = 0;
+  //     print(DateFormat('MMM').format(date));
+  //     // Filter rent payments for the current month
+  //     var currentMonthRentPayments = _rent.where((test) {
+  //       DateTime paymentDate = DateTime.parse(test.time!.split(",").first);
+  //       return test.type == "RENT" &&
+  //           paymentDate.year == date.year &&
+  //           paymentDate.month == date.month;
+  //     }).toList();
+  //
+  //     // Calculate total amount paid for the current month
+  //     totalAmountPaid = currentMonthRentPayments.fold(
+  //       0.0,
+  //           (previous, test) => previous + double.parse(test.amount.toString()),
+  //     );
+  //
+  //     // Handle overpayment and balance calculation
+  //     while (totalAmountPaid > 0) {
+  //       double paymentForThisMonth = rent;
+  //       balance = 0;
+  //
+  //       if (totalAmountPaid < rent) {
+  //         paymentForThisMonth = totalAmountPaid;
+  //         balance = rent - totalAmountPaid;
+  //       }
+  //
+  //       String monthName = DateFormat('MMM').format(date);
+  //       print('Month $monthName: Paid \$${paymentForThisMonth.toStringAsFixed(2)}, Remaining balance: \$${balance.toStringAsFixed(2)}');
+  //       monthsList.add(MonthModel(
+  //         year: date.year,
+  //         monthName: monthName,
+  //         month: date.month,
+  //         amount: paymentForThisMonth,
+  //         balance: balance,
+  //       ));
+  //
+  //       totalAmountPaid -= paymentForThisMonth;
+  //
+  //       if (balance > 0) {
+  //         // If there's a balance, break the while loop, and continue with the same month in the for loop
+  //         break;
+  //       } else {
+  //         // If no balance, move to the next month within the while loop
+  //         date = DateTime(date.year, date.month + 1, date.day);
+  //       }
+  //     }
+  //
+  //     if (balance > 0) {
+  //       // If there's a balance, reset date to the current month to repeat in the next for loop iteration
+  //       date = DateTime(date.year, date.month - 1, date.day);
+  //     }
+  //     // If no balance, the for loop will naturally continue to the next month
+  //   }
+  //
+  //   return monthsList;
+  // }
+
+  List<MonthModel> generateMonthsList(DateTime startDate, DateTime endDate) {
+    List<MonthModel> monthList = [];
+    double remainingBalance = 0.0;
+
+    for (DateTime date = startDate; date.isBefore(endDate) || date.isAtSameMomentAs(endDate); date = DateTime(date.year, date.month + 1, 1)) {
+      double totalAmountPaid = 0.0;
+      double monthlyBalance = rent;
+
+      // Find payments for the current month
+      var currentMonthPayments = _rent.where((payment) {
+        List<String> times = payment.time!.split(',');
+        DateTime paymentStart = DateTime.parse(times.first);
+        DateTime paymentEnd = times.length > 1 ? DateTime.parse(times.last) : paymentStart;
+
+        return (paymentStart.year == date.year && paymentStart.month == date.month) ||
+            (paymentEnd.year == date.year && paymentEnd.month == date.month) ||
+            (paymentStart.isBefore(date) && paymentEnd.isAfter(date));
+      }).toList();
+
+      // Accumulate payments for the month
+      for (var payment in currentMonthPayments) {
+        double paymentAmount = double.parse(payment.amount!);
+
+        if (date.month == DateTime.parse(payment.time!.split(',').first).month &&
+            date.year == DateTime.parse(payment.time!.split(',').first).year) {
+          // Add previous balance to the first payment in the period
+          paymentAmount += remainingBalance;
+        }
+
+        totalAmountPaid += paymentAmount;
+      }
+
+      // Determine the balance for the current month
+      if (totalAmountPaid >= monthlyBalance) {
+        remainingBalance = totalAmountPaid - monthlyBalance;
+        monthlyBalance = 0.0;
+      } else {
+        remainingBalance = 0.0;
+        monthlyBalance -= totalAmountPaid;
+      }
+
+      // Create MonthModel for the current month
+      monthList.add(MonthModel(
+        year: date.year,
+        month: date.month,
+        monthName: DateFormat('MMM').format(date),
+        amount: totalAmountPaid,
+        balance: monthlyBalance,
+      ));
+    }
+
+    return monthList;
+  }
+
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _search = TextEditingController();
+    _searchPay = TextEditingController();
+    lid = widget.leasid;
+    _getData();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _search.dispose();
+    _searchPay.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white10
+        : Colors.black12;
+    final color2 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white24
+        : Colors.black26;
+    final color5 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white54
+        : Colors.black54;
+    final normal = Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
+    final reverse = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+    final dgColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.withOpacity(.4)
+        : Colors.white;
+    final width = 800.0;
+    final style = TextStyle(fontSize: 13, color: secondaryColor);
+    final bold = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: reverse);
+    final activeBlue = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: CupertinoColors.activeBlue);
+    final activeRed = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.red);
+    List filteredTenants = [];
+    if (_search.text.toString() != null && _search.text.isNotEmpty) {
+      _users.where((test) => _leases.any((element) => element.tid == test.uid)).toList().forEach((item) {
+        if (item.firstname.toString().toLowerCase().contains(_search.text.toString().toLowerCase())
+            || item.lastname.toString().toLowerCase().contains(_search.text.toString().toLowerCase())
+            || item.username.toString().toLowerCase().contains(_search.text.toString().toLowerCase()))
+          filteredTenants.add(item);
+      });
+    } else {
+      filteredTenants = _users.where((test) => _leases.any((element) => element.tid == test.uid)).toList();
+    }
+
+    List<PaymentsModel> filteredPayList = [];
+    if (_searchPay.text.toString() != null && _searchPay.text.isNotEmpty) {
+      _current.forEach((item) {
+        if (item.amount.toString().toLowerCase().contains(_searchPay.text.toString().toLowerCase())
+            || item.type.toString().toLowerCase().contains(_searchPay.text.toString().toLowerCase())
+            || item.method.toString().toLowerCase().contains(_searchPay.text.toString().toLowerCase()))
+          filteredPayList.add(item);
+      });
+    } else {
+      filteredPayList = _current;
+    }
+    return Scaffold(
+      body: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                surfaceTintColor: Colors.transparent,
+                backgroundColor: normal,
+                pinned: true,
+                expandedHeight: currentTenant.uid==""? 220 :290,
+                toolbarHeight: 35,
+                title: Text(entity.title!),
+                actions: [
+                  InkWell(
+                    onTap: (){},
+                    hoverColor: color1,
+                    borderRadius: BorderRadius.circular(5),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.filter_list),
+                    ),
+                  ),
+                  SizedBox(width: 5,),
+                  Showcase(
+                    key: _keyThree,
+                    description: 'Get more options',
+                    child: buildButton(),
+                    tooltipBackgroundColor: dgColor,
+                    textColor: reverse,
+                    tooltipPadding: EdgeInsets.symmetric(vertical: 3, horizontal: 5 ),
+                    tooltipBorderRadius: BorderRadius.circular(5),
+                    descTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
+                  )
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: 40),
+                        Row(
+                          children: [
+                            Stack(
+                              children: [
+                                Container(
+                                  width: 100,
+                                  height: 100,
+                                  margin: EdgeInsets.symmetric(vertical: 5),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                          color: unit.tid==""&&currentTenant.uid==""?CupertinoColors.activeBlue:color1,
+                                          width: 1
+                                      ),
+                                      color: unit.tid==""&&currentTenant.uid==""?CupertinoColors.activeBlue:color1
+                                  ),
+                                  child: Center(child: Text(unit.title.toString(), style: TextStyle(fontWeight: FontWeight.w600),)),
+                                ),
+                                Positioned(
+                                    right: 5,
+                                    bottom: 8,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                            ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
+                                            : unit.checked.toString().contains("EDIT")
+                                            ? Icon(Icons.edit, color: Colors.red,size: 20,)
+                                            : unit.checked == "false"
+                                            ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
+                                            : SizedBox(),
+                                        SizedBox(width: 3,),
+                                        currentTenant.uid==""
+                                            ? SizedBox()
+                                            : UserProfile(image: currentTenant.image.toString(), radius: 10,)
+                                      ],
+                                    )
+                                )
+                              ],
+                            ),
+                            SizedBox(width: 10,),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  unit.tid==""
+                                      ? Text(
+                                          entity.title!.toUpperCase(),
+                                            style: TextStyle(fontWeight: FontWeight.w700)
+                                        )
+                                      : Text(currentTenant.username.toString().toUpperCase(),
+                                          style: TextStyle(fontWeight: FontWeight.w700),
+                                        ),
+                                  Text(
+                                      floor == 0
+                                        ? "GROUND FLOOR"
+                                        : "${TFormat().getOrdinal(floor)} FLOOR"
+                                  ),
+                                  Text(
+                                      room == 0
+                                          ? "STUDIO"
+                                          : "${room} BEDROOM"
+                                  ),
+                                  currentTenant.uid==""
+                                      ? SizedBox()
+                                      : Wrap(
+                                    runSpacing: 5,
+                                    spacing: 5,
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(5),
+                                            color: color1
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Icon(CupertinoIcons.mail, color: color5,size: 13,),
+                                            SizedBox(width: 2,),
+                                            Text(
+                                              currentTenant.email.toString(),
+                                              style: TextStyle(color: color5,fontSize: 12),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      currentTenant.phone.toString() == "" ? SizedBox() : Container(
+                                        padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(5),
+                                            color: color1
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(CupertinoIcons.phone, color: color5,size:  13),
+                                            SizedBox(width: 2,),
+                                            Text(
+                                              currentTenant.phone.toString(),
+                                              style: TextStyle(color: color5,fontSize: 12),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(height: 3,),
+                                ],
+                              ),
+                            ),
+                            InkWell(
+                              onTap: (){
+                                Get.to(()=>CoTenants(unit: unit, lease: currentLease),transition: Transition.rightToLeft);
+                              },
+                              borderRadius: BorderRadius.circular(5),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Tooltip(
+                                    message: 'Click here to see all co-tenants',
+                                    child: Container(
+                                      width: 60,
+                                      height: 20,
+                                      child: Stack(
+                                        children: [
+                                          AnimatedPositioned(
+                                            left: _position1,
+                                            duration: Duration(seconds: 1),
+                                            curve: Curves.easeInOut,
+                                            child:  UserProfile(image: image3,radius: 10, shadow: Colors.black54,),
+                                          ),
+                                          AnimatedPositioned(
+                                            left: _position2,
+                                            duration: Duration(seconds: 1),
+                                            curve: Curves.easeInOut,
+                                            child: UserProfile(image: image2,radius: 10, shadow: Colors.black54,),
+                                          ),
+                                          AnimatedPositioned(
+                                            left: _position3,
+                                            duration: Duration(seconds: 1),
+                                            curve: Curves.easeInOut,
+                                            child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
+                                          ),
+                                          !admin.contains(currentUser.uid) ? SizedBox() : AnimatedPositioned(
+                                            left: _position4,
+                                            duration: Duration(seconds: 1),
+                                            curve: Curves.easeInOut,
+                                            child: CircleAvatar(
+                                              radius: 10,
+                                              backgroundColor: reverse,
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.add,
+                                                  size: 15,
+                                                  color: normal,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Text('Co-Tenants', overflow: TextOverflow.ellipsis, style: TextStyle(color: secondaryColor, fontSize: 10),)
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        currentTenant.uid==""
+                            ? SizedBox()
+                            : Row(
+                          children: [
+                            start.isEmpty? SizedBox() : Container(
+                              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: color1
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(CupertinoIcons.play_arrow , color: color5,size: 12,),
+                                  SizedBox(width: 2,),
+                                  Text(
+                                    "Begin : ${DateFormat.yMMMEd().format(DateTime.parse(start))}",
+                                    style: TextStyle(color: color5,fontSize: 12),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 5,),
+                            end.isEmpty? SizedBox() :  Container(
+                              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: color1
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(CupertinoIcons.stop , color: color5,size: 12,),
+                                  SizedBox(width: 2,),
+                                  Text(
+                                    "End : ${DateFormat.yMMMEd().format(DateTime.parse(end))}",
+                                    style: TextStyle(color: color5,fontSize: 12),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        currentTenant.uid==""
+                            ? SizedBox()
+                            : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Platform.isAndroid || Platform.isIOS
+                                ?  CardButton(
+                                text: "PHONE",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.phone, color: normal,size: 20),
+                                onTap: (){
+                                  if(currentTenant.phone.toString()==""){
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(Data().noPhone),
+                                            width: 500,
+                                        )
+                                    );
+                                  }
+                                  FlutterPhoneDirectCaller.callNumber(currentTenant.phone!);
+                                }
+                            )
+                                :  SizedBox(),
+                            CardButton(
+                                text: "CHAT",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.bubble_left, color: normal,size: 20),
+                                onTap: (){
+                                  Platform.isAndroid || Platform.isIOS
+                                      ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: currentTenant), transition: Transition.rightToLeft)
+                                      : Get.to(() => WebChat(selected: currentTenant), transition: Transition.rightToLeft);
+                                }
+                            ),
+                            currentTenant.uid!=unit.tid
+                                ? SizedBox()
+                                : CardButton(
+                                text:
+                                "RENT",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.house,color: normal,size: 20),
+                                onTap: (){
+                                  dialogRecordPayments(context, "RENT",accrued);
+                                }
+                            ),
+                            currentTenant.uid!=unit.tid
+                                ? SizedBox()
+                                : paidDeposit < deposit
+                                ?  CardButton(
+                                text:
+                                "DEPOSIT",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.lock, color: normal,size: 20,),
+                                onTap: (){
+                                  dialogRecordPayments(context, "DEPOSIT",depoBalance);
+                                }
+                            )
+                                :entity.utilities == ""
+                                ? CardButton(
+                                text: "REPAIRS",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.gear, color: normal,size: 20),
+                                onTap: (){
+                                  // dialogUtil(context);
+
+                                }
+                            )
+                                : CardButton(
+                                text: "UTILITY",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.lightbulb, color: normal,size: 20),
+                                onTap: (){
+                                  // dialogUtil(context);
+                                }
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        currentTenant.uid!=unit.tid
+                            ?RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "This lease was terminated on ",
+                                    style: style
+                                  ),
+                                  TextSpan(
+                                   text: end.isEmpty? "" : DateFormat.yMMMEd().format(DateTime.parse(end)),
+                                    style: bold
+                                  )
+                                ]
+                              )
+                            )
+                            :unit.tid == ""
+                            ? RichText(
+                              textAlign: TextAlign.center,
+                              text:TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "This unit is currently available for lease. Wish to ",
+                                      style: style
+                                    ),
+
+                                    WidgetSpan(
+                                        child: InkWell(
+                                          onTap: (){
+                                            dialogAddTenant(context);
+                                          },
+                                          child: Text("Add Tenant", style: activeBlue,
+                                          )
+                                        )
+                                    ),
+                                    ]
+                                )
+                              )
+                            : RichText(
+                            textAlign: TextAlign.center,
+                            text: paidDeposit < deposit
+                                ? TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: depoBalance < deposit? "Record " : "The anticipated ",
+                                  style: style
+                                ),
+                                TextSpan(
+                                  text: "security deposit ",
+                                  style: bold
+                                ),
+                                TextSpan(
+                                    text: depoBalance < deposit? "balance of " : "amount is ",
+                                    style: style
+                                ),
+                                WidgetSpan(
+                                    child: InkWell(
+                                      onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance);},
+                                      child: Text(
+                                          "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
+                                          style: activeBlue
+                                      ),
+                                    )
+                                ),
+                              ]
+                            )
+                                : TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: "The rent has accrued by ",
+                                      style: style
+                                    ),
+                                    WidgetSpan(
+                                        child: InkWell(
+                                          onTap: (){},
+                                          child: Text(
+                                              "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
+                                              style: activeRed,
+                                          ),
+                                        )
+                                    ),
+                                    TextSpan(
+                                        text: _accrue.length < 2? "" : " over the past ",
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: _accrue.length < 2? "" :"${_accrue.length} ",
+                                        style: bold
+                                    ),
+                                    TextSpan(
+                                        text: _accrue.length < 2? "" : "months",
+                                        style: style
+                                    ),
+                                  ]
+                                )
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(40),
+                  child: currentTenant.uid==""
+                      ? Row(
+                        children: [
+                          SizedBox(width: 10,),
+                          Icon(CupertinoIcons.doc_text, size: 20,),
+                          Text(
+                            '  Leases' ,
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      )
+                      : Container(
+                    width: 500,
+                    height: 30,
+                    margin: EdgeInsets.only(left: 10, bottom: 0),
+                    child: TabBar(
+                      controller: _tabController,
+                      labelColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                      indicatorWeight: 3,
+                      labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                      unselectedLabelStyle: const TextStyle(fontSize: 15),
+                      labelPadding:  EdgeInsets.zero,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorPadding: const EdgeInsets.symmetric(horizontal: 10,),
+                      unselectedLabelColor: Colors.grey,
+                      indicatorColor: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                      splashBorderRadius: const BorderRadius.all(Radius.circular(10)),
+                      tabs: const [
+                        Tab(text: 'Rent',),
+                        Tab(text: 'Payments',),
+                        Tab(text: 'Periods'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: currentTenant.uid==""
+                    ? Container(
+                      height: MediaQuery.of(context).size.height - 35,
+                      child: Column(
+                        children: [
+                          SizedBox(height: 10),
+                          Container(
+                            width: 500,
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: TextFormField(
+                              controller: _search,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                hintText: "🔎 Search for tenants...",
+                                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                                fillColor: color1,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: BorderSide.none,
+                                ),
+                                filled: true,
+                                isDense: true,
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
+                              ),
+                              onChanged: (text) => setState(() {}),
+                            ),
+                          ),
+                          Expanded(
+                            child: SizedBox(width: 1000,
+                              child: ListView.builder(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  itemCount: filteredTenants.length,
+                                  itemBuilder: (context, index){
+                                    UserModel user = filteredTenants[index];
+
+                                    List<LeaseModel> _filtTenant = _leases.where((e) => e.tid == user.uid).toList();
+                                    _filtPay = _pay.where((p) => p.tid == user.uid).toList();
+                                    var amount = _filtPay.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
+
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 5.0,),
+                                      child: Column(
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                if(expanded.contains(user.uid)){
+                                                  expanded = "";
+                                                } else {
+                                                  expanded = user.uid;
+                                                }
+                                              });
+                                            },
+                                            hoverColor: color1,
+                                            borderRadius: BorderRadius.circular(5),
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+                                              child: Row(
+                                                children: [
+                                                  UserProfile(image: user.image.toString()),
+                                                  SizedBox(width: 10,),
+                                                  Expanded(
+                                                    child: Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text(user.username.toString()),
+                                                        Text(
+                                                          '${user.firstname} ${user.lastname}',
+                                                          style: TextStyle(color: secondaryColor, fontSize: 12),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Column(
+                                                    children: [
+                                                      Text(
+                                                        admin.contains(user.uid)? "Admin" : "",
+                                                        style: TextStyle(fontSize: 12, color: Colors.green),
+                                                      ),
+                                                      Wrap(
+                                                        runSpacing: 5,
+                                                        spacing: 5,
+                                                        children: [
+                                                          Container(
+                                                            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
+                                                            decoration: BoxDecoration(
+                                                                color: color1,
+                                                                borderRadius: BorderRadius.circular(5)
+                                                            ),
+                                                            child: Row(
+                                                              children: [
+                                                                LineIcon.wallet(size: 12,color: secondaryColor,),
+                                                                SizedBox(width: 5,),
+                                                                Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}', style: TextStyle(fontSize: 11, color: secondaryColor),)
+                                                              ],
+                                                            ),
+                                                          ),
+
+                                                          _filtTenant.length < 2? SizedBox() :Container(
+                                                            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
+                                                            decoration: BoxDecoration(
+                                                                color: color1,
+                                                                borderRadius: BorderRadius.circular(5)
+                                                            ),
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(CupertinoIcons.doc_text ,size: 12,color: secondaryColor,),
+                                                                SizedBox(width: 5,),
+                                                                Text('${_filtTenant.length} leases', style: TextStyle(fontSize: 11, color: secondaryColor),)
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                  SizedBox(width: 10,),
+                                                  _loading
+                                                      ? Container(
+                                                      margin: EdgeInsets.only(right: 10),
+                                                      width: 20, height: 20,
+                                                      child: CircularProgressIndicator(color: reverse, strokeWidth: 3)
+                                                  )
+                                                      : SizedBox(),
+                                                  user.uid==currentUser.uid
+                                                      ? SizedBox()
+                                                      : AnimatedRotation(
+                                                    duration: Duration(milliseconds: 500),
+                                                    turns: expanded == user.uid ? 0.5 : 0.0,
+                                                    child: Icon(Icons.keyboard_arrow_down, color: secondaryColor,),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          user.uid==currentUser.uid
+                                              ?  SizedBox()
+                                              :  AnimatedSize(
+                                            duration: Duration(milliseconds: 500),
+                                            alignment: Alignment.topCenter,
+                                            curve: Curves.easeInOut,
+                                            child: expanded ==user.uid
+                                                ? Column(
+                                              children: [
+                                                SizedBox(height: 5,),
+                                                IntrinsicHeight(
+                                                  child: Row(
+                                                    children: [
+                                                      BottomCallButtons(
+                                                          onTap: () {
+                                                            dialogLeases(context, user, _filtTenant);
+                                                          },
+                                                          icon: Icon(CupertinoIcons.doc_text ,
+                                                              color: secondaryColor),
+                                                          actionColor: secondaryColor,
+                                                          backColor: Colors.transparent,
+                                                          title: "Leases"
+                                                      ),
+                                                      Padding(
+                                                        padding: EdgeInsets.symmetric(vertical: 10),
+                                                        child: VerticalDivider(
+                                                          thickness: 1,
+                                                          width: 15,
+                                                          color: secondaryColor,
+                                                        ),
+                                                      ),
+                                                      BottomCallButtons(
+                                                          onTap: () {
+                                                            Get.to(()=>Payments(eid: entity.eid, unitid: unit.id.toString(), tid: "", lid: currentLease.lid,),transition: Transition.rightToLeft);
+                                                          },
+                                                          icon: LineIcon.wallet(color: secondaryColor,),
+                                                          actionColor: secondaryColor,
+                                                          backColor: Colors.transparent,
+                                                          title: "Payments"),
+
+                                                      Platform.isAndroid || Platform.isIOS ? Padding(
+                                                        padding: EdgeInsets.symmetric(vertical: 10),
+                                                        child: VerticalDivider(
+                                                          thickness: 1,
+                                                          width: 15,
+                                                          color: secondaryColor,
+                                                        ),
+                                                      ) : SizedBox(),
+                                                      Platform.isAndroid || Platform.isIOS? BottomCallButtons(
+                                                          onTap: () {
+                                                            if(user.phone.toString()==""){
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(Data().noPhone),
+                                                                    width: 500,
+                                                                    showCloseIcon: true,
+                                                                  )
+                                                              );
+                                                            } else {
+                                                              _callNumber(user.phone.toString());
+                                                            }
+                                                          },
+                                                          icon: Icon(
+                                                            CupertinoIcons.phone,
+                                                            color: secondaryColor,
+                                                          ),
+                                                          actionColor: secondaryColor,
+                                                          backColor: Colors.transparent,
+                                                          title: "Call") : SizedBox(),
+                                                      Padding(
+                                                        padding: EdgeInsets.symmetric(vertical: 10),
+                                                        child: VerticalDivider(
+                                                          thickness: 1,
+                                                          width: 15,
+                                                          color: secondaryColor,
+                                                        ),
+                                                      ),
+                                                      BottomCallButtons(
+                                                          onTap: () {
+                                                            Platform.isAndroid || Platform.isIOS
+                                                                ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: user), transition: Transition.rightToLeft)
+                                                                : Get.to(() => WebChat(selected: user), transition: Transition.rightToLeft);
+                                                          },
+                                                          icon: Icon(
+                                                            CupertinoIcons.ellipses_bubble,
+                                                            color: secondaryColor,
+                                                          ),
+                                                          actionColor: secondaryColor,
+                                                          backColor: Colors.transparent,
+                                                          title: "Message"
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                                : SizedBox(),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                  }),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    : Container(
+                  height: MediaQuery.of(context).size.height - 35,
+                  child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        Column(
+                          children: [
+                            Expanded(
+                              child: SizedBox(width: width,
+                                child: GroupedListView(
+                                  physics: BouncingScrollPhysics(),
+                                  padding: EdgeInsets.all(5),
+                                  order: GroupedListOrder.DESC,
+                                  elements: monthsList,
+                                  groupBy: (months) => DateTime(
+                                      months.year
+                                  ),
+                                  groupHeaderBuilder: (MonthModel months) {
+                                    final year = months.year.toString();
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Divider(
+                                              thickness: 0.5,
+                                              height: 0.5,
+                                              color: reverse,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                            decoration: BoxDecoration(
+                                              color: color2,
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Text(
+                                              year,
+                                              style: TextStyle(fontSize: 10),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Divider(
+                                              thickness: 0.5,
+                                              height: 0.5,
+                                              color: reverse,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  indexedItemBuilder : (BuildContext context, MonthModel month, int index) {
+                                    var amount = double.parse(month.amount.toString());
+                                    var balance = double.parse(month.amount.toString());
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+                                      child: InkWell(
+                                        onTap: (){
+                                          // dialogPayStatements(context, "RENT", current, double.parse(widget.unit.price!) - amount, month);
+                                        },
+                                        borderRadius: BorderRadius.circular(5),
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                                          decoration: BoxDecoration(
+                                              color: color1,
+                                              borderRadius: BorderRadius.circular(5)
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                amount == 0
+                                                    ? CupertinoIcons.circle
+                                                    : amount < double.parse(widget.unit.price!)
+                                                    ? CupertinoIcons.circle_lefthalf_fill
+                                                    :CupertinoIcons.check_mark_circled,
+                                                size: 20,
+                                                color: amount == double.parse(widget.unit.price!)? Colors.green :secondaryColor,
+                                              ),
+                                              SizedBox(width: 10,),
+                                              Text(
+                                                DateFormat.MMMM().format(DateTime(month.year, month.month)).toUpperCase(),
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.w600,fontSize: 15
+                                                ),
+                                              ),
+                                              Expanded(child: SizedBox()),
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: [
+                                                  Text(
+                                                    '${amount<=0?"":"+"}${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}',
+                                                    style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: amount<=0?secondaryColor:CupertinoColors.activeBlue
+                                                    ),
+                                                  ),
+                                                  amount < double.parse(widget.unit.price!)
+                                                      ? Text("Balance : ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(widget.unit.price!) - amount)}",
+                                                        style: TextStyle(color: secondaryColor),)
+                                                      : SizedBox()
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            SizedBox(height: 10,),
+                            Container(
+                              width: 500,
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                              child: TextFormField(
+                                controller: _searchPay,
+                                keyboardType: TextInputType.text,
+                                decoration: InputDecoration(
+                                  hintText: "🔎 Search by amount, account or transaction type",
+                                  hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                                  fillColor: color1,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 10),
+                                ),
+                                onChanged: (text) => setState(() {}),
+                              ),
+                            ),
+                            Expanded(
+                              child: SizedBox(width: 500,
+                                child: GroupedListView(
+                                  physics: BouncingScrollPhysics(),
+                                  padding: EdgeInsets.all(5),
+                                  order: GroupedListOrder.DESC,
+                                  elements: filteredPayList,
+                                  groupBy: (_filterpay) => DateTime(
+                                    DateTime.parse(_filterpay.current.toString()).year,
+                                    DateTime.parse(_filterpay.current.toString()).month,
+                                    DateTime.parse(_filterpay.current.toString()).day,
+                                  ),
+                                  groupHeaderBuilder: (PaymentsModel payment) {
+                                    final now = DateTime.now();
+                                    final today = DateTime(now.year, now.month, now.day);
+                                    final yesterday = today.subtract(Duration(days: 1));
+                                    final time = DateTime.parse(payment.current.toString());
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Divider(
+                                              thickness: 0.5,
+                                              height: 0.5,
+                                              color: reverse,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                            decoration: BoxDecoration(
+                                              color: color2,
+                                              borderRadius: BorderRadius.circular(5),
+                                            ),
+                                            child: Text(
+                                              time.year == now.year && time.month == now.month && time.day == now.day
+                                                  ? 'Today'
+                                                  : time.year == yesterday.year && time.month == yesterday.month && time.day == yesterday.day
+                                                  ? 'Yesterday'
+                                                  : DateFormat.yMMMd().format(time),
+                                              style: TextStyle(fontSize: 10),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Divider(
+                                              thickness: 0.5,
+                                              height: 0.5,
+                                              color: reverse,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  indexedItemBuilder : (BuildContext context, PaymentsModel payment, int index) {
+                                    return ItemPay(payments: payment, removePay: _removePay, from: 'Unit',);
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        PayPeriods(
+                          unit: widget.unit,
+                          entity: entity,
+                          addPay: _addPay,
+                          updatePay: _updatePay,
+                          tenant: LeaseModel(tid: currentTenant.uid, lid: unit.lid.toString()),
+                        )
+                      ]
+                  ),
+                ),
+              )
+            ],
+          )
+      ),
+      endDrawer: Drawer(
+        child: Scaffold(
+          body: SafeArea (
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Options',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20,),
+                  RowButton(onTap: (){
+                    Navigator.pop(context);
+                    dialogEditUnit(context, widget.unit);
+                  } , icon : Icon(CupertinoIcons.pen), title: "Edit Unit",subtitle: ""),
+                  unit.checked.toString().contains("DELETE")
+                      ? RowButton(onTap: ()async{
+                        Navigator.pop(context);
+                        await Data().restoreUnit(context, unit, "DELETE", (){
+                          setState(() {});
+                          _getData();
+                          widget.reload();
+
+                        });
+                      } ,
+                      icon : Icon(CupertinoIcons.restart), title: "Undo",subtitle: "")
+                      : RowButton(onTap: (){
+                    Navigator.pop(context);
+                    dialogRemoveUnit(context, widget.unit);
+                  } ,
+                      icon : Icon(CupertinoIcons.delete), title: "Remove Unit",subtitle: ""),
+                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid
+                      ? SizedBox()
+                      : RowButton(onTap: (){
+                    // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
+                  },
+                      icon : Icon(CupertinoIcons.person_badge_minus), title: "Remove Tenant",subtitle: ""),
+                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid
+                      ? SizedBox()
+                      : RowButton(onTap: (){
+                          Get.to(()=>CoTenants(unit: unit, lease: currentLease),transition: Transition.rightToLeft);
+                      },
+                      icon : Icon(CupertinoIcons.person_2), title: "Co-Tenants",subtitle: ""),
+                  widget.unit.tid.toString() == ''||currentTenant.uid!=unit.tid
+                      ? SizedBox()
+                      : RowButton(onTap: (){
+                    // dialogChargers(context);
+                  },
+                      icon : Icon(CupertinoIcons.money_dollar), title: "Charges",subtitle: ""),
+                  currentTenant.uid!=unit.tid?SizedBox():RowButton(onTap: (){
+                    // dialogMaintain(context);
+                  },
+                      icon : Icon(CupertinoIcons.gear), title: "Maintenance & Repair",subtitle: ""),
+
+                    currentTenant.uid!=unit.tid?SizedBox(): RowButton(onTap: (){
+                        Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
+                      },
+                      icon : Icon(CupertinoIcons.doc_text), title: "Leases",subtitle: ""
+                    ),
+                  RowButton(onTap: (){
+                    Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: "", lid: currentLease.lid,), transition: Transition.rightToLeft);
+                  },
+                      icon : LineIcon.wallet(), title: "Payments",subtitle: ""),
+
+                  RowButton(onTap: (){
+                    Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(),), transition: Transition.rightToLeft);
+                  },
+                      icon : Icon(CupertinoIcons.graph_square), title: "Reports & Analytics",subtitle: "Beta"),
+                  Expanded(child: SizedBox()),
+                  Container(
+                    child: Column(
+                      children: [
+                        Text("Z E L L I", style: TextStyle(fontWeight: FontWeight.w200, fontSize: 10),),
+                        SizedBox(height: 5,),
+                        Text("S T U D I O 5 I V E", style: TextStyle( color: secondaryColor, fontSize: 10),),
+                        SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20,)
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  void dialogAddTenant(BuildContext context){
+    final size = MediaQuery.of(context).size;
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(10),
+              topLeft: Radius.circular(10),
+            )
+        ),
+        isScrollControlled: true,
+        useRootNavigator: true,
+        useSafeArea: true,
+        constraints: BoxConstraints(
+            maxHeight: size.height - 100,
+            minHeight: size.height/2,
+            maxWidth: 500,minWidth: 400
+        ),
+        context: context,
+        builder: (context) {
+          return DialogAddTenant(
+            unit: widget.unit,
+            getUnits: _getData,
+            onUpdateTid: (newTid) {
+              setState(() {
+                widget.unit.tid = newTid;
+              });
+            }, entity: entity,
+          );
+        });
+  }
+  void dialogEditUnit(BuildContext context, UnitModel unitModel){
+    final dilogbg = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white;
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+        alignment: Alignment.center,
+        backgroundColor: dilogbg,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child:  Container(
+          width:450,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "E D I T"),
+              Text(
+                '',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: secondaryColor, ),
+              ),
+              DialogEditUnit(unit: unitModel, reload: _getData,)
+            ],
+          ),
+        ),
+      );
+    });
+  }
+  void dialogRemoveUnit(BuildContext context, UnitModel unitModel){
+    final dilogbg = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white;
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+        alignment: Alignment.center,
+        backgroundColor: dilogbg,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child:  Container(
+          width: 450,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "R E M O V E"),
+              RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Are you sure you wish to remove ",
+                          style: TextStyle(color: secondaryColor, ),
+                        ),
+                        TextSpan(
+                          text: "${unitModel.title} ",
+                        ),
+                        TextSpan(
+                          text: "from your entity completely.",
+                          style: TextStyle(color: secondaryColor, ),
+                        ),
+                      ]
+                  )
+              ),
+              DoubleCallAction(
+                  action: ()async{
+                    await Data().removeUnit(unitModel, widget.reload, context).then((value){
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    });
+                  })
+            ],
+          ),
+        ),
+      );
+    });
+  }
+  void dialogLeases(BuildContext context, UserModel user, List<LeaseModel> leases) {
+    final reverse = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white12
+        : Colors.black12;
+    final normal = Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
+    showDialog(context: context, builder: (context){
+      return Dialog(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5)
+        ),
+        child: Container(
+          width: 450,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "LEASES"),
+              Text(
+                'Select a lease item to view detailed information.',
+                style: TextStyle( color: secondaryColor),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 5,),
+              ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: leases.length,
+                  itemBuilder: (context, index){
+                    LeaseModel lease = leases[index];
+                    UserModel user = _users.firstWhere((test) => test.uid == lease.tid, orElse: ()=>UserModel(uid: ""));
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 5),
+                      child: InkWell(
+                        onTap: (){
+                          Navigator.push(context, (MaterialPageRoute(builder: (context) => ShowCaseWidget(
+                            builder:  (_) => UnitProfile(unit: unit, reload: (){}, removeTenant: (){}, removeFromList: (){}, user: user, leasid: lease.lid,),
+                          ))));
+                        },
+                        splashColor: CupertinoColors.activeBlue,
+                        borderRadius: BorderRadius.circular(5),
+                        hoverColor: color1,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: color1,
+                                child: Icon(CupertinoIcons.doc_text, color: reverse,),
+                              ),
+                              SizedBox(width: 10,),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(" ${unit.title.toString()}"),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
+                                          decoration: BoxDecoration(
+                                              color: color1,
+                                              borderRadius: BorderRadius.circular(5)
+                                          ),
+                                          child: Text("Start : ${DateFormat.yMMMEd().format(DateTime.parse(lease.start.toString()))}" , style: TextStyle(fontSize: 11, color: secondaryColor),),
+                                        ),
+                                        lease.end.toString().isEmpty? SizedBox() : Container(
+                                          padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
+                                          decoration: BoxDecoration(
+                                              color: color1,
+                                              borderRadius: BorderRadius.circular(5)
+                                          ),
+                                          child: Text("End : ${DateFormat.yMMMEd().format(DateTime.parse(lease.end.toString()))}" , style: TextStyle(fontSize: 11, color: secondaryColor),),
+                                        ),
+                                      ],
+                                    )
+
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+  void dialogRecordPayments(BuildContext context,String account, double amount){
+    final reverse = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: Container(
+            width: 450,
+            padding: EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DialogTitle(title: account.split("").join(" ")),
+                RichText(
+                    text: TextSpan(
+                        children: [
+                          TextSpan(
+                              text: "Record ",
+                              style: TextStyle(color: secondaryColor)
+                          ),
+                          TextSpan(
+                              text: "tenant ",
+                              style: TextStyle(color: secondaryColor)
+                          ),
+                          TextSpan(
+                              text: "${account.toLowerCase()} ",
+                              style: TextStyle(color: reverse)
+                          ),
+                          TextSpan(
+                              text: "amount of ",
+                              style: TextStyle(color: secondaryColor,)
+                          ),
+                          TextSpan(
+                              text: "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}.",
+                              style: TextStyle(color: reverse, )
+                          ),
+                        ]
+                    )
+                ),
+                SizedBox(height: 5,),
+                DialogPay(unit: unit, amount: amount, entity: entity, account: account, reload: _getData, lastPaid: lastPaid,)
+              ],
+            ),
+          ),
+        )
+    );
+  }
+
+
+  void _addPay(PaymentsModel paymentsModel, double paid, String account){
+    print("Payment adding");
+    _pay.add(paymentsModel);
+    _rent.add(paymentsModel);
+    _current.add(paymentsModel);
+    setState(() {
+    });
+  }
+  void changeMessage(MessModel messModel){
+  }
+  void _updatePay(String payid){
+    print("Payment updating");
+    _pay.firstWhere((pay) => pay.payid == payid).checked = "true";
+    _current.firstWhere((pay) => pay.payid == payid).checked = "true";
+    _getPayments();
+  }
+  void _removePay(){
+  }
+  void _updateCount(){}
+  void _changeMess(MessModel messModel){}
+
+  _callNumber(String number) async{
+    await FlutterPhoneDirectCaller.callNumber(number);
+  }
+}
+
+class buildButton extends StatelessWidget {
+  const buildButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white10
+        : Colors.black12;
+    return InkWell(
+        onTap: (){
+          Scaffold.of(context).openEndDrawer();
+        },
+        hoverColor: color1,
+        borderRadius: BorderRadius.circular(5),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(Icons.menu),
+        ));
+  }
+}
