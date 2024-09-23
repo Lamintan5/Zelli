@@ -89,7 +89,6 @@ class _DialogPayState extends State<DialogPay> {
               return null;
             },
           ),
-          Text(widget.lastPaid.monthName),
           Row(
             children: [
               Text('Payment Method :  ', style: TextStyle(color: method==null?Theme.of(context).colorScheme.error:secondaryColor),),

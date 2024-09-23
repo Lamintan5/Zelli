@@ -13,7 +13,10 @@ class Payments extends StatefulWidget {
   final String unitid;
   final String tid;
   final String lid;
-  const Payments({super.key, required this.eid, required this.unitid, required this.tid, required this.lid});
+  final String month;
+  final String year;
+  final String type;
+  const Payments({super.key, required this.eid, required this.unitid, required this.tid, required this.lid, this.month = "", this.year = "", this.type =""});
 
   @override
   State<Payments> createState() => _PaymentsState();
@@ -28,7 +31,9 @@ class _PaymentsState extends State<Payments> {
       bool matchesUnit = widget.unitid.isEmpty || test.uid == widget.unitid;
       bool matchesTid = widget.tid.isEmpty || test.tid == widget.tid.toString();
       bool matchesLid = widget.lid.isEmpty || test.lid == widget.lid.toString();
-      return matchesEid && matchesUnit && matchesTid && matchesLid;
+      bool matchesType = widget.type.isEmpty || test.type == widget.type.toString();
+      bool matchesPeriod = widget.month.isEmpty || DateTime.parse(test.time!).month == int.parse(widget.month) && DateTime.parse(test.time!).year == int.parse(widget.year);
+      return matchesEid && matchesUnit && matchesTid && matchesLid && matchesPeriod && matchesType;
     }).toList();
     _pay = widget.eid ==""?_pay
         :_pay.where((test) => test.eid==widget.eid).toList();

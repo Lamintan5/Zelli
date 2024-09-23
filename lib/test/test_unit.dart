@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:Zelli/views/unit/tabs/periods.dart';
 import 'package:Zelli/widgets/items/item_pay.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -799,7 +798,7 @@ class _TestUnitState extends State<TestUnit> with TickerProviderStateMixin {
                             )
                           ],
                         ),
-                        PayPeriods(unit: widget.unit, entity: entity, addPay: _addPay, updatePay: _updatePay, tenant: LeaseModel(tid: crrntTenant.uid, lid: ''),)
+
                       ]
                   ),
                 ),

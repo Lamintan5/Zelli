@@ -54,15 +54,15 @@ class Data{
     ChargeModel(title: "Internet and Cable Fees", message: "If the property provides these services, the associated fees may be part of the tenant's responsibility."),
   ];
   List<UtilModel> utilList = [
-    UtilModel(text: 'Electricity', message: 'The cost of electrical power used within the rented premises.', icon: Icon(Icons.flash_on)),
-    UtilModel(text: 'Water', message: 'Charges for water usage, which can include both water consumption and sewage fees.', icon: LineIcon.water()),
-    UtilModel(text: 'Gas', message: 'If the property uses gas for heating, cooking, or other purposes, tenants may be responsible for the associated costs.', icon: LineIcon.gasPump()),
-    UtilModel(text: 'Heating/Cooling', message: 'In some cases, tenants may have to pay for heating or cooling, especially if the AC is individually metered.', icon: LineIcon.thermometerEmpty()),
-    UtilModel(text: 'Trash/Recycling', message: 'Charges for waste removal and recycling services.', icon: LineIcon.trash()),
-    UtilModel(text: 'Internet/Cable/TV', message: ' If these services are not included in the rent, tenants may need to pay for them separately.', icon: LineIcon.wifi()),
-    UtilModel(text: 'Telephone', message: 'The cost of landline telephone service if it\'s not included in the rent.', icon: LineIcon.phone()),
-    UtilModel(text: 'HOA', message: 'If the property is part of a homeowners association (HOA), tenants may be responsible for associated fees.', icon: LineIcon.userShield()),
-    UtilModel(text: 'Security System Fees', message: 'If the rental property has a security system in place, tenants might be responsible for any associated monitoring or service fees.', icon: LineIcon.alternateShield()),
+    UtilModel(text: 'Electricity', message: 'The cost of electrical power used within the rented premises.', icon: Icon(CupertinoIcons.bolt)),
+    UtilModel(text: 'Water', message: 'Charges for water usage, which can include both water consumption and sewage fees.', icon: Icon(CupertinoIcons.drop)),
+    UtilModel(text: 'Gas', message: 'If the property uses gas for heating, cooking, or other purposes, tenants may be responsible for the associated costs.', icon: Icon(CupertinoIcons.flame)),
+    UtilModel(text: 'Heating/Cooling', message: 'In some cases, tenants may have to pay for heating or cooling, especially if the AC is individually metered.', icon: Icon(CupertinoIcons.thermometer)),
+    UtilModel(text: 'Trash/Recycling', message: 'Charges for waste removal and recycling services.', icon: Icon(CupertinoIcons.trash)),
+    UtilModel(text: 'Internet/Cable/TV', message: ' If these services are not included in the rent, tenants may need to pay for them separately.', icon: Icon(CupertinoIcons.wifi)),
+    UtilModel(text: 'Telephone', message: 'The cost of landline telephone service if it\'s not included in the rent.', icon: Icon(CupertinoIcons.phone)),
+    UtilModel(text: 'HOA', message: 'If the property is part of a homeowners association (HOA), tenants may be responsible for associated fees.', icon: Icon(CupertinoIcons.person_crop_square)),
+    UtilModel(text: 'Security System Fees', message: 'If the rental property has a security system in place, tenants might be responsible for any associated monitoring or service fees.', icon: Icon(CupertinoIcons.lock_shield)),
   ];
   List<MaintainModel> maintainList = [
     MaintainModel(text: "Emergency", maintain: ['Issues requiring immediate attention, such as medical attention , gas leaks, major water leaks, electrical emergencies'], icon: Icon(Icons.local_hospital)),

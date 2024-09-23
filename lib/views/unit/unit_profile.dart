@@ -8,7 +8,6 @@ import 'package:Zelli/models/payments.dart';
 import 'package:Zelli/models/users.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/unit/activities/co_tenants.dart';
-import 'package:Zelli/views/unit/tabs/periods.dart';
 import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:showcaseview/showcaseview.dart';
 
 import '../../home/actions/chat/message_screen.dart';
@@ -28,6 +28,8 @@ import '../../models/messages.dart';
 import '../../models/month_model.dart';
 import '../../models/lease.dart';
 import '../../models/units.dart';
+import '../../models/util.dart';
+import '../../models/utils.dart';
 import '../../utils/colors.dart';
 import '../../widgets/buttons/bottom_call_buttons.dart';
 import '../../widgets/buttons/call_actions/double_call_action.dart';
@@ -37,6 +39,7 @@ import '../../widgets/dialogs/dialog_add_tenant.dart';
 import '../../widgets/dialogs/dialog_edit_unit.dart';
 import '../../widgets/dialogs/dialog_title.dart';
 import '../../widgets/items/item_pay.dart';
+import '../../widgets/items/item_utils_period.dart';
 import '../../widgets/profile_images/user_profile.dart';
 
 class UnitProfile extends StatefulWidget {
@@ -115,7 +118,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _listMonth();
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
-    lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0);
+    lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0, orElse: ()=>MonthModel(year: DateTime.now().year, monthName: "Jan", month: DateTime.now().month, amount: 0, balance: 0));
     monthsList.forEach((mnth){
       print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
     });
@@ -275,18 +278,21 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             date.year == DateTime.parse(payment.time!.split(',').first).year) {
           // Add previous balance to the first payment in the period
           paymentAmount += remainingBalance;
+          remainingBalance = 0;  // Reset the remaining balance after it's used
+          // print("Remain Balance $remainingBalance");
         }
 
-        totalAmountPaid += paymentAmount;
-      }
-
-      // Determine the balance for the current month
-      if (totalAmountPaid >= monthlyBalance) {
-        remainingBalance = totalAmountPaid - monthlyBalance;
-        monthlyBalance = 0.0;
-      } else {
-        remainingBalance = 0.0;
-        monthlyBalance -= totalAmountPaid;
+        // Distribute the payment amount across months, if necessary
+        if (paymentAmount > monthlyBalance) {
+          remainingBalance = paymentAmount - monthlyBalance;
+          totalAmountPaid += monthlyBalance;
+          // print("Remain Balance $remainingBalance");
+          break;  // Stop accumulating payments once the rent is covered
+        } else {
+          totalAmountPaid += paymentAmount;
+          monthlyBalance -= paymentAmount;
+          print("Monthly Balance $monthlyBalance");
+        }
       }
 
       // Create MonthModel for the current month
@@ -295,13 +301,12 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         month: date.month,
         monthName: DateFormat('MMM').format(date),
         amount: totalAmountPaid,
-        balance: monthlyBalance,
+        balance:monthlyBalance,
       ));
     }
 
     return monthList;
   }
-
 
 
   @override
@@ -475,52 +480,52 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                           ? "STUDIO"
                                           : "${room} BEDROOM"
                                   ),
-                                  currentTenant.uid==""
-                                      ? SizedBox()
-                                      : Wrap(
-                                    runSpacing: 5,
-                                    spacing: 5,
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(5),
-                                            color: color1
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            Icon(CupertinoIcons.mail, color: color5,size: 13,),
-                                            SizedBox(width: 2,),
-                                            Text(
-                                              currentTenant.email.toString(),
-                                              style: TextStyle(color: color5,fontSize: 12),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      currentTenant.phone.toString() == "" ? SizedBox() : Container(
-                                        padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(5),
-                                            color: color1
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(CupertinoIcons.phone, color: color5,size:  13),
-                                            SizedBox(width: 2,),
-                                            Text(
-                                              currentTenant.phone.toString(),
-                                              style: TextStyle(color: color5,fontSize: 12),
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  SizedBox(height: 3,),
+                                  Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(rent)}"),
+                                  // currentTenant.uid==""
+                                  //     ? SizedBox()
+                                  //     : Wrap(
+                                  //   runSpacing: 5,
+                                  //   spacing: 5,
+                                  //   children: [
+                                  //     Container(
+                                  //       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                                  //       decoration: BoxDecoration(
+                                  //           borderRadius: BorderRadius.circular(5),
+                                  //           color: color1
+                                  //       ),
+                                  //       child: Row(
+                                  //         mainAxisSize: MainAxisSize.min,
+                                  //         crossAxisAlignment: CrossAxisAlignment.end,
+                                  //         children: [
+                                  //           Icon(CupertinoIcons.mail, color: color5,size: 13,),
+                                  //           SizedBox(width: 2,),
+                                  //           Text(
+                                  //             currentTenant.email.toString(),
+                                  //             style: TextStyle(color: color5,fontSize: 12),
+                                  //           )
+                                  //         ],
+                                  //       ),
+                                  //     ),
+                                  //     currentTenant.phone.toString() == "" ? SizedBox() : Container(
+                                  //       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                                  //       decoration: BoxDecoration(
+                                  //           borderRadius: BorderRadius.circular(5),
+                                  //           color: color1
+                                  //       ),
+                                  //       child: Row(
+                                  //         mainAxisSize: MainAxisSize.min,
+                                  //         children: [
+                                  //           Icon(CupertinoIcons.phone, color: color5,size:  13),
+                                  //           SizedBox(width: 2,),
+                                  //           Text(
+                                  //             currentTenant.phone.toString(),
+                                  //             style: TextStyle(color: color5,fontSize: 12),
+                                  //           )
+                                  //         ],
+                                  //       ),
+                                  //     )
+                                  //   ],
+                                  // ),
                                 ],
                               ),
                             ),
@@ -847,8 +852,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       splashBorderRadius: const BorderRadius.all(Radius.circular(10)),
                       tabs: const [
                         Tab(text: 'Rent',),
-                        Tab(text: 'Payments',),
-                        Tab(text: 'Periods'),
+                        Tab(text: 'Periods',),
+                        Tab(text: 'Payments'),
                       ],
                     ),
                   ),
@@ -1160,7 +1165,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
                                       child: InkWell(
                                         onTap: (){
-                                          // dialogPayStatements(context, "RENT", current, double.parse(widget.unit.price!) - amount, month);
+                                          Get.to(() => Payments(eid: unit.eid!, unitid: unit.id!, tid: "", lid: lid, month: month.month.toString(),year: month.year.toString(), type: "RENT",), transition: Transition.rightToLeft);
                                         },
                                         borderRadius: BorderRadius.circular(5),
                                         child: Container(
@@ -1182,9 +1187,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                               ),
                                               SizedBox(width: 10,),
                                               Text(
-                                                DateFormat.MMMM().format(DateTime(month.year, month.month)).toUpperCase(),
+                                                TFormat().toCamelCase(DateFormat.MMMM().format(DateTime(month.year, month.month))),
                                                 style: TextStyle(
-                                                    fontWeight: FontWeight.w600,fontSize: 15
+                                                    fontWeight: FontWeight.w600,fontSize: 15,
+                                                  color: amount < double.parse(widget.unit.price!) ? secondaryColor : reverse
                                                 ),
                                               ),
                                               Expanded(child: SizedBox()),
@@ -1199,7 +1205,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                         color: amount<=0?secondaryColor:CupertinoColors.activeBlue
                                                     ),
                                                   ),
-                                                  amount < double.parse(widget.unit.price!)
+                                                  amount < double.parse(widget.unit.price!) && double.parse(widget.unit.price!) - amount != rent
                                                       ? Text("Balance : ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(widget.unit.price!) - amount)}",
                                                         style: TextStyle(color: secondaryColor),)
                                                       : SizedBox()
@@ -1214,6 +1220,71 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
                                 ),
                               ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Container(
+                              width: 800,
+                              margin: EdgeInsets.symmetric(horizontal:  10),
+                              child: GridView.builder(
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: 120,
+                                      childAspectRatio: 3 / 2,
+                                      crossAxisSpacing: 1,
+                                      mainAxisSpacing: 1
+                                  ),
+                                  itemCount: monthsList.length,
+                                  itemBuilder: (context, index){
+                                    MonthModel monthModel = monthsList[index];
+                                    var percent = (monthModel.amount/rent);
+                                    return InkWell(
+                                      onTap: (){
+                                        dialogActivities(context, monthModel);
+                                      },
+                                      borderRadius: BorderRadius.circular(10),
+                                      splashColor: CupertinoColors.activeBlue,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: color1,
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child:Column(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              monthModel.monthName.toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            Text(monthModel.year.toString(),
+                                              style: TextStyle(color: secondaryColor),
+                                            ),
+                                            SizedBox(height: 2,),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                              child: LinearPercentIndicator(
+                                                animation: true,
+                                                lineHeight: 5.0,
+                                                animationDuration: 2000,
+                                                percent: percent,
+                                                barRadius: Radius.circular(50),
+                                                linearStrokeCap: LinearStrokeCap.roundAll,
+                                                progressColor: CupertinoColors.activeBlue,
+                                                backgroundColor: color1,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
                             ),
                           ],
                         ),
@@ -1305,13 +1376,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                             )
                           ],
                         ),
-                        PayPeriods(
-                          unit: widget.unit,
-                          entity: entity,
-                          addPay: _addPay,
-                          updatePay: _updatePay,
-                          tenant: LeaseModel(tid: currentTenant.uid, lid: unit.lid.toString()),
-                        )
                       ]
                   ),
                 ),
@@ -1670,7 +1734,194 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         )
     );
   }
+  void dialogActivities(BuildContext context, MonthModel month) {
+    final dilogbg = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white70;
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white12
+        : Colors.black12;
+    final size = MediaQuery.of(context).size;
+    final padding = EdgeInsets.symmetric(horizontal: 10);
+    List<String> _util = entity.utilities!.split("&");
+    List<UtilsModel> _utils = [];
 
+    if (entity.utilities != "") {
+      _utils = _util.map((jsonString) => UtilsModel.fromJson(json.decode(jsonString))).toList();
+      _utils.removeWhere((element) => element.text == "");
+    } else {
+
+      _utils = [];
+    }
+    List<PaymentsModel> _periodPays = [];
+    // _periodPays = _sortedPay.where((element) => DateTime.parse(element.time.toString()).month == monthIndex && DateTime.parse(element.time.toString()).year == year).toList();
+    // oldRent = double.parse(widget.unit.price!) -_periodPays.where((pay) => pay.type == "RENT").fold(0, (previousValue, element) => previousValue + double.parse(element.amount!) );
+    // oldDepo = double.parse(widget.unit.deposit!) -_periodPays.where((pay) => pay.type == "DEPOSIT").fold(0, (previousValue, element) => previousValue + double.parse(element.amount!));
+    // blncRent =  oldRent;
+    // blncDepo = oldDepo;
+
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(10),
+              topLeft: Radius.circular(10),
+            )
+        ),
+        backgroundColor: dilogbg,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        useSafeArea: true,
+        constraints: BoxConstraints(
+            maxHeight: size.height/2 + 100,
+            minHeight: size.height/2,
+            maxWidth: 500,minWidth: 400
+        ),
+        context: context,
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "${month.monthName.toUpperCase().split("").join(" ")} ${month.year.toString().split("").join(" ")}"),
+              Padding(
+                padding: padding,
+                child: const Text(
+                  'Please click the arrow button to view a comprehensive list of payments associated with each respective account.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: secondaryColor),
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  physics: BouncingScrollPhysics(),
+                  children: [
+                    month.month==1
+                        ?Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: InkWell(
+                        onTap: (){},
+                        borderRadius: BorderRadius.circular(5),
+                        hoverColor: color1,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 5,),
+                              Icon(CupertinoIcons.padlock),
+                              SizedBox(width: 20,),
+                              Expanded(child: Text("Security Deposit")),
+                              depoBalance == 0
+                                  ? Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(deposit)}", style: TextStyle(fontWeight: FontWeight.w600),)
+                                  : TextButton(onPressed: (){}, child: Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")),
+                              SizedBox(width: 10,),
+                              InkWell(
+                                onTap: (){},
+                                borderRadius: BorderRadius.circular(5),
+                                hoverColor: color1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                                ),
+                              )
+
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                        :SizedBox(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: InkWell(
+                        onTap: (){},
+                        borderRadius: BorderRadius.circular(5),
+                        hoverColor: color1,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 5,),
+                              Icon(CupertinoIcons.home),
+                              SizedBox(width: 20,),
+                              Expanded(child: Text("Rent")),
+                              month.balance==0
+                                  ?Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.amount)}", style: TextStyle(fontWeight: FontWeight.w600))
+                                  :TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.balance)}")),
+                              SizedBox(width: 10,),
+                              InkWell(
+                                onTap: (){},
+                                borderRadius: BorderRadius.circular(5),
+                                hoverColor: color1,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                                ),
+                              )
+
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    ListView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemCount: _utils.length,
+                        itemBuilder: (context, index){
+                          UtilsModel utils = _utils[index];
+                          UtilModel util = Data().utilList.firstWhere((element) => element.text == utils.text);
+                          double balance = 0;
+                          balance = double.parse(utils.amount) - _periodPays.where((element) => element.type?.toUpperCase() == utils.text.toUpperCase()).fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount!));
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: InkWell(
+                              onTap: (){},
+                              borderRadius: BorderRadius.circular(5),
+                              hoverColor: color1,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 5,),
+                                    util.icon,
+                                    SizedBox(width: 20,),
+                                    Expanded(child: Text(utils.text)),
+                                    balance==0 || balance <0
+                                        ?Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}', style: TextStyle(color: secondaryColor),)
+                                        :balance==double.parse(utils.amount)
+                                        ? TextButton(
+                                        onPressed: (){
+
+                                        },
+                                        child: Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"))
+                                        :TextButton(
+                                        onPressed: (){
+
+                                        },
+                                        child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
+                                    SizedBox(width: 10,),
+                                    InkWell(
+                                      onTap: (){},
+                                      borderRadius: BorderRadius.circular(5),
+                                      hoverColor: color1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                                      ),
+                                    )
+
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        })
+                  ],
+                ),
+              )
+            ],
+          );
+        });
+  }
 
   void _addPay(PaymentsModel paymentsModel, double paid, String account){
     print("Payment adding");
