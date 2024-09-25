@@ -221,7 +221,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                         text: "REQUEST",
                                         backcolor: reverse,
                                         forecolor: normal,
-                                        icon: Icon(CupertinoIcons.shift_fill, color: normal,size: 18),
+                                        icon: Icon(CupertinoIcons.arrowshape_turn_up_right_fill, color: normal,size: 18),
                                         onTap: (){
                                           // Get.to(()=>Requests(entity: entity, updateCount: _updateCount,), transition: Transition.rightToLeft);
                                         }

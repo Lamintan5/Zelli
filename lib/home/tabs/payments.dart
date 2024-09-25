@@ -88,6 +88,21 @@ class _PaymentsState extends State<Payments> {
                         fontSize: 25, fontWeight: FontWeight.bold
                     ),
                   ),
+                  Expanded(child: SizedBox()),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: InkWell(
+                      onTap: (){
+
+                      },
+                      hoverColor: color1,
+                      borderRadius: BorderRadius.circular(5),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(Icons.filter_list_rounded),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               Expanded(

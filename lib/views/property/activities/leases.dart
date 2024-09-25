@@ -75,13 +75,13 @@ class _LeasesState extends State<Leases> {
     }).toList();
     _leases = _leases.where((test){
       bool matchesEid = widget.entity.eid.isEmpty || test.eid == widget.entity.eid;
-      bool matchesUid = widget.unit.id.toString().isEmpty || test.uid == widget.unit.id.toString();
+      bool matchesUid = widget.unit.id.toString().isEmpty || test.uid!.split(",").first == widget.unit.id.toString();
       // bool matchesEnd = widget.unit.id.toString().isEmpty || test.end != "";
-      return matchesEid && matchesUid ;
+      return matchesEid  && matchesUid;
     }).toList();
     _user = _user.where((test) => _leases.any((element) => element.tid == test.uid)).toList();
     // _leases.forEach((e){
-    //   print("TID:${e.tid}, UID:${e.uid}");
+    //   print("LID:${e.lid}, TID:${e.tid}, UID:${e.uid}");
     // });
     setState(() {
 
@@ -200,7 +200,7 @@ class _LeasesState extends State<Leases> {
                                       children: [
                                         Text(user.username.toString()),
                                         Text(
-                                          '${user.firstname} ${user.lastname}',
+                                          '${user.firstname} ${user.lastname} ',
                                           style: TextStyle(color: secondaryColor, fontSize: 12),
                                         ),
                                       ],

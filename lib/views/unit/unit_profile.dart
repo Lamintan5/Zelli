@@ -38,6 +38,7 @@ import '../../widgets/cards/row_button.dart';
 import '../../widgets/dialogs/dialog_add_tenant.dart';
 import '../../widgets/dialogs/dialog_edit_unit.dart';
 import '../../widgets/dialogs/dialog_title.dart';
+import '../../widgets/dialogs/unit_dialogs/dialog_terminate.dart';
 import '../../widgets/items/item_pay.dart';
 import '../../widgets/items/item_utils_period.dart';
 import '../../widgets/profile_images/user_profile.dart';
@@ -139,7 +140,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         :  _users.firstWhere((test) => test.uid == unit.tid, orElse: () => UserModel(uid: ""));
 
     _leases = _leases.where((test){
-      bool matchLid = lid.isEmpty || test.lid == unit.lid.toString();
+      bool matchLid = lid.isEmpty || test.lid == lid;
       bool matchTid = currentTenant.uid.isEmpty || test.tid == currentTenant.uid;
       bool matchUid = unit.id.toString().isEmpty || test.uid.toString().split(",").first == unit.id.toString();
       return matchLid && matchUid && matchTid;
@@ -164,9 +165,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   _getPayments(){
     _pay = myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).toList();
     _pay = _pay.where((test) => test.uid == unit.id).toList();
-    _current = unit.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid).toList();
-    _deposit = unit.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type == "DEPOSIT").toList();
-    _rent = unit.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type ==  "RENT").toList();
+    _current = currentLease.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid).toList();
+    _deposit = currentLease.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type == "DEPOSIT").toList();
+    _rent = currentLease.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type ==  "RENT").toList();
     paidDeposit = _deposit.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
     depoBalance = deposit - paidDeposit;
   }
@@ -1243,7 +1244,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     var percent = (monthModel.amount/rent);
                                     return InkWell(
                                       onTap: (){
-                                        dialogActivities(context, monthModel);
+                                        dialogActivities(context, monthModel, index);
                                       },
                                       borderRadius: BorderRadius.circular(10),
                                       splashColor: CupertinoColors.activeBlue,
@@ -1411,9 +1412,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           setState(() {});
                           _getData();
                           widget.reload();
-
                         });
-                      } ,
+                      },
                       icon : Icon(CupertinoIcons.restart), title: "Undo",subtitle: "")
                       : RowButton(onTap: (){
                     Navigator.pop(context);
@@ -1424,8 +1424,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       ? SizedBox()
                       : RowButton(onTap: (){
                     // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
+                    Navigator.pop(context);
+                    dialogTerminateLease(context);
                   },
-                      icon : Icon(CupertinoIcons.person_badge_minus), title: "Remove Tenant",subtitle: ""),
+                      icon : Icon(CupertinoIcons.clear_circled), title: "Terminate Lease",subtitle: ""),
                   widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid
                       ? SizedBox()
                       : RowButton(onTap: (){
@@ -1437,11 +1439,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       : RowButton(onTap: (){
                     // dialogChargers(context);
                   },
-                      icon : Icon(CupertinoIcons.money_dollar), title: "Charges",subtitle: ""),
+                      icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""),
                   currentTenant.uid!=unit.tid?SizedBox():RowButton(onTap: (){
                     // dialogMaintain(context);
                   },
-                      icon : Icon(CupertinoIcons.gear), title: "Maintenance & Repair",subtitle: ""),
+                      icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: ""),
 
                     currentTenant.uid!=unit.tid?SizedBox(): RowButton(onTap: (){
                         Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
@@ -1567,19 +1569,64 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           text: "${unitModel.title} ",
                         ),
                         TextSpan(
-                          text: "from your entity completely.",
+                          text: "from your entity completely?",
                           style: TextStyle(color: secondaryColor, ),
                         ),
                       ]
                   )
               ),
               DoubleCallAction(
+                  titleColor: Colors.red,
+                  title: "Remove",
                   action: ()async{
                     await Data().removeUnit(unitModel, widget.reload, context).then((value){
                       Navigator.pop(context);
                       Navigator.pop(context);
                     });
                   })
+            ],
+          ),
+        ),
+      );
+    });
+  }
+  void dialogTerminateLease(BuildContext context){
+    final dilogbg = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white;
+    showDialog(context: context, builder: (context) {
+      return Dialog(
+        alignment: Alignment.center,
+        backgroundColor: dilogbg,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+        ),
+        child:  Container(
+          width: 450,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "T E R M I N A T E"),
+              RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Are you certain you want to proceed with terminating ",
+                          style: TextStyle(color: secondaryColor, ),
+                        ),
+                        TextSpan(
+                          text: "${currentTenant.username}'s ",
+                        ),
+                        TextSpan(
+                          text: "lease for this unit?",
+                          style: TextStyle(color: secondaryColor, ),
+                        ),
+                      ]
+                  )
+              ),
+              DialogTerminate(unit: unit, lease: currentLease, reload: _getData,),
             ],
           ),
         ),
@@ -1607,7 +1654,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              DialogTitle(title: "LEASES"),
+              DialogTitle(title: "L E A S E S"),
               Text(
                 'Select a lease item to view detailed information.',
                 style: TextStyle( color: secondaryColor),
@@ -1734,7 +1781,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         )
     );
   }
-  void dialogActivities(BuildContext context, MonthModel month) {
+  void dialogActivities(BuildContext context, MonthModel month, int index) {
     final dilogbg = Theme.of(context).brightness == Brightness.dark
         ? Colors.grey[900]
         : Colors.white70;
@@ -1784,7 +1831,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
               DialogTitle(title: "${month.monthName.toUpperCase().split("").join(" ")} ${month.year.toString().split("").join(" ")}"),
               Padding(
                 padding: padding,
-                child: const Text(
+                child: Text(
                   'Please click the arrow button to view a comprehensive list of payments associated with each respective account.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: secondaryColor),
@@ -1794,11 +1841,15 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 child: ListView(
                   physics: BouncingScrollPhysics(),
                   children: [
-                    month.month==1
+                    index==0
                         ?Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: InkWell(
-                        onTap: (){},
+                        onTap: (){
+                          Navigator.pop(context);
+                          Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                            month: month.month.toString(),year: month.year.toString(),type: "DEPOSIT",),transition: Transition.rightToLeft);
+                        },
                         borderRadius: BorderRadius.circular(5),
                         hoverColor: color1,
                         child: Container(
@@ -1811,10 +1862,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               Expanded(child: Text("Security Deposit")),
                               depoBalance == 0
                                   ? Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(deposit)}", style: TextStyle(fontWeight: FontWeight.w600),)
-                                  : TextButton(onPressed: (){}, child: Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")),
+                                  : TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")),
                               SizedBox(width: 10,),
                               InkWell(
-                                onTap: (){},
+                                onTap: (){Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                                  month: month.month.toString(),year: month.year.toString(),type: "DEPOSIT",),transition: Transition.rightToLeft);},
                                 borderRadius: BorderRadius.circular(5),
                                 hoverColor: color1,
                                 child: Padding(
@@ -1822,7 +1874,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
                                 ),
                               )
-
                             ],
                           ),
                         ),
@@ -1832,7 +1883,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: InkWell(
-                        onTap: (){},
+                        onTap: (){
+                          Navigator.pop(context);
+                          Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                            month: month.month.toString(),year: month.year.toString(),type: "RENT",),transition: Transition.rightToLeft);
+                        },
                         borderRadius: BorderRadius.circular(5),
                         hoverColor: color1,
                         child: Container(
@@ -1846,9 +1901,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               month.balance==0
                                   ?Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.amount)}", style: TextStyle(fontWeight: FontWeight.w600))
                                   :TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.balance)}")),
-                              SizedBox(width: 10,),
+                              SizedBox(width: 10),
                               InkWell(
-                                onTap: (){},
+                                onTap: (){Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                                  month: month.month.toString(),year: month.year.toString(),type: "RENT",),transition: Transition.rightToLeft);},
                                 borderRadius: BorderRadius.circular(5),
                                 hoverColor: color1,
                                 child: Padding(
@@ -1856,7 +1912,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
                                 ),
                               )
-
                             ],
                           ),
                         ),
@@ -1874,7 +1929,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: InkWell(
-                              onTap: (){},
+                              onTap: (){
+                                Navigator.pop(context);
+                                Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                                month: month.month.toString(),year: month.year.toString(),type: utils.text,),transition: Transition.rightToLeft);},
                               borderRadius: BorderRadius.circular(5),
                               hoverColor: color1,
                               child: Container(

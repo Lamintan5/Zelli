@@ -671,6 +671,20 @@ class Services{
       return 'error';
     }
   }
+  // UPDATE LEASE END
+  static Future<String> terminateLease(String lid) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _UPDATE;
+      map["lid"] = lid;
+      map["end"] = DateTime.now().toString();
+      final response = await http.post(Uri.parse(_LEASE), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+
 
 
   // DELETE ENTITY
