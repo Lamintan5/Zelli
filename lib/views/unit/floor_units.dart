@@ -136,7 +136,7 @@ class _FloorUnitsState extends State<FloorUnits> {
                                   : (myUsers
                                   .map((jsonString) => UserModel.fromJson(json.decode(jsonString)))
                                   .firstWhere(
-                                    (element) => element.uid == unit.tid,
+                                    (element) => element.uid == unit.tid!.split(",").first,
                                 orElse: () => UserModel(uid: "", image: ""), // Provide a default value
                               ));
                               return InkWell(
@@ -179,21 +179,26 @@ class _FloorUnitsState extends State<FloorUnits> {
                                     ),
                                     unit.tid == ""
                                         ? SizedBox()
-                                        :Positioned(
+                                        : Positioned(
                                         right: 5,
                                         bottom: 5,
-                                        child:UserProfile(radius: 10, image: user.image.toString(),)
-                                    ),
-                                    unit.checked == "false"
-                                        ?Positioned(
-                                        bottom: 0,
-                                        right: 5,
-                                        child: Icon(
-                                          Icons.cloud_upload_rounded,
-                                          size: 20,color: Colors.red,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                                ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
+                                                : unit.checked.toString().contains("EDIT")
+                                                ? Icon(Icons.edit, color: Colors.red,size: 20,)
+                                                : unit.checked == "false"
+                                                ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
+                                                : SizedBox(),
+                                            SizedBox(width: 3,),
+                                            user.uid==""
+                                                ? SizedBox()
+                                                : UserProfile(image: user.image.toString(), radius: 10,)
+                                          ],
                                         )
-                                    )
-                                        : SizedBox()
+                                    ),
                                   ],
                                 ),
                               );

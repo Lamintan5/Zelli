@@ -127,7 +127,7 @@ class _UnitsState extends State<Units> {
                         final currentMonth = DateTime.now().month;
                         entity = _entity.firstWhere((element) => element.eid == unit.eid, orElse: ()=>EntityModel(eid: "", title: "", image: ""));
                         UserModel user = UserModel(uid: "");
-                        user = _users.firstWhere((test) => test.uid == unit.tid, orElse: ()=> UserModel(uid: ""));
+                        user = _users.firstWhere((test) => test.uid == unit.tid!.split(",").first, orElse: ()=> UserModel(uid: ""));
                         void _removeTenant(){
                           unit.tid ="";
                           setState(() {
@@ -178,21 +178,24 @@ class _UnitsState extends State<Units> {
                                   :Positioned(
                                   right: 5,
                                   bottom: 5,
-                                  child: user.uid == currentUser.uid
-                                      ? CurrentImage(radius: 10,)
-                                      : UserProfile(radius: 10, image: user.image.toString(),)
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                          ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
+                                          : unit.checked.toString().contains("EDIT")
+                                          ? Icon(Icons.edit, color: Colors.red,size: 20,)
+                                          : unit.checked == "false"
+                                          ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
+                                          : SizedBox(),
+                                      SizedBox(width: 3,),
+                                      user.uid==""
+                                          ? SizedBox()
+                                          : UserProfile(image: user.image.toString(), radius: 10,)
+                                    ],
+                                  )
                               ),
-                              Positioned(
-                                  bottom: 5,
-                                  right: 5,
-                                  child: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
-                                      ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
-                                      : unit.checked.toString().contains("EDIT")
-                                      ? Icon(Icons.edit, color: Colors.red,size: 20,)
-                                      : unit.checked == "false"
-                                      ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
-                                      : SizedBox()
-                              )
+
                             ],
                           ),
                         );

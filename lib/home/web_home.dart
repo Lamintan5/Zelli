@@ -359,7 +359,7 @@ class _WebHomeState extends State<WebHome> {
                       : nav == 1
                       ? Expanded(child: Units())
                       : nav==2
-                      ? Expanded(child: Tenants())
+                      ? Expanded(child: Tenants(entity: EntityModel(eid: "")))
                       : nav==3
                       ? SizedBox()
                       : nav==4

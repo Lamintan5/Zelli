@@ -460,7 +460,7 @@ class _LeasesState extends State<Leases> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                DialogTitle(title: "LEASES"),
+                DialogTitle(title: "L E A S E S"),
                 Text(
                   'Select a lease item to view detailed information.',
                   style: TextStyle( color: secondaryColor),
@@ -473,9 +473,9 @@ class _LeasesState extends State<Leases> {
                     itemBuilder: (context, index){
                       LeaseModel lease = leases[index];
                       UserModel user = _user.firstWhere((test) => test.uid == lease.tid, orElse: ()=>UserModel(uid: ""));
-                      UnitModel unit = _units.firstWhere((test) => test.id == lease.uid, orElse: ()=> UnitModel(id: "", title: ""));
+                      UnitModel unit = _units.firstWhere((test) => test.id == lease.uid!.split(",").first, orElse: ()=> UnitModel(id: "", title: ""));
                       return Padding(
-                        padding: EdgeInsets.only(bottom: 5),
+                        padding: EdgeInsets.only(bottom: 5), 
                         child: InkWell(
                           onTap: (){
                             if(widget.unit.tid==lease.tid && lease.end == ""){

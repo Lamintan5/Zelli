@@ -582,7 +582,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                             )
                           ],
                         ),
-                        Tenants()
+                        Tenants(entity: EntityModel(eid: ""),)
                       ],
                   ),
                 ),

@@ -346,8 +346,8 @@ class _ReportState extends State<Report> {
                             return input.substring(0, maxLength)+ '...';
                           }
                         }
-                        tenant = _users.isEmpty? UserModel(uid: "", username: "N/A", image: ""): _users.firstWhere((usr) => usr.uid == pay.tid);
-                        entity = _entity.isEmpty? EntityModel(eid: "",title: "N/A", image: ""): _entity.firstWhere((ent) => ent.eid == pay.eid);
+                        tenant = _users.isEmpty? UserModel(uid: "", username: "N/A", image: ""): _users.firstWhere((usr) => usr.uid == pay.tid.toString().split(",").first, orElse: ()=> UserModel(uid: "", username: "N/A"));
+                        entity = _entity.isEmpty? EntityModel(eid: "",title: "N/A", image: ""): _entity.firstWhere((ent) => ent.eid == pay.eid, orElse: ()=>EntityModel(eid: "", title: "N/A"));
                         return DataRow(
                             cells: [
                               DataCell(

@@ -52,8 +52,11 @@ class Services{
   static const String _UPDATE_PID  = 'UPDATE_PID';
   static const String _UPDATE_ADMIN  = 'UPDATE_ADMIN';
   static const String _REMOVE_PID  = 'REMOVE_PID';
+  static const String _REMOVE_COTID  = 'REMOVE_COTID';
+  static const String _REMOVE_TID  = 'REMOVE_TID';
   static const String _REMOVE_ADMIN  = 'REMOVE_ADMIN';
   static const String _UPDATE_TID  = 'UPDATE_TID';
+  static const String _UPDATE_COTID  = 'UPDATE_COTID';
   static const String _UPDATE_SEEN  = 'UPDATE_SEEN';
   static const String _UPDATE_PROFILE  = 'UPDATE_PROFILE';
   static const String _UPDATE_UTIL  = 'UPDATE_UTIL';
@@ -592,6 +595,19 @@ class Services{
       return 'error';
     }
   }
+  // UPDATE LEASE CTID
+  static Future<String> updateLeaseCtid(String lid, String tid) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _UPDATE_COTID;
+      map["lid"] = lid;
+      map["tid"] = tid;
+      final response = await http.post(Uri.parse(_LEASE), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
   // UPDATE PID
   static Future<String> updatePid(String eid) async {
     try {
@@ -613,6 +629,32 @@ class Services{
       map["eid"] = eid;
       map["uid"] = uid;
       final response = await http.post(Uri.parse(_ENTITY), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // REMOVE UNIT TID
+  static Future<String> removeUnitTid(String id, String tid) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _REMOVE_TID;
+      map["id"] = id;
+      map["tid"] = tid;
+      final response = await http.post(Uri.parse(_UNIT), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // REMOVE LEASE CTID
+  static Future<String> removeLeaseCtid(String lid, String tid) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _REMOVE_COTID;
+      map["lid"] = lid;
+      map["tid"] = tid;
+      final response = await http.post(Uri.parse(_LEASE), body: map);
       return response.body;
     } catch (e) {
       return 'error';

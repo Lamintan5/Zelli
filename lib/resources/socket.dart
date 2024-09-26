@@ -78,13 +78,16 @@ class SocketManager extends GetxController  {
     // Loop through units and process
     for (var unt in _unit) {
       if (!_pidList.contains(unt.tid) && unt.tid != currentUser.uid) {
-        _pidList.add(unt.tid);
-        var users = await Services().getCrntUsr(unt.tid.toString());
-        if (users.isNotEmpty) {
-          _user.add(users.first);
-        }
+        _pidList.addAll(unt.tid.toString().split(","));
+        unt.tid.toString().split(",").forEach((e)async{
+          var users = await Services().getCrntUsr(e);
+          if (users.isNotEmpty) {
+            _user.add(users.first);
+          }
+        });
       }
     }
+
     for (var lease in _lease){
       if(!_user.any((e) => e.uid == lease.tid)){
         var users = await Services().getCrntUsr(lease.tid.toString());

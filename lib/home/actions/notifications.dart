@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:Zelli/main.dart';
 import 'package:Zelli/resources/services.dart';
+import 'package:Zelli/widgets/items/notificationsitems/item_req_co_tnt.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,7 +83,6 @@ class _NotificationsState extends State<Notifications> {
                           mynotifs = eid==""
                               ? mynotifs
                               : mynotifs.where((test) => test.eid == eid).toList();
-
                           if (mounted && _key.currentState != null) {
                             int itemIndex = 0;
                             if (itemIndex >= 0 && itemIndex <= mynotifs.length) {
@@ -122,6 +122,8 @@ class _NotificationsState extends State<Notifications> {
                                       ? ItemTntRq(notif: notification, getEntity: widget.reload, from:  eid!=""?"Entity":'Notification')
                                       :notification.type == 'MNTNRQ'
                                       ? ItemMainReq(notif: notification, getEntity: widget.reload, from:  eid!=""?"Entity":'Notification')
+                                      : notification.type == 'RQCOTNT'
+                                      ? ItemReqCoTnt(notif: notification, getEntity: widget.reload, from: eid!=""?"Entity":'Notification', remove: _remove,)
                                       : SizedBox(),
                                 ),
                               );

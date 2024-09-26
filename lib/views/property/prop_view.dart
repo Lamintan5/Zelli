@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:Zelli/home/tabs/payments.dart';
+import 'package:Zelli/home/tabs/tenants.dart';
 import 'package:Zelli/models/duties.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/resources/socket.dart';
@@ -9,8 +10,6 @@ import 'package:Zelli/views/property/activities/edit_property.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/property/activities/utilities.dart';
 import 'package:Zelli/views/property/activities/managers.dart';
-import 'package:Zelli/views/property/tabs/prop_payments.dart';
-import 'package:Zelli/views/property/tabs/prop_tenant.dart';
 import 'package:Zelli/views/property/tabs/prop_unit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:showcaseview/showcaseview.dart';
 
 import '../../create/create_units.dart';
 import '../../home/actions/notifications.dart';
@@ -515,10 +513,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                   controller: _tabController,
                   children: [
                     PropUnit(title: entity.title.toString(), entity: entity, max: highestId+1,),
-                    ShowCaseWidget(
-                      builder : (context) => PropTenant(entity: entity,),
-                    ),
-                    PropPayments(entity: entity,),
+                    Tenants(entity: entity),
+                    Payments(eid: entity.eid, unitid: "", tid: "", lid: ""),
                   ],
                 ),
               ),

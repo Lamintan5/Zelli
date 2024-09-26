@@ -61,7 +61,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   late TextEditingController _search;
   late TextEditingController _searchPay;
 
-
   EntityModel entity = EntityModel(eid: "");
   UnitModel unit = UnitModel(id: "");
   UserModel currentTenant = UserModel(uid: "");
@@ -69,6 +68,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   MonthModel lastPaid = MonthModel(year: 2000, monthName: "Jan", month: 1, amount: 0, balance: 0);
 
   List<UserModel> _users = [];
+  List<UserModel> _tenants = [];
   List<PaymentsModel> _pay = [];
   List<PaymentsModel> _filtPay = [];
   List<PaymentsModel> _current = [];
@@ -77,7 +77,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   List<MonthModel> _accrue = [];
   List<MonthModel> monthsList = [];
   List<LeaseModel> _leases = [];
-  List<String> admin = [];
+  List<String> _admin = [];
+  List<String> _tids = [];
 
   final _keyOne = GlobalKey();
   final _keyTwo = GlobalKey();
@@ -120,16 +121,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
     lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0, orElse: ()=>MonthModel(year: DateTime.now().year, monthName: "Jan", month: DateTime.now().month, amount: 0, balance: 0));
-    monthsList.forEach((mnth){
-      print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
-    });
+    // monthsList.forEach((mnth){
+    //   print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
+    // });
     setState(() {
     });
   }
 
   _getEntity(){
     entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test)=> test.eid == unit.eid);
-    admin = entity.admin.toString().split(",");
+    _admin = entity.admin.toString().split(",");
   }
 
   _getUser(){
@@ -137,7 +138,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _leases = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).toList();
     currentTenant =  widget.user.uid.isNotEmpty
         ? widget.user
-        :  _users.firstWhere((test) => test.uid == unit.tid, orElse: () => UserModel(uid: ""));
+        :  _users.firstWhere((test) => test.uid == unit.tid.toString().split(",").first, orElse: () => UserModel(uid: ""));
 
     _leases = _leases.where((test){
       bool matchLid = lid.isEmpty || test.lid == lid;
@@ -145,12 +146,34 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
       bool matchUid = unit.id.toString().isEmpty || test.uid.toString().split(",").first == unit.id.toString();
       return matchLid && matchUid && matchTid;
     }).toList();
-    currentLease = _leases.isEmpty? LeaseModel(lid: "", tid: "", start: "", end: "") : _leases.last;
+    currentLease = _leases.firstWhere((test) => test.lid == lid, orElse: ()=>LeaseModel(lid: "", tid: "", start: "", end: "") );
     start = currentLease.start.toString();
     end = currentLease.end.toString();
-    // _leases.forEach((e){
-    //   print(e.toJson());
-    // });
+    _leases.forEach((e){
+      print(e.toJson());
+    });
+    _tids.addAll(unit.tid.toString().split(","));
+    currentLease.ctid.toString().split(",").forEach((e){
+      if(!_tids.contains(e)){
+        _tids.add(e);
+      }
+    });
+    _tenants = _users.where((usr)=>_tids.any((tnt) => usr.uid==tnt)).toList();
+    if (_tenants.isNotEmpty) {
+      image1 = _tenants.length > 0 ? _tenants[0].image.toString() : '';
+      image2 = _tenants.length > 1 ? _tenants[1].image.toString() : '';
+      image3 = _tenants.length > 2 ? _tenants[2].image.toString() : '';
+    }
+
+
+    Future.delayed(Duration(milliseconds: 100), () {
+      setState(() {
+        _position1 = _tenants.length == 2 ? 18 : _tenants.length == 3 || _tenants.length > 3 ? 10 : 20.0;
+        _position2 = _tenants.length == 2 ? 18 : _tenants.length == 3 || _tenants.length > 3 ? 20 : 20.0;
+        _position3 = _tenants.length == 0 ? 20 : _tenants.length == 1 ? 20 : _tenants.length == 2 || _tenants.length == 3 || _tenants.length > 3 ? 30 : 20.0;
+        _position4 = _tenants.length == 0 ? 20 : _tenants.length == 1 ? 30 : _tenants.length == 2 || _tenants.length == 3 || _tenants.length > 3 ? 40 : 20.0;
+      });
+    });
   }
 
   _getUnit(){
@@ -159,7 +182,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     room = int.parse(unit.room.toString());
     deposit = double.parse(unit.deposit.toString());
     rent = double.parse(unit.price.toString());
-
   }
 
   _getPayments(){
@@ -317,7 +339,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _tabController = TabController(length: 3, vsync: this);
     _search = TextEditingController();
     _searchPay = TextEditingController();
-    lid = widget.leasid;
+    lid = widget.leasid.isEmpty? widget.unit.lid.toString() : widget.leasid;
     _getData();
   }
 
@@ -387,19 +409,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 backgroundColor: normal,
                 pinned: true,
                 expandedHeight: currentTenant.uid==""? 220 :290,
-                toolbarHeight: 35,
+                toolbarHeight: 40,
                 title: Text(entity.title!),
                 actions: [
-                  InkWell(
-                    onTap: (){},
-                    hoverColor: color1,
-                    borderRadius: BorderRadius.circular(5),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.filter_list),
-                    ),
-                  ),
-                  SizedBox(width: 5,),
                   Showcase(
                     key: _keyThree,
                     description: 'Get more options',
@@ -532,7 +544,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                             ),
                             InkWell(
                               onTap: (){
-                                Get.to(()=>CoTenants(unit: unit, lease: currentLease),transition: Transition.rightToLeft);
+                                Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
                               },
                               borderRadius: BorderRadius.circular(5),
                               child: Column(
@@ -563,7 +575,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                             curve: Curves.easeInOut,
                                             child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
                                           ),
-                                          !admin.contains(currentUser.uid) ? SizedBox() : AnimatedPositioned(
+                                          !_admin.contains(currentUser.uid) ? SizedBox() : AnimatedPositioned(
                                             left: _position4,
                                             duration: Duration(seconds: 1),
                                             curve: Curves.easeInOut,
@@ -583,6 +595,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 5,),
                                   Text('Co-Tenants', overflow: TextOverflow.ellipsis, style: TextStyle(color: secondaryColor, fontSize: 10),)
                                 ],
                               ),
@@ -670,7 +683,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                       : Get.to(() => WebChat(selected: currentTenant), transition: Transition.rightToLeft);
                                 }
                             ),
-                            currentTenant.uid!=unit.tid
+                            currentTenant.uid!=unit.tid.toString().split(",").first
                                 ? SizedBox()
                                 : CardButton(
                                 text:
@@ -682,7 +695,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   dialogRecordPayments(context, "RENT",accrued);
                                 }
                             ),
-                            currentTenant.uid!=unit.tid
+                            currentTenant.uid!=unit.tid.toString().split(",").first
                                 ? SizedBox()
                                 : paidDeposit < deposit
                                 ?  CardButton(
@@ -718,7 +731,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           ],
                         ),
                         SizedBox(height: 10),
-                        currentTenant.uid!=unit.tid
+                        currentTenant.uid!=unit.tid.toString().split(",").first
                             ?RichText(
                               text: TextSpan(
                                 children: [
@@ -939,7 +952,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                   Column(
                                                     children: [
                                                       Text(
-                                                        admin.contains(user.uid)? "Admin" : "",
+                                                        _admin.contains(user.uid)? "_admin" : "",
                                                         style: TextStyle(fontSize: 12, color: Colors.green),
                                                       ),
                                                       Wrap(
@@ -1420,7 +1433,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     dialogRemoveUnit(context, widget.unit);
                   } ,
                       icon : Icon(CupertinoIcons.delete), title: "Remove Unit",subtitle: ""),
-                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid
+                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid.toString().split(",").first
                       ? SizedBox()
                       : RowButton(onTap: (){
                     // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
@@ -1428,24 +1441,24 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     dialogTerminateLease(context);
                   },
                       icon : Icon(CupertinoIcons.clear_circled), title: "Terminate Lease",subtitle: ""),
-                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid
+                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid.toString().split(",").first
                       ? SizedBox()
                       : RowButton(onTap: (){
-                          Get.to(()=>CoTenants(unit: unit, lease: currentLease),transition: Transition.rightToLeft);
+                          Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
                       },
                       icon : Icon(CupertinoIcons.person_2), title: "Co-Tenants",subtitle: ""),
-                  widget.unit.tid.toString() == ''||currentTenant.uid!=unit.tid
+                  widget.unit.tid.toString() == ''||currentTenant.uid!=unit.tid.toString().split(",").first
                       ? SizedBox()
                       : RowButton(onTap: (){
                     // dialogChargers(context);
                   },
                       icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""),
-                  currentTenant.uid!=unit.tid?SizedBox():RowButton(onTap: (){
+                  currentTenant.uid!=unit.tid.toString().split(",").first?SizedBox():RowButton(onTap: (){
                     // dialogMaintain(context);
                   },
                       icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: ""),
 
-                    currentTenant.uid!=unit.tid?SizedBox(): RowButton(onTap: (){
+                    currentTenant.uid!=unit.tid.toString().split(",").first?SizedBox(): RowButton(onTap: (){
                         Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
                       },
                       icon : Icon(CupertinoIcons.doc_text), title: "Leases",subtitle: ""
@@ -1510,13 +1523,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         });
   }
   void dialogEditUnit(BuildContext context, UnitModel unitModel){
-    final dilogbg = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey[900]
-        : Colors.white;
     showDialog(context: context, builder: (context) {
       return Dialog(
         alignment: Alignment.center,
-        backgroundColor: dilogbg,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10)
         ),

@@ -41,18 +41,23 @@ class _ItemPayState extends State<ItemPay> {
   EntityModel entity = EntityModel(eid: "");
   UnitModel unit = UnitModel(id: "");
 
+  _getDetails()async{
+    
+  }
+
   _getData(){
     _enty = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
     _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
-    user = widget.payments.tid == currentUser.uid
-        ? currentUser
-        : _user.firstWhere((element) => element.uid == widget.payments.tid, orElse: () => UserModel(uid: "", image: "", username: "N/A"));
     payer = widget.payments.payerid == currentUser.uid
         ? currentUser
         : _user.firstWhere((element) => element.uid == widget.payments.payerid, orElse: () => UserModel(uid: "", image: "", username: "N/A"));
     entity = _enty.firstWhere((element) => element.eid == widget.payments.eid, orElse: ()=> EntityModel(eid: "", image: "", title: "N/A"));
     unit = _unit.firstWhere((element) => element.id == widget.payments.uid, orElse: ()=> UnitModel(id: "", title: "N/A"));
+    user = unit.tid.toString().split(",").first.split(",").first == currentUser.uid
+        ? currentUser
+        : _user.firstWhere((element) => element.uid == unit.tid.toString().split(",").first,
+        orElse: () => UserModel(uid: "", image: "", username: "N/A"));
     start = DateTime.parse(widget.payments.time.toString().split(",").first);
     end = DateTime.parse(widget.payments.time.toString().split(",").last);
     setState(() {
@@ -146,10 +151,11 @@ class _ItemPayState extends State<ItemPay> {
                             user.uid == "" || entity.eid == ""
                                 ? Container(margin: EdgeInsets.only(bottom: 5) ,child: ShimmerWidget.rectangular(width: 100, height: 10))
                                 : widget.from == "Entity" || widget.from == "Home"
-                                ? Expanded(child: Text(user.username.toString(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: reverse),))
+                                ? Text(user.username.toString(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: reverse),)
                                 : widget.from=="Unit"
-                                ? Expanded(child: Text(payer.username.toString(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: reverse),))
-                                :Expanded(child: Text(entity.title.toString(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: reverse),)),
+                                ? Text(payer.username.toString(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: reverse),)
+                                : Text(entity.title.toString(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: reverse),),
+                            Expanded(child: SizedBox()),
                             Text(
                               '${widget.payments.type!.split(",").first == "EXP"?'-':'+'}${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(widget.payments.amount.toString()))}',
                               style: TextStyle(

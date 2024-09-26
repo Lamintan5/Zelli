@@ -133,14 +133,13 @@ class Data{
       }
     }
     // Mark Entity as DELETED if they are not in newDataList
-    if(newDataList.length != 0 || newDataList.isNotEmpty){
-      for (var existingEntity in _entity) {
-        bool existsInNewDataList = newDataList.any((newEntity) => newEntity.eid == existingEntity.eid);
-        if (!existsInNewDataList && existingEntity.checked.toString().contains("true")) {
-          existingEntity.checked = "REMOVED";
-        }
+    for (var existingEntity in _entity) {
+      bool existsInNewDataList = newDataList.any((newEntity) => newEntity.eid == existingEntity.eid);
+      if (!existsInNewDataList && existingEntity.checked.toString().contains("true")) {
+        existingEntity.checked = "REMOVED";
       }
     }
+
     uniqueEntities = _entity.map((model) => jsonEncode(model.toJson())).toList();
     sharedPreferences.setStringList('notmyentity', uniqueEntities);
     notMyEntity = uniqueEntities;
@@ -167,14 +166,13 @@ class Data{
       }
     }
     // Mark Entity as DELETED if they are not in newDataList
-    if(newDataList.length != 0 || newDataList.isNotEmpty){
-      for (var existingUnit in _unit) {
-        bool existsInNewDataList = newDataList.any((newEntity) => newEntity.id == existingUnit.id);
-        if (!existsInNewDataList && existingUnit.checked.toString().contains("true")) {
-          existingUnit.checked = "REMOVED";
-        }
+    for (var existingUnit in _unit) {
+      bool existsInNewDataList = newDataList.any((newEntity) => newEntity.id == existingUnit.id);
+      if (!existsInNewDataList && existingUnit.checked.toString().contains("true")) {
+        existingUnit.checked = "REMOVED";
       }
     }
+
     uniqueUnit = _unit.map((model) => jsonEncode(model.toJson())).toList();
     sharedPreferences.setStringList('myunit', uniqueUnit);
     myUnits = uniqueUnit;
@@ -201,14 +199,13 @@ class Data{
       }
     }
     // Mark Entity as DELETED if they are not in newDataList
-    if(newDataList.length != 0 || newDataList.isNotEmpty){
-      for (var existingPay in _payments) {
-        bool existsInNewDataList = newDataList.any((newPay) => newPay.payid == existingPay.payid);
-        if (!existsInNewDataList && existingPay.checked.toString().contains("true")) {
-          existingPay.checked = "REMOVED";
-        }
+    for (var existingPay in _payments) {
+      bool existsInNewDataList = newDataList.any((newPay) => newPay.payid == existingPay.payid);
+      if (!existsInNewDataList && existingPay.checked.toString().contains("true")) {
+        existingPay.checked = "REMOVED";
       }
     }
+
     uniquePay = _payments.map((model) => jsonEncode(model.toJson())).toList();
     sharedPreferences.setStringList('mypay', uniquePay);
     myPayment = uniquePay;

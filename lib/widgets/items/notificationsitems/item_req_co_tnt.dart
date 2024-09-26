@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:Zelli/models/messages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
@@ -10,50 +9,52 @@ import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:uuid/uuid.dart';
 
-import '../../../../main.dart';
-import '../../../../models/data.dart';
-import '../../../../models/entities.dart';
-import '../../../../models/notifications.dart';
-import '../../../../models/units.dart';
-import '../../../../models/users.dart';
-import '../../../../resources/services.dart';
 import '../../../home/actions/chat/message_screen.dart';
 import '../../../home/actions/chat/web_chat.dart';
+import '../../../main.dart';
+import '../../../models/data.dart';
+import '../../../models/entities.dart';
+import '../../../models/messages.dart';
+import '../../../models/notifications.dart';
+import '../../../models/units.dart';
+import '../../../models/users.dart';
+import '../../../resources/services.dart';
 import '../../../utils/colors.dart';
 import '../../logo/prop_logo.dart';
 import '../../profile_images/user_profile.dart';
 import '../../shimmer_widget.dart';
 import '../../text/text_format.dart';
 
-class ItemReqTnt extends StatefulWidget {
+class ItemReqCoTnt extends StatefulWidget {
   final NotifModel notif;
   final Function getEntity;
   final Function remove;
   final String from;
-  const ItemReqTnt({super.key, required this.notif, required this.getEntity, required this.from, required this.remove});
+  const ItemReqCoTnt({super.key, required this.notif, required this.getEntity, required this.from, required this.remove});
 
   @override
-  State<ItemReqTnt> createState() => _ItemReqTntState();
+  State<ItemReqCoTnt> createState() => _ItemReqCoTntState();
 }
 
-class _ItemReqTntState extends State<ItemReqTnt> {
+class _ItemReqCoTntState extends State<ItemReqCoTnt> {
+  bool _loading = false;
+
   List<EntityModel> _entity = [];
   List<EntityModel> _newEntity = [];
   List<UserModel> _newUser = [];
   List<UserModel> _user = [];
   List<UnitModel> _unit = [];
   List<UnitModel> _newUnit = [];
+  List<String> uidList = [];
+
+  NotifModel notifModel = NotifModel(nid: "");
   UnitModel unitmodel = UnitModel(id: "", title: "");
   EntityModel entityModel = EntityModel(eid: "",title: "",image: "");
   UserModel sender = UserModel(uid: "", username: "", image: "");
   UserModel receiver = UserModel(uid: "", username: "", image: "");
   UserModel user = UserModel(uid: "", username: "", image: "");
-  bool _loading = false;
-  List<String> uidList = [];
 
-  NotifModel notifModel = NotifModel(nid: "");
   bool _isExpanded = false;
 
   _getDetails()async{
@@ -63,8 +64,6 @@ class _ItemReqTntState extends State<ItemReqTnt> {
     _newUnit = await Services().getCrrntUnit(notifModel.text.toString().split(",").first);
     await Data().addNotMyEntity(_newEntity);
     await Data().addOrUpdateUserList(_newUser);
-    await Data().updateSeen(notifModel);
-    widget.getEntity();
     _getData();
   }
 
@@ -109,15 +108,9 @@ class _ItemReqTntState extends State<ItemReqTnt> {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
     final color1 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white10
         : Colors.black12;
-    final color5 = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white54
-        : Colors.black54;
     final reverse = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
@@ -137,7 +130,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                   children: [
                     Icon(CupertinoIcons.arrow_up_right_circle, size: 12,color: secondaryColor,),
                     SizedBox(width: 5,),
-                    Text("REQUEST", style: TextStyle(color: secondaryColor),),
+                    Text("REQUEST", style: TextStyle(color: secondaryColor)),
                     notifModel.actions == ""? SizedBox() :  Text("•  ${TFormat().toCamelCase("${notifModel.actions}")}", style: TextStyle(color: secondaryColor),),
                     Expanded(child: SizedBox()),
                     InkWell(
@@ -197,7 +190,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                               text: widget.notif.rid == currentUser.uid ? TextSpan(
                                   children: [
                                     TextSpan(
-                                        text: "You have received a request to commence leasing ",
+                                        text: "You have received a request to commence co-leasing ",
                                         style: style
                                     ),
                                     TextSpan(
@@ -216,19 +209,14 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                         text: "as a ",
                                         style: style
                                     ),
-                                    unitmodel.tid == null
-                                        ?  TextSpan(
-                                        text: "Tenant",
-                                        style: style
-                                    )
-                                        : WidgetSpan(
+                                    WidgetSpan(
                                         child: Container(
                                             padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
                                             decoration: BoxDecoration(
-                                                color:unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange.withOpacity(0.2) : unitmodel.tid != ""? Colors.red.withOpacity(0.2) :Colors.lightBlueAccent.withOpacity(0.2),
+                                                color:Colors.lightBlueAccent.withOpacity(0.2),
                                                 borderRadius: BorderRadius.circular(5)
                                             ),
-                                            child: Text("Tenant", style: TextStyle(color: unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange : unitmodel.tid != ""? Colors.red : CupertinoColors.activeBlue, fontWeight: FontWeight.w700),)
+                                            child: Text("Co-Tenant", style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.w700),)
                                         )
                                     )
                                   ]
@@ -243,7 +231,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: 'to initiate the leasing process for Unit ',
+                                        text: 'to initiate the co-leasing process for Unit ',
                                         style: style
                                     ),
                                     TextSpan(
@@ -280,7 +268,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                               text:widget.notif.rid == currentUser.uid ? TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: "Your commercial lease agreement for ",style: style
+                                        text: "Your commercial co-lease agreement for ",style: style
                                     ),
                                     TextSpan(
                                         text: '${unitmodel.title} ',
@@ -308,7 +296,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: "commercial lease agreement for unit ",style: style
+                                        text: "commercial co-lease agreement for unit ",style: style
                                     ),
                                     TextSpan(
                                         text: '${unitmodel.title.toString()} ',
@@ -335,10 +323,11 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                               : RichText(
                               maxLines: _isExpanded?100:1,
                               overflow: TextOverflow.ellipsis,
-                              text:widget.notif.rid == currentUser.uid ? TextSpan(
+                              text:widget.notif.rid == currentUser.uid
+                                  ? TextSpan(
                                   children: [
                                     TextSpan(
-                                        text: "You have declined the request to commence leasing  ",style: style
+                                        text: "You have declined the request to commence co-leasing  ",style: style
                                     ),
                                     TextSpan(
                                         text: unitmodel.title.toString(),
@@ -356,21 +345,22 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                     ),
                                     unitmodel.tid == null
                                         ?  TextSpan(
-                                        text: "Tenant",
+                                        text: "Co-Tenant",
                                         style: style
                                     )
                                         : WidgetSpan(
                                         child: Container(
                                             padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
                                             decoration: BoxDecoration(
-                                                color:unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange.withOpacity(0.2) : unitmodel.tid != ""? Colors.red.withOpacity(0.2) :Colors.lightBlueAccent.withOpacity(0.2),
+                                                color:unitmodel.tid.toString().contains(currentUser.uid)  ? Colors.orange.withOpacity(0.2) : unitmodel.tid != ""? Colors.red.withOpacity(0.2) :Colors.lightBlueAccent.withOpacity(0.2),
                                                 borderRadius: BorderRadius.circular(5)
                                             ),
-                                            child: Text("Tenant", style: TextStyle(color:unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange : unitmodel.tid != ""? Colors.red : CupertinoColors.activeBlue, fontWeight: FontWeight.w700),)
+                                            child: Text("Co-Tenant", style: TextStyle(color:unitmodel.tid.toString().contains(currentUser.uid)  ? Colors.orange : unitmodel.tid != ""? Colors.red : CupertinoColors.activeBlue, fontWeight: FontWeight.w700),)
                                         )
                                     ),
                                   ]
-                              ) : TextSpan(
+                              )
+                                  : TextSpan(
                                   style: DefaultTextStyle.of(context).style,
                                   children: <TextSpan>[
                                     TextSpan(
@@ -378,7 +368,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text:'request to initiate leasing ',style: style
+                                        text:'request to initiate co-leasing ',style: style
                                     ),
                                     TextSpan(
                                         text: '${unitmodel.title} ',
@@ -418,15 +408,15 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                             :  Expanded(
                           child: InkWell(
                             onTap: (){
-                              if(unitmodel.tid == ""){
+                              if(!unitmodel.tid.toString().contains(currentUser.uid) ){
                                 _action("ACCEPTED");
-                              } else if(unitmodel.tid != ""){
+                              } else if(unitmodel.tid.toString().contains(currentUser.uid) ){
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text("This unit is now being leased"),
+                                    SnackBar(
+                                      content: Text("This are currently leasing ${unitmodel.title}"),
                                       width: 500,
                                       showCloseIcon: true,
-                                  )
+                                    )
                                 );
                               } else if(unitmodel.tid == null){
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -437,7 +427,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                     )
                                 );
                               }
-                              },
+                            },
                             borderRadius: BorderRadius.circular(5),
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 8),
@@ -508,7 +498,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                 ],
                               )
                           ),
-                          notifModel.rid == currentUser.uid && notifModel.actions=="" && unitmodel.tid == ""
+                          notifModel.rid == currentUser.uid && notifModel.actions=="" && !unitmodel.tid.toString().contains(currentUser.uid) 
                               ? Container(
                               padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                               decoration: BoxDecoration(
@@ -595,30 +585,31 @@ class _ItemReqTntState extends State<ItemReqTnt> {
               ],
             ),
           ),
-          _loading ? LinearProgressIndicator(backgroundColor: color1,minHeight: 1,) : SizedBox()
+          _loading ? LinearProgressIndicator(backgroundColor: color1,minHeight: 1) : SizedBox()
         ],
       ),
     );
   }
   void _action(String actions)async{
-    String lid = "";
-    Uuid uuid = Uuid();
     setState(() {
       _loading = true;
-      lid = uuid.v1();
     });
     await Services.updateNotifAct(notifModel.nid, actions).then((response)async{
       print("Response $response");
       if(response=="success"){
         if(actions=="ACCEPTED"){
-          await Services.updateUnitTid(notifModel.text.toString().split(",").first, currentUser.uid, lid).then((value)async{
+          await Services.updateUnitTid(notifModel.text.toString().split(",").first, currentUser.uid, unitmodel.lid.toString()).then((value)async{
             print("Value $value");
             if(value=="success"){
-              Services.addLeases(lid, currentUser.uid, notifModel.eid.toString(), notifModel.text.toString(), notifModel.pid.toString(), DateTime.now().toString(), "",).then((state){
+              Services.updateLeaseCtid(unitmodel.lid.toString(), currentUser.uid).then((state){
                 print("State $state");
               });
-              unitmodel.tid = currentUser.uid;
-              unitmodel.lid = lid;
+              List<String> tids = [];
+              tids = unitmodel.tid.toString().split(",");
+              if(!tids.contains(currentUser.uid)){
+                tids.add(currentUser.uid);
+              }
+              unitmodel.tid = tids.join(",");
               await Data().addEntity(entityModel);
               await Data().addUnit(unitmodel);
             }
@@ -663,8 +654,6 @@ class _ItemReqTntState extends State<ItemReqTnt> {
       }
     });
   }
-  void _updateCount(){}
-  void _changeMess(MessModel mess){}
   void _undo()async{
     List<EntityModel> _entity = [];
     List<UnitModel> _unit = [];
@@ -711,6 +700,9 @@ class _ItemReqTntState extends State<ItemReqTnt> {
       });
     });
   }
+
+  void _updateCount(){}
+  void _changeMess(MessModel mess){}
   _callNumber(String number) async{
     await FlutterPhoneDirectCaller.callNumber(number);
   }

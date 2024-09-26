@@ -9,7 +9,8 @@ import '../../models/users.dart';
 import '../../widgets/items/item_tenant.dart';
 
 class Tenants extends StatefulWidget {
-  const Tenants({super.key});
+  final EntityModel entity;
+  const Tenants({super.key, required this.entity});
 
   @override
   State<Tenants> createState() => _TenantsState();
@@ -24,7 +25,11 @@ class _TenantsState extends State<Tenants> {
   _getData(){
     _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _units = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) =>unt.tid !="").toList();
-    _tntList = _units.map((unt) => unt.tid.toString()).toList();
+    _units = _units.where((test){
+      bool matchesEid = widget.entity.eid.isEmpty || test.eid == widget.entity.eid;
+      return matchesEid;
+    }).toList();
+    _tntList = _units.map((unt) => unt.tid!.split(",").first).toList();
     _user = _user.where((usr) => _tntList.any((tnt) => usr.uid == tnt)).toList();
     setState(() {
 
