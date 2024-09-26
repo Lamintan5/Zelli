@@ -478,7 +478,7 @@ class _LeasesState extends State<Leases> {
                         padding: EdgeInsets.only(bottom: 5), 
                         child: InkWell(
                           onTap: (){
-                            if(widget.unit.tid==lease.tid && lease.end == ""){
+                            if(widget.lease.lid==lease.lid && lease.end == ""){
 
                             } else {
                               Get.to(() =>  ShowCaseWidget(
@@ -501,7 +501,7 @@ class _LeasesState extends State<Leases> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(" ${unit.title.toString()}"),
+                                      Text("${lease.lid.split("-").first.toUpperCase()}, ${unit.title.toString()}"),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [

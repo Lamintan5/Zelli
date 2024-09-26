@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:Zelli/models/data.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/models/units.dart';
-import 'package:Zelli/models/users.dart';
 import 'package:Zelli/resources/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -113,6 +113,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   String image3 = '';
 
   _getData(){
+    lid = widget.leasid.isEmpty? widget.unit.lid.toString() : widget.leasid;
     _getUnit();
     _getEntity();
     _getUser();
@@ -152,12 +153,13 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _leases.forEach((e){
       print(e.toJson());
     });
-    _tids.addAll(unit.tid.toString().split(","));
+    _tids.add(currentLease.tid.toString());
     currentLease.ctid.toString().split(",").forEach((e){
       if(!_tids.contains(e)){
         _tids.add(e);
       }
     });
+    _tids.remove("");
     _tenants = _users.where((usr)=>_tids.any((tnt) => usr.uid==tnt)).toList();
     if (_tenants.isNotEmpty) {
       image1 = _tenants.length > 0 ? _tenants[0].image.toString() : '';
@@ -339,7 +341,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _tabController = TabController(length: 3, vsync: this);
     _search = TextEditingController();
     _searchPay = TextEditingController();
-    lid = widget.leasid.isEmpty? widget.unit.lid.toString() : widget.leasid;
+
     _getData();
   }
 
@@ -410,7 +412,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 pinned: true,
                 expandedHeight: currentTenant.uid==""? 220 :290,
                 toolbarHeight: 40,
-                title: Text(entity.title!),
+                title: Text(entity.title.toString()),
                 actions: [
                   Showcase(
                     key: _keyThree,
@@ -542,7 +544,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ],
                               ),
                             ),
-                            InkWell(
+                            lid == "" ? SizedBox() : InkWell(
                               onTap: (){
                                 Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
                               },
@@ -910,7 +912,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   itemBuilder: (context, index){
                                     UserModel user = filteredTenants[index];
 
-                                    List<LeaseModel> _filtTenant = _leases.where((e) => e.tid == user.uid).toList();
+                                    List<LeaseModel> _lease = _leases.where((e) => e.tid == user.uid).toList();
                                     _filtPay = _pay.where((p) => p.tid == user.uid).toList();
                                     var amount = _filtPay.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
 
@@ -974,7 +976,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                             ),
                                                           ),
 
-                                                          _filtTenant.length < 2? SizedBox() :Container(
+                                                          _lease.length < 2? SizedBox() :Container(
                                                             padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
                                                             decoration: BoxDecoration(
                                                                 color: color1,
@@ -984,7 +986,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                               children: [
                                                                 Icon(CupertinoIcons.doc_text ,size: 12,color: secondaryColor,),
                                                                 SizedBox(width: 5,),
-                                                                Text('${_filtTenant.length} leases', style: TextStyle(fontSize: 11, color: secondaryColor),)
+                                                                Text('${_lease.length} leases', style: TextStyle(fontSize: 11, color: secondaryColor),)
                                                               ],
                                                             ),
                                                           ),
@@ -1026,7 +1028,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                     children: [
                                                       BottomCallButtons(
                                                           onTap: () {
-                                                            dialogLeases(context, user, _filtTenant);
+                                                            dialogLeases(context, user, _lease);
                                                           },
                                                           icon: Icon(CupertinoIcons.doc_text ,
                                                               color: secondaryColor),
@@ -1414,62 +1416,93 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     ],
                   ),
                   SizedBox(height: 20,),
-                  RowButton(onTap: (){
-                    Navigator.pop(context);
-                    dialogEditUnit(context, widget.unit);
-                  } , icon : Icon(CupertinoIcons.pen), title: "Edit Unit",subtitle: ""),
-                  unit.checked.toString().contains("DELETE")
-                      ? RowButton(onTap: ()async{
+                  _admin.contains(currentUser.uid)?
+                  RowButton(
+                      onTap: (){
                         Navigator.pop(context);
-                        await Data().restoreUnit(context, unit, "DELETE", (){
-                          setState(() {});
-                          _getData();
-                          widget.reload();
-                        });
+                        dialogEditUnit(context, widget.unit);
                       },
-                      icon : Icon(CupertinoIcons.restart), title: "Undo",subtitle: "")
-                      : RowButton(onTap: (){
-                    Navigator.pop(context);
-                    dialogRemoveUnit(context, widget.unit);
-                  } ,
-                      icon : Icon(CupertinoIcons.delete), title: "Remove Unit",subtitle: ""),
-                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid.toString().split(",").first
-                      ? SizedBox()
-                      : RowButton(onTap: (){
-                    // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
-                    Navigator.pop(context);
-                    dialogTerminateLease(context);
-                  },
-                      icon : Icon(CupertinoIcons.clear_circled), title: "Terminate Lease",subtitle: ""),
-                  widget.unit.tid.toString() == ''|| currentTenant.uid!=unit.tid.toString().split(",").first
-                      ? SizedBox()
-                      : RowButton(onTap: (){
-                          Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
-                      },
-                      icon : Icon(CupertinoIcons.person_2), title: "Co-Tenants",subtitle: ""),
-                  widget.unit.tid.toString() == ''||currentTenant.uid!=unit.tid.toString().split(",").first
-                      ? SizedBox()
-                      : RowButton(onTap: (){
-                    // dialogChargers(context);
-                  },
-                      icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""),
-                  currentTenant.uid!=unit.tid.toString().split(",").first?SizedBox():RowButton(onTap: (){
-                    // dialogMaintain(context);
-                  },
-                      icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: ""),
+                      icon : Icon(CupertinoIcons.pen), title: "Edit Unit",subtitle: ""
+                  ):SizedBox(),
 
-                    currentTenant.uid!=unit.tid.toString().split(",").first?SizedBox(): RowButton(onTap: (){
+                  _admin.contains(currentUser.uid)?
+                  unit.checked.toString().contains("DELETE")
+                      ? RowButton(
+                          onTap: ()async{
+                            Navigator.pop(context);
+                            await Data().restoreUnit(context, unit, "DELETE", (){
+                              setState(() {});
+                              _getData();
+                              widget.reload();
+                            });
+                          },
+                          icon : Icon(CupertinoIcons.restart), title: "Undo",subtitle: ""
+                      )
+                      : RowButton(
+                        onTap: (){
+                          Navigator.pop(context);
+                          dialogRemoveUnit(context, widget.unit);
+                        },
+                            icon : Icon(CupertinoIcons.delete), title: "Remove Unit",subtitle: ""
+                        )
+                      : SizedBox(),
+
+                  widget.unit.tid.toString() == ''|| unit.lid!=lid
+                      ?SizedBox()
+                      :_admin.contains(currentUser.uid)
+                      ?RowButton(
+                          onTap: (){
+                            // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
+                            Navigator.pop(context);
+                            dialogTerminateLease(context);
+                          },
+                          icon : Icon(CupertinoIcons.clear_circled), title: "Terminate Lease",subtitle: ""
+                      ) : SizedBox(),
+
+                  lid == ''
+                      ? SizedBox()
+                      : currentLease.ctid.toString().contains(currentUser.uid) || _admin.contains(currentUser.uid)
+                      ? RowButton(
+                          onTap: (){
+                          Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);},
+                          icon : Icon(CupertinoIcons.person_2), title: "Co-Tenants",subtitle: ""
+                        )
+                      : SizedBox(),
+
+                  _admin.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid)
+                      ? RowButton(
+                      onTap: (){
+                        // dialogChargers(context);
+                      },
+                      icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""
+                  )
+                      : SizedBox(),
+
+                  _admin.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid)
+                      ? RowButton(
+                          onTap: (){
+                          // dialogMaintain(context);
+                          },
+                          icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: ""
+                        )
+                      : SizedBox(),
+
+                  _admin.contains(currentUser.uid)
+                      ? RowButton(
+                      onTap: (){
                         Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
                       },
                       icon : Icon(CupertinoIcons.doc_text), title: "Leases",subtitle: ""
-                    ),
+                  )
+                      : SizedBox(),
+
                   RowButton(onTap: (){
                     Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: "", lid: currentLease.lid,), transition: Transition.rightToLeft);
                   },
                       icon : LineIcon.wallet(), title: "Payments",subtitle: ""),
 
                   RowButton(onTap: (){
-                    Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(),), transition: Transition.rightToLeft);
+                    Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(), lid: lid,), transition: Transition.rightToLeft);
                   },
                       icon : Icon(CupertinoIcons.graph_square), title: "Reports & Analytics",subtitle: "Beta"),
                   Expanded(child: SizedBox()),
@@ -1635,7 +1668,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       ]
                   )
               ),
-              DialogTerminate(unit: unit, lease: currentLease, reload: _getData,),
+              DialogTerminate(
+                unit: unit, lease: currentLease, reload: (){
+                widget.reload();
+                _getData();
+              },),
             ],
           ),
         ),
@@ -1700,7 +1737,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(" ${unit.title.toString()}"),
+                                    Text("${lease.lid.split("-").first.toUpperCase()}"),
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [

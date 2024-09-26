@@ -596,7 +596,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                 },  icon :LineIcon.wallet(), title:"Payments", subtitle:"")
                                 : SizedBox(),
                             !admin.contains(currentUser.uid) ? SizedBox() :RowButton(onTap:() {
-                              Get.to(()=>Report(entity: widget.entity, unitid: '', tid: ''), transition: Transition.rightToLeft);
+                              Get.to(()=>Report(entity: widget.entity, unitid: '', tid: '', lid: '',), transition: Transition.rightToLeft);
                             },  icon :Icon(CupertinoIcons.chart_bar_alt_fill,), title:"Reports & Analytics", subtitle:"Beta"),
                           ],
                         ),

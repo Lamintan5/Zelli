@@ -355,7 +355,7 @@ class _WebHomeState extends State<WebHome> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  nav==0? Expanded(child: Report(entity: EntityModel(eid: ""), unitid: '', tid: '',))
+                  nav==0? Expanded(child: Report(entity: EntityModel(eid: ""), unitid: '', tid: '', lid: '',))
                       : nav == 1
                       ? Expanded(child: Units())
                       : nav==2

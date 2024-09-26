@@ -42,21 +42,22 @@ class _ItemPayState extends State<ItemPay> {
   UnitModel unit = UnitModel(id: "");
 
   _getDetails()async{
-    
+    _getData();
+    _getData();
   }
 
   _getData(){
     _enty = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
     _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
+    entity = _enty.firstWhere((element) => element.eid == widget.payments.eid, orElse: ()=> EntityModel(eid: "", image: "", title: "N/A"));
     payer = widget.payments.payerid == currentUser.uid
         ? currentUser
         : _user.firstWhere((element) => element.uid == widget.payments.payerid, orElse: () => UserModel(uid: "", image: "", username: "N/A"));
-    entity = _enty.firstWhere((element) => element.eid == widget.payments.eid, orElse: ()=> EntityModel(eid: "", image: "", title: "N/A"));
     unit = _unit.firstWhere((element) => element.id == widget.payments.uid, orElse: ()=> UnitModel(id: "", title: "N/A"));
-    user = unit.tid.toString().split(",").first.split(",").first == currentUser.uid
+    user = widget.payments.tid.toString().split(",").first == currentUser.uid
         ? currentUser
-        : _user.firstWhere((element) => element.uid == unit.tid.toString().split(",").first,
+        : _user.firstWhere((element) => element.uid == widget.payments.tid.toString().split(",").first,
         orElse: () => UserModel(uid: "", image: "", username: "N/A"));
     start = DateTime.parse(widget.payments.time.toString().split(",").first);
     end = DateTime.parse(widget.payments.time.toString().split(",").last);
@@ -68,7 +69,7 @@ class _ItemPayState extends State<ItemPay> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getData();
+    _getDetails();
   }
 
   @override

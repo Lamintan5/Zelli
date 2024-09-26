@@ -10,5 +10,5 @@ List<Widget> homeScreenItems = [
   Profile(),
   Units(),
   Payments(eid: '',unitid: '',tid: '', lid: '',),
-  Report(entity: EntityModel(eid: ""), unitid: '', tid: ''),
+  Report(entity: EntityModel(eid: ""), unitid: '', tid: '', lid: '',),
 ];

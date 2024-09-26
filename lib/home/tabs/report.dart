@@ -20,7 +20,8 @@ class Report extends StatefulWidget {
   final EntityModel entity;
   final String unitid;
   final String tid;
-  const Report({super.key, required this.entity, required this.unitid, required this.tid});
+  final String lid;
+  const Report({super.key, required this.entity, required this.unitid, required this.tid, required this.lid});
 
   @override
   State<Report> createState() => _ReportState();
@@ -56,7 +57,8 @@ class _ReportState extends State<Report> {
       bool matchesEid = widget.entity.eid.isEmpty || test.eid==widget.entity.eid;
       bool matchesUnit = widget.unitid.isEmpty || test.uid == widget.unitid;
       bool matchesTid = widget.tid.isEmpty || test.tid == widget.tid.toString();
-      return matchesEid && matchesUnit && matchesTid;
+      bool matchesLid = widget.lid.isEmpty || test.lid == widget.lid.toString();
+      return matchesEid && matchesUnit && matchesTid && matchesLid;
     }).toList();
     _rent = _pay.where((element) => element.type == "RENT").toList();
     _revenue = _pay.where((pay) => pay.type!.split(",").first != "EXP").toList();

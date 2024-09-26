@@ -52,8 +52,8 @@ class _CoTenantsState extends State<CoTenants> {
   _getData(){
     _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _admin = widget.entity.admin.toString().split(",");
-    _tenants.addAll(widget.unit.tid.toString().split(","));
-    mainTenant = widget.unit.tid.toString().split(",").first;
+    mainTenant = widget.lease.tid.toString();
+    _tenants.add(mainTenant);
     widget.lease.ctid.toString().split(",").forEach((e){
       if(!_tenants.contains(e)){
         _tenants.add(e);
@@ -95,7 +95,8 @@ class _CoTenantsState extends State<CoTenants> {
       appBar: AppBar(
         title: Text("Co-Tenants"),
         actions: [
-          Tooltip(
+          _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
+              ?Tooltip(
             message: "Add new co-tenants",
             child: InkWell(
                 onTap: (){dialogGetCoTenants(context);},
@@ -107,6 +108,7 @@ class _CoTenantsState extends State<CoTenants> {
                 )
             ),
           )
+              :SizedBox()
         ],
       ),
       body: Padding(
@@ -196,7 +198,9 @@ class _CoTenantsState extends State<CoTenants> {
                                         IntrinsicHeight(
                                           child: Row(
                                             children: [
-                                              _admin.contains(currentUser.uid) || mainTenant == currentUser.uid? BottomCallButtons(
+                                              widget.unit.lid != widget.lease.lid?SizedBox():
+                                              _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
+                                                  ? BottomCallButtons(
                                                   onTap: () {
                                                     dialogRemoveTenant(context, user);
                                                   },
@@ -206,7 +210,9 @@ class _CoTenantsState extends State<CoTenants> {
                                                   backColor: Colors.transparent,
                                                   title: "Remove"
                                               ) : SizedBox(),
-                                              _admin.contains(currentUser.uid) || mainTenant == currentUser.uid? Padding(
+                                              widget.unit.lid != widget.lease.lid?SizedBox():
+                                              _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
+                                                  ? Padding(
                                                 padding: EdgeInsets.symmetric(vertical: 10),
                                                 child: VerticalDivider(
                                                   thickness: 1,
