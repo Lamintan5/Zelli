@@ -301,9 +301,10 @@ class _OptionsState extends State<Options> {
         preferences.remove('password');
         // preferences.remove('unit_profile_showcase');
         preferences.remove('myentity');
+        preferences.remove('notmyentity');
         preferences.remove('myunit');
         preferences.remove('myusers');
-        preferences.remove('myLease');
+        preferences.remove('mylease');
         preferences.remove('mymess');
         preferences.remove('mypay');
         preferences.remove('mynotif');
@@ -313,6 +314,7 @@ class _OptionsState extends State<Options> {
         preferences.remove('myduties');
         currentUser = UserModel(uid: "", email: "", phone: "", username: "", image: "", token: "");
         myEntity = [];
+        notMyEntity = [];
         myUnits = [];
         myThird = [];
         myUsers = [];

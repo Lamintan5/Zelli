@@ -247,10 +247,13 @@ class Data{
   Future<void> addOrUpdateLease(List<LeaseModel> newDataList) async {
     List<LeaseModel> _lease = [];
     List<String> uniqueLease = [];
+
     final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
     _lease = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).toList();
+
     for (var newLease in newDataList) {
-      int existingLeaseIndex = _lease.indexWhere((tnt) => tnt.lid == newLease.lid && tnt.eid == newLease.eid && tnt.uid == newLease.uid && tnt.start == newLease.start && tnt.end == newLease.end );
+      int existingLeaseIndex = _lease.indexWhere((tnt) => tnt.lid == newLease.lid);
       if (existingLeaseIndex != -1) {
         LeaseModel existingTenant = _lease[existingLeaseIndex];
         if (existingTenant.toJson().toString() != newLease.toJson().toString()) {

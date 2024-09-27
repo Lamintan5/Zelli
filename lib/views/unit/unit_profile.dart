@@ -78,6 +78,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   List<MonthModel> monthsList = [];
   List<LeaseModel> _leases = [];
   List<String> _admin = [];
+  List<String> _pids = [];
   List<String> _tids = [];
 
   final _keyOne = GlobalKey();
@@ -132,27 +133,27 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   _getEntity(){
     entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test)=> test.eid == unit.eid);
     _admin = entity.admin.toString().split(",");
+    _pids = entity.pid.toString().split(",");
   }
 
   _getUser(){
     _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
-    _leases = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).toList();
-    currentTenant =  widget.user.uid.isNotEmpty
-        ? widget.user
-        :  _users.firstWhere((test) => test.uid == unit.tid.toString().split(",").first, orElse: () => UserModel(uid: ""));
-
-    _leases = _leases.where((test){
+    _leases = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).where((test){
       bool matchLid = lid.isEmpty || test.lid == lid;
       bool matchTid = currentTenant.uid.isEmpty || test.tid == currentTenant.uid;
       bool matchUid = unit.id.toString().isEmpty || test.uid.toString().split(",").first == unit.id.toString();
       return matchLid && matchUid && matchTid;
     }).toList();
+    currentTenant =  widget.user.uid.isNotEmpty
+        ? widget.user
+        :  _users.firstWhere((test) => test.uid == unit.tid.toString().split(",").first, orElse: () => UserModel(uid: ""));
+
     currentLease = _leases.firstWhere((test) => test.lid == lid, orElse: ()=>LeaseModel(lid: "", tid: "", start: "", end: "") );
     start = currentLease.start.toString();
     end = currentLease.end.toString();
-    _leases.forEach((e){
-      print(e.toJson());
-    });
+    // _leases.forEach((e){
+    //   print(e.toJson());
+    // });
     _tids.add(currentLease.tid.toString());
     currentLease.ctid.toString().split(",").forEach((e){
       if(!_tids.contains(e)){
@@ -430,6 +431,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SizedBox(height: 40),
                         Row(
@@ -606,8 +608,29 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         ),
                         currentTenant.uid==""
                             ? SizedBox()
-                            : Row(
+                            : Wrap(
+                          spacing: 5,
+                          runSpacing: 5,
                           children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: color1
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(CupertinoIcons.doc_text , color: color5,size: 12,),
+                                  SizedBox(width: 2,),
+                                  Text(
+                                    currentLease.lid.split("-").first.toUpperCase(),
+                                    style: TextStyle(color: color5,fontSize: 12),
+                                  )
+                                ],
+                              ),
+                            ),
                             start.isEmpty? SizedBox() : Container(
                               padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
                               decoration: BoxDecoration(
@@ -627,7 +650,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ],
                               ),
                             ),
-                            SizedBox(width: 5,),
                             end.isEmpty? SizedBox() :  Container(
                               padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
                               decoration: BoxDecoration(
@@ -733,83 +755,84 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           ],
                         ),
                         SizedBox(height: 10),
-                        currentTenant.uid!=unit.tid.toString().split(",").first
-                            ?RichText(
+                        Center(
+                          child: currentTenant.uid!=unit.tid.toString().split(",").first
+                              ?RichText(
                               text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "This lease was terminated on ",
-                                    style: style
-                                  ),
-                                  TextSpan(
-                                   text: end.isEmpty? "" : DateFormat.yMMMEd().format(DateTime.parse(end)),
-                                    style: bold
-                                  )
-                                ]
+                                  children: [
+                                    TextSpan(
+                                        text: "This lease was terminated on ",
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: end.isEmpty? "" : DateFormat.yMMMEd().format(DateTime.parse(end)),
+                                        style: bold
+                                    )
+                                  ]
                               )
-                            )
-                            :unit.tid == ""
-                            ? RichText(
+                          )
+                              :unit.tid == ""
+                              ? RichText(
                               textAlign: TextAlign.center,
                               text:TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "This unit is currently available for lease. Wish to ",
-                                      style: style
+                                        text: "This unit is currently available for lease. Wish to ",
+                                        style: style
                                     ),
 
                                     WidgetSpan(
                                         child: InkWell(
-                                          onTap: (){
-                                            dialogAddTenant(context);
-                                          },
-                                          child: Text("Add Tenant", style: activeBlue,
-                                          )
+                                            onTap: (){
+                                              dialogAddTenant(context);
+                                            },
+                                            child: Text("Add Tenant", style: activeBlue,
+                                            )
                                         )
                                     ),
-                                    ]
-                                )
+                                  ]
                               )
-                            : RichText(
-                            textAlign: TextAlign.center,
-                            text: paidDeposit < deposit
-                                ? TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: depoBalance < deposit? "Record " : "The anticipated ",
-                                  style: style
-                                ),
-                                TextSpan(
-                                  text: "security deposit ",
-                                  style: bold
-                                ),
-                                TextSpan(
-                                    text: depoBalance < deposit? "balance of " : "amount is ",
-                                    style: style
-                                ),
-                                WidgetSpan(
-                                    child: InkWell(
-                                      onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance);},
-                                      child: Text(
-                                          "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
-                                          style: activeBlue
-                                      ),
-                                    )
-                                ),
-                              ]
-                            )
-                                : TextSpan(
+                          )
+                              : RichText(
+                              textAlign: TextAlign.center,
+                              text: paidDeposit < deposit
+                                  ? TextSpan(
                                   children: [
                                     TextSpan(
-                                      text: "The rent has accrued by ",
-                                      style: style
+                                        text: depoBalance < deposit? "Record " : "The anticipated ",
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: "security deposit ",
+                                        style: bold
+                                    ),
+                                    TextSpan(
+                                        text: depoBalance < deposit? "balance of " : "amount is ",
+                                        style: style
+                                    ),
+                                    WidgetSpan(
+                                        child: InkWell(
+                                          onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance);},
+                                          child: Text(
+                                              "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
+                                              style: activeBlue
+                                          ),
+                                        )
+                                    ),
+                                  ]
+                              )
+                                  : TextSpan(
+                                  children: [
+                                    TextSpan(
+                                        text: "The rent has accrued by ",
+                                        style: style
                                     ),
                                     WidgetSpan(
                                         child: InkWell(
                                           onTap: (){},
                                           child: Text(
-                                              "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
-                                              style: activeRed,
+                                            "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
+                                            style: activeRed,
                                           ),
                                         )
                                     ),
@@ -826,7 +849,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                         style: style
                                     ),
                                   ]
-                                )
+                              )
+                          ),
                         ),
                       ],
                     ),
@@ -915,7 +939,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     List<LeaseModel> _lease = _leases.where((e) => e.tid == user.uid).toList();
                                     _filtPay = _pay.where((p) => p.tid == user.uid).toList();
                                     var amount = _filtPay.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
-
 
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 5.0,),
@@ -1448,16 +1471,17 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       : SizedBox(),
 
                   widget.unit.tid.toString() == ''|| unit.lid!=lid
-                      ?SizedBox()
-                      :_admin.contains(currentUser.uid)
-                      ?RowButton(
+                      ? SizedBox()
+                      : _admin.contains(currentUser.uid)
+                      ? RowButton(
                           onTap: (){
                             // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
                             Navigator.pop(context);
                             dialogTerminateLease(context);
                           },
                           icon : Icon(CupertinoIcons.clear_circled), title: "Terminate Lease",subtitle: ""
-                      ) : SizedBox(),
+                      )
+                      : SizedBox(),
 
                   lid == ''
                       ? SizedBox()
@@ -1487,7 +1511,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         )
                       : SizedBox(),
 
-                  _admin.contains(currentUser.uid)
+                  _admin.contains(currentUser.uid) && unit.lid == currentLease.lid
                       ? RowButton(
                       onTap: (){
                         Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
@@ -1496,15 +1520,23 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   )
                       : SizedBox(),
 
-                  RowButton(onTap: (){
-                    Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: "", lid: currentLease.lid,), transition: Transition.rightToLeft);
-                  },
-                      icon : LineIcon.wallet(), title: "Payments",subtitle: ""),
+                  _pids.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid)
+                      ? RowButton(
+                          onTap: (){
+                            Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: "", lid: currentLease.lid,), transition: Transition.rightToLeft);
+                          },
+                          icon : LineIcon.wallet(), title: "Payments",subtitle: ""
+                      )
+                      : SizedBox(),
 
-                  RowButton(onTap: (){
-                    Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(), lid: lid,), transition: Transition.rightToLeft);
-                  },
-                      icon : Icon(CupertinoIcons.graph_square), title: "Reports & Analytics",subtitle: "Beta"),
+                  _pids.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid)
+                      ? RowButton(
+                          onTap: (){
+                            Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(), lid: lid,), transition: Transition.rightToLeft);
+                          },
+                          icon : Icon(CupertinoIcons.graph_square), title: "Reports & Analytics",subtitle: "Beta"
+                        )
+                      : SizedBox(),
                   Expanded(child: SizedBox()),
                   Container(
                     child: Column(

@@ -56,9 +56,9 @@ class _ReportState extends State<Report> {
     _pay =  myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((test){
       bool matchesEid = widget.entity.eid.isEmpty || test.eid==widget.entity.eid;
       bool matchesUnit = widget.unitid.isEmpty || test.uid == widget.unitid;
-      bool matchesTid = widget.tid.isEmpty || test.tid == widget.tid.toString();
+      bool matchesTid = widget.tid.isEmpty || test.tid.toString().split(",") == widget.tid.toString();
       bool matchesLid = widget.lid.isEmpty || test.lid == widget.lid.toString();
-      return matchesEid && matchesUnit && matchesTid && matchesLid;
+      return matchesEid && matchesUnit  && matchesLid;
     }).toList();
     _rent = _pay.where((element) => element.type == "RENT").toList();
     _revenue = _pay.where((pay) => pay.type!.split(",").first != "EXP").toList();

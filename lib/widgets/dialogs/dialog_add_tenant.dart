@@ -208,7 +208,7 @@ class _DialogAddTenantState extends State<DialogAddTenant> {
                 itemCount: _search.text.isEmpty? filteredList.length < 20? filteredList.length : 20 : filteredList.length,
                 itemBuilder: (context, index){
                   UserModel user = filteredList[index];
-                  _filtUnits = _units.where((element) => element.tid == user.uid && element.eid == widget.unit.eid).toList();
+                  _filtUnits = _units.where((element) => element.tid.toString().split(",").contains(user.uid) && element.eid == widget.unit.eid).toList();
                   return  InkWell(
                     onTap: (){
                       dialogSelectedTenant(context, user);
