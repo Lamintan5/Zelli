@@ -209,7 +209,7 @@ class _ItemTenantState extends State<ItemTenant> {
                       ),
                       BottomCallButtons(
                           onTap: () {
-                            Get.to(()=>Payments(eid: widget.entity.eid, unitid: "", tid: widget.user.uid, lid: '',),transition: Transition.rightToLeft);
+                            Get.to(()=>Payments(eid: widget.entity.eid, unitid: "", tid: widget.user.uid, lid: '', from: 'item',),transition: Transition.rightToLeft);
                           },
                           icon: LineIcon.wallet(color: secondaryColor,),
                           actionColor: secondaryColor,

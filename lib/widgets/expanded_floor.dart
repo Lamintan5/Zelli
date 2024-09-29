@@ -21,7 +21,6 @@ import '../resources/services.dart';
 import '../utils/colors.dart';
 import '../views/unit/floor_units.dart';
 import '../views/unit/unit_profile.dart';
-import '../views/unit/unit_profile_page.dart';
 import 'dialogs/dialog_add_unit.dart';
 import 'dialogs/dialog_title.dart';
 // import '../views/units/floor_units.dart';
@@ -205,11 +204,7 @@ class _ExpandFloorState extends State<ExpandFloor> {
 
                 return InkWell(
                   onTap: (){
-                    unit.tid == currentUser.uid
-                        ? Get.to(()=> ShowCaseWidget(
-                      builder: (_) => UnitProfilePage(unit: unit, entity: widget.entity,),
-                    ), transition: Transition.rightToLeft)
-                        : Get.to(()=> ShowCaseWidget(
+                    Get.to(()=> ShowCaseWidget(
                       builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
                     ), transition: Transition.rightToLeft);
                   },

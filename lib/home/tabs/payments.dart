@@ -16,7 +16,8 @@ class Payments extends StatefulWidget {
   final String month;
   final String year;
   final String type;
-  const Payments({super.key, required this.eid, required this.unitid, required this.tid, required this.lid, this.month = "", this.year = "", this.type =""});
+  final String from;
+  const Payments({super.key, required this.eid, required this.unitid, required this.tid, required this.lid, this.month = "", this.year = "", this.type ="", required this.from});
 
   @override
   State<Payments> createState() => _PaymentsState();
@@ -66,7 +67,7 @@ class _PaymentsState extends State<Payments> {
             children: [
               Row(
                 children: [
-                  widget.eid.isEmpty && widget.unitid.isEmpty && widget.tid.isEmpty
+                  widget.from.isEmpty
                       ? SizedBox()
                       : Padding(
                         padding: const EdgeInsets.only(right: 8.0),

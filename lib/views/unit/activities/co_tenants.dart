@@ -198,7 +198,7 @@ class _CoTenantsState extends State<CoTenants> {
                                         IntrinsicHeight(
                                           child: Row(
                                             children: [
-                                              widget.unit.lid != widget.lease.lid?SizedBox():
+                                              widget.unit.lid != widget.lease.lid || user.uid == currentUser.uid?SizedBox():
                                               _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
                                                   ? BottomCallButtons(
                                                   onTap: () {
@@ -209,8 +209,9 @@ class _CoTenantsState extends State<CoTenants> {
                                                   actionColor: secondaryColor,
                                                   backColor: Colors.transparent,
                                                   title: "Remove"
-                                              ) : SizedBox(),
-                                              widget.unit.lid != widget.lease.lid?SizedBox():
+                                              )
+                                                  : SizedBox(),
+                                              widget.unit.lid != widget.lease.lid|| user.uid == currentUser.uid?SizedBox():
                                               _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
                                                   ? Padding(
                                                 padding: EdgeInsets.symmetric(vertical: 10),
@@ -222,7 +223,7 @@ class _CoTenantsState extends State<CoTenants> {
                                               ) :SizedBox(),
                                               BottomCallButtons(
                                                   onTap: () {
-                                                    Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid,),transition: Transition.rightToLeft);
+                                                    Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid, from: 'tenant',),transition: Transition.rightToLeft);
                                                   },
                                                   icon: LineIcon.wallet(color: secondaryColor,),
                                                   actionColor: secondaryColor,

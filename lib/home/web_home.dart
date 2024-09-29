@@ -31,7 +31,6 @@ import '../models/units.dart';
 import '../resources/services.dart';
 import '../resources/socket.dart';
 import '../utils/colors.dart';
-import '../views/property/prop_page.dart';
 import '../views/property/prop_view.dart';
 import '../widgets/frosted_glass.dart';
 import '../widgets/logo/prop_logo.dart';
@@ -363,7 +362,7 @@ class _WebHomeState extends State<WebHome> {
                       : nav==3
                       ? SizedBox()
                       : nav==4
-                      ? Expanded(child: Payments(eid: '',unitid: '',tid: '', lid: '',))
+                      ? Expanded(child: Payments(eid: '',unitid: '',tid: '', lid: '', from: '',))
                       :SizedBox()
                 ],
               )
@@ -519,9 +518,7 @@ class _WebHomeState extends State<WebHome> {
                             int noTenant = 0;
                             return InkWell(
                               onTap: (){
-                                entity.pid!.contains(currentUser.uid)
-                                    ?  Get.to(()=>PropertyView(entity: entity,removeEntity: _removeEntity, reload: _getData,), transition: Transition.rightToLeftWithFade)
-                                    :  Get.to(()=>PropertyPage(entity: entity, units: _unitList,), transition: Transition.rightToLeft);
+                                Get.to(()=>PropertyView(entity: entity,removeEntity: _removeEntity, reload: _getData,), transition: Transition.rightToLeftWithFade);
                               },
                               borderRadius: BorderRadius.circular(10),
                               splashColor: CupertinoColors.activeBlue,

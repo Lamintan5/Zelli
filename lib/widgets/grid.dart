@@ -17,7 +17,6 @@ import '../models/users.dart';
 import '../utils/colors.dart';
 import '../views/unit/floor_units.dart';
 import '../views/unit/unit_profile.dart';
-import '../views/unit/unit_profile_page.dart';
 import 'dialogs/dialog_add_unit.dart';
 
 class GridUnits extends StatefulWidget {
@@ -130,11 +129,7 @@ class _GridUnitsState extends State<GridUnits> {
 
               return InkWell(
                 onTap: (){
-                  unit.tid == currentUser.uid
-                       ? Get.to(()=> ShowCaseWidget(
-                        builder: (_) => UnitProfilePage(unit: unit, entity: widget.entity,),
-                      ), transition: Transition.rightToLeft)
-                      : Get.to(()=> ShowCaseWidget(
+                  Get.to(()=> ShowCaseWidget(
                     builder: (_) => UnitProfile(unit: unit, reload: _getUnit, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
                   ), transition: Transition.rightToLeft);
                 },

@@ -670,8 +670,7 @@ class Data{
         uniqueUnit = _units.map((model) => jsonEncode(model.toJson())).toList();
         uniqueNotif = _notif.map((model) => jsonEncode(model.toJson())).toList();
         uniquePayments  = _payments.map((model) => jsonEncode(model.toJson())).toList();
-
-
+        
         sharedPreferences.setStringList('myentity', uniqueEntities);
         sharedPreferences.setStringList("myunit", uniqueUnit);
         sharedPreferences.setStringList("mynotif", uniqueNotif);
@@ -720,9 +719,9 @@ class Data{
     myUnits = uniqueUnit;
     reload();
 
-    await Services.deleteUnit(unit.id.toString()).then((response){
-
+    await Services.deleteUnit(unit.id.toString()).then((response)async{
       if(response=="success"||response=="Does not exist"){
+        await Services.terminateLease(unit.lid.toString());
         _unit.removeWhere((test) => test.id==unit.id);
         uniqueUnit = _unit.map((model) => jsonEncode(model.toJson())).toList();
         sharedPreferences.setStringList('myunit', uniqueUnit);
@@ -973,7 +972,51 @@ class Data{
   }
 
   Future<bool> exitEntity(BuildContext context, EntityModel entity, Function reload)async{
+    List<EntityModel> _entity = [];
+    List<UnitModel> _units = [];
+    List<NotifModel> _notif = [];
+    List<PaymentsModel> _payments = [];
 
+    List<String> uniqueEntities = [];
+    List<String> uniqueUnit = [];
+    List<String> uniqueNotif = [];
+    List<String> uniquePayments = [];
+
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    _entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
+    _units = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
+    _notif = myNotif.map((jsonString) => NotifModel.fromJson(json.decode(jsonString))).toList();
+    _payments = myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).toList();
+    
+    await Services.removeAdmin(entity.eid, currentUser.uid).then((response){print("Response $response");});
+    await Services.removePid(entity.eid, currentUser.uid).then((value){
+      print("Value ${value}");
+      if(value=="success"||value=="Does not exist"){
+        _entity.removeWhere((element) => element.eid == entity.eid);
+        _units.removeWhere((element) => element.eid == entity.eid);
+        _payments.removeWhere((element) => element.eid == entity.eid);
+        _notif.removeWhere((element) => element.eid == entity.eid);
+        socketManager.notifications.removeWhere((element) => element.eid == entity.eid);
+
+        uniqueEntities = _entity.map((model) => jsonEncode(model.toJson())).toList();
+        uniqueUnit = _units.map((model) => jsonEncode(model.toJson())).toList();
+        uniqueNotif = _notif.map((model) => jsonEncode(model.toJson())).toList();
+        uniquePayments  = _payments.map((model) => jsonEncode(model.toJson())).toList();
+
+        sharedPreferences.setStringList('myentity', uniqueEntities);
+        sharedPreferences.setStringList("myunit", uniqueUnit);
+        sharedPreferences.setStringList("mynotif", uniqueNotif);
+        sharedPreferences.setStringList('mypay', uniquePayments);
+
+
+        myEntity = uniqueEntities;
+        myUnits = uniqueUnit;
+        myNotif = uniqueNotif;
+        myPayment = uniquePayments;
+        reload();
+      }
+    });
 
     return false;
   }

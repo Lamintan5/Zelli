@@ -28,7 +28,6 @@ import '../../../widgets/dialogs/dialog_grid.dart';
 import '../../../widgets/dialogs/dialog_title.dart';
 import '../../../widgets/text/text_format.dart';
 import '../../unit/unit_profile.dart';
-import '../../unit/unit_profile_page.dart';
 
 class Leases extends StatefulWidget {
   final EntityModel entity;
@@ -314,7 +313,7 @@ class _LeasesState extends State<Leases> {
                                       ),
                                       BottomCallButtons(
                                           onTap: () {
-                                            Get.to(()=>Payments(eid: widget.entity.eid, unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid,),transition: Transition.rightToLeft);
+                                            Get.to(()=>Payments(eid: widget.entity.eid, unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid, from: 'lease',),transition: Transition.rightToLeft);
                                           },
                                           icon: LineIcon.wallet(color: secondaryColor,),
                                           actionColor: secondaryColor,

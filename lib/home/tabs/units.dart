@@ -11,7 +11,6 @@ import 'package:showcaseview/showcaseview.dart';
 import '../../models/entities.dart';
 import '../../models/units.dart';
 import '../../views/unit/unit_profile.dart';
-import '../../views/unit/unit_profile_page.dart';
 import '../../widgets/map_key.dart';
 import '../../widgets/profile_images/user_profile.dart';
 
@@ -135,11 +134,7 @@ class _UnitsState extends State<Units> {
                         }
                         return InkWell(
                           onTap: (){
-                            unit.tid == currentUser.uid
-                                ? Get.to(()=> ShowCaseWidget(
-                                    builder: (_) => UnitProfilePage(unit: unit, entity: entity,),
-                                  ), transition: Transition.rightToLeft)
-                                : Get.to(()=> ShowCaseWidget(
+                             Get.to(()=> ShowCaseWidget(
                                     builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
                                   ), transition: Transition.rightToLeft);
                           },

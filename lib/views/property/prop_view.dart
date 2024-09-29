@@ -161,7 +161,28 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
               pinned: true,
               expandedHeight: 350,
               foregroundColor: reverse,
-              toolbarHeight: 30,
+              toolbarHeight: 40,
+              actions: [
+                _loading ? SizedBox(width: 20,height: 20, child: CircularProgressIndicator(color: reverse,strokeWidth: 2,)) : SizedBox(),
+                SizedBox(width: 10,),
+                admin.contains(currentUser.uid) || entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
+                    ? Tooltip(
+                  message: "Community",
+                  child: InkWell(
+                      onTap: (){
+
+                      },
+                      hoverColor: color1,
+                      borderRadius: BorderRadius.circular(5),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Icon(CupertinoIcons.bubble_middle_bottom),
+                      )
+                  ),
+                ) : SizedBox(),
+                SizedBox(width: 5,),
+                buildButton(),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 background: SafeArea(
                   child: Stack(
@@ -192,58 +213,16 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                               ],
                             ),
                             SizedBox(height: 5,),
-                            entity.checked.contains("REMOVE") || !entity.pid.toString().contains(currentUser.uid)
-                                ? SizedBox() : SizedBox(width: 450,
-                              child: IntrinsicHeight(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    SizedBox(width: 20,),
-                                    CardButton(
-                                        text: "REVIEWS",
-                                        backcolor: reverse,
-                                        forecolor: normal,
-                                        icon: Icon(CupertinoIcons.star_fill, color: normal, size: 18,),
-                                        onTap: (){
-                                          // Get.to(()=>Reviews(entity: entity), transition: Transition.rightToLeft);
-                                        }
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 3),
-                                      child: VerticalDivider(
-                                        color: color5,
-                                        thickness: 2,
-                                      ),
-                                    ),
-                                    CardButton(
-                                        text: "REQUEST",
-                                        backcolor: reverse,
-                                        forecolor: normal,
-                                        icon: Icon(CupertinoIcons.arrowshape_turn_up_right_fill, color: normal,size: 18),
-                                        onTap: (){
-                                          // Get.to(()=>Requests(entity: entity, updateCount: _updateCount,), transition: Transition.rightToLeft);
-                                        }
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 3),
-                                      child: VerticalDivider(
-                                        color: color5,
-                                        thickness: 2,
-                                      ),
-                                    ),
-                                    CardButton(
-                                        text: "COMM",
-                                        backcolor: reverse,
-                                        forecolor: normal,
-                                        icon: Icon(CupertinoIcons.person_2_fill, color: normal,size: 18),
-                                        onTap: (){
-                                          // Get.to(()=>Community(entity: entity, changeMess: _changeMess, updateCount: _updateCount,), transition: Transition.rightToLeft);
-                                        }
-                                    ),
-                                    SizedBox(width: 20,),
-                                  ],
-                                ),
-                              ),
+                            entity.checked.contains("REMOVE")
+                                ? SizedBox()
+                                : CardButton(
+                                text: "REVIEWS",
+                                backcolor: reverse,
+                                forecolor: normal,
+                                icon: Icon(CupertinoIcons.star_fill, color: normal, size: 18,),
+                                onTap: (){
+                                  // Get.to(()=>Reviews(entity: entity), transition: Transition.rightToLeft);
+                                }
                             ),
                             SizedBox(height: 20,),
                           ],
@@ -254,65 +233,67 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                         right: 8,
                         child: Column(
                           children: [
-                            entity.checked.contains("REMOVE") || !entity.pid.toString().contains(currentUser.uid)
-                                ? SizedBox(height: 50,) :
-                            InkWell(
-                              onTap: (){
-                                Get.to(()=>Managers(entity: entity, reload: _getDetails),transition: Transition.rightToLeft);
-                              },
-                              borderRadius: BorderRadius.circular(5),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Tooltip(
-                                    message: 'Click here to see all handlers',
-                                    child: Container(
-                                      width: 60,
-                                      height: 20,
-                                      child: Stack(
-                                        children: [
-                                          AnimatedPositioned(
-                                            left: _position1,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child:  UserProfile(image: image3,radius: 10, shadow: Colors.black54,),
-                                          ),
-                                          AnimatedPositioned(
-                                            left: _position2,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child: UserProfile(image: image2,radius: 10, shadow: Colors.black54,),
-                                          ),
-                                          AnimatedPositioned(
-                                            left: _position3,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
-                                          ),
-                                          !admin.contains(currentUser.uid) ? SizedBox() : AnimatedPositioned(
-                                            left: _position4,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child: CircleAvatar(
-                                              radius: 10,
-                                              backgroundColor: reverse,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.add,
-                                                  size: 15,
-                                                  color: normal,
-                                                ),
-                                              ),
+                            entity.checked.contains("REMOVE")
+                                ? SizedBox()
+                                : entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
+                                ? InkWell(
+                          onTap: (){
+                            Get.to(()=>Managers(entity: entity, reload: _getDetails),transition: Transition.rightToLeft);
+                          },
+                          borderRadius: BorderRadius.circular(5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Tooltip(
+                                message: 'Click here to see all handlers',
+                                child: Container(
+                                  width: 60,
+                                  height: 20,
+                                  child: Stack(
+                                    children: [
+                                      AnimatedPositioned(
+                                        left: _position1,
+                                        duration: Duration(seconds: 1),
+                                        curve: Curves.easeInOut,
+                                        child:  UserProfile(image: image3,radius: 10, shadow: Colors.black54,),
+                                      ),
+                                      AnimatedPositioned(
+                                        left: _position2,
+                                        duration: Duration(seconds: 1),
+                                        curve: Curves.easeInOut,
+                                        child: UserProfile(image: image2,radius: 10, shadow: Colors.black54,),
+                                      ),
+                                      AnimatedPositioned(
+                                        left: _position3,
+                                        duration: Duration(seconds: 1),
+                                        curve: Curves.easeInOut,
+                                        child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
+                                      ),
+                                      !admin.contains(currentUser.uid) ? SizedBox() : AnimatedPositioned(
+                                        left: _position4,
+                                        duration: Duration(seconds: 1),
+                                        curve: Curves.easeInOut,
+                                        child: CircleAvatar(
+                                          radius: 10,
+                                          backgroundColor: reverse,
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.add,
+                                              size: 15,
+                                              color: normal,
                                             ),
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  Text('Managers', overflow: TextOverflow.ellipsis, style: TextStyle(color: secondaryColor, fontSize: 10),)
-                                ],
+                                ),
                               ),
-                            ),
+                              Text('Managers', overflow: TextOverflow.ellipsis, style: TextStyle(color: secondaryColor, fontSize: 10),)
+                            ],
+                          ),
+                        )
+                                : Text(""),
                             entity.checked.contains("false") || entity.checked.contains("EDIT") || entity.checked.contains("DELETE") || entity.checked.contains("REMOVED")
                                 ? Card(
                               color: Colors.red,
@@ -453,7 +434,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
               ),
               bottom: PreferredSize(
                 preferredSize: Size.fromHeight(20),
-                child: entity.checked.contains("REMOVE") || !entity.pid.toString().contains(currentUser.uid)
+                child: entity.checked.contains("REMOVE")
                     ? SizedBox(height: 20,)
                     : Container(
                   width: 220,
@@ -485,7 +466,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
               ),
             ),
             SliverToBoxAdapter(
-              child: entity.checked.contains("REMOVE") || !entity.pid.toString().contains(currentUser.uid)
+              child: entity.checked.contains("REMOVE")
                   ? Column(
                       children: [
                         Row(),
@@ -514,11 +495,11 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                   children: [
                     PropUnit(title: entity.title.toString(), entity: entity, max: highestId+1,),
                     Tenants(entity: entity),
-                    Payments(eid: entity.eid, unitid: "", tid: "", lid: ""),
+                    Payments(eid: entity.eid, unitid: "", tid: "", lid: "", from: '',),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
         endDrawer: Drawer(
@@ -542,38 +523,76 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            RowButton(onTap: (){
-                                Navigator.pop(context);
-                                Get.to(()=> Managers(entity: entity, reload: _getDetails), transition: Transition.rightToLeft);
-                              } ,
-                                icon : Icon(CupertinoIcons.person_crop_circle), title: "Managers",subtitle: ""),
+
+                            // Managers
+                            admin.contains(currentUser.uid) || entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
+                                ? RowButton(
+                                onTap: (){
+                                  Navigator.pop(context);
+                                  Get.to(()=> Managers(entity: entity, reload: _getDetails), transition: Transition.rightToLeft);
+                                },
+                                icon : Icon(CupertinoIcons.person_crop_circle), title: "Managers",subtitle: ""
+                            )
+                                : SizedBox(),
+
+                            // Edit Property
                             !admin.contains(currentUser.uid)
-                                ? SizedBox() : RowButton(onTap:() {
-                              Navigator.pop(context);
-                              Get.to(()=>EditProperty(entity: entity, reload: _updateEntityProfile,), transition: Transition.rightToLeftWithFade);
-                            },icon :  Icon(CupertinoIcons.pen, ), title: "Edit Property",subtitle: ""),
-                            !admin.contains(currentUser.uid)? RowButton(onTap: () {
-                              Navigator.pop(context);
-                              dialogRemoveEntity(context, 'Exit');
-                            },  icon : Icon(CupertinoIcons.minus_circle,), title:"Exit Property", subtitle:"") : RowButton(onTap: () {
-                              Navigator.pop(context);
-                              dialogRemoveEntity(context, 'Delete');
-                              },  icon : Icon(CupertinoIcons.delete,), title:"Remove Property", subtitle:""),
-                            !admin.contains(currentUser.uid) ? SizedBox() : RowButton(onTap:() {
-                              Get.to(() => Leases(entity: entity, unit: UnitModel(id: ""), lease: LeaseModel(lid: ""),), transition: Transition.rightToLeft);
-                            }, icon : Icon(CupertinoIcons.doc_text,), title:"Leases", subtitle:""),
-                            !admin.contains(currentUser.uid)? SizedBox() : RowButton(
-                                onTap:() {
-                              Get.to(()=>CreateUnits(
-                                getUnits: _getDetails,
-                                floor:  highestId+1,
-                                entity: entity,
-                                addToUnitList: _addToUnitList,
-                                removeFromList: _removeFromList,
-                                updateUnit: _updateUnit,
-                                updateUnitData: _updateUnitData,
-                              ), transition: Transition.rightToLeftWithFade);
-                            }, icon : Icon(CupertinoIcons.add), title:"Add Floor", subtitle:""),
+                                ? SizedBox()
+                                : RowButton(
+                                    onTap:() {
+                                      Navigator.pop(context);
+                                      Get.to(()=>EditProperty(entity: entity, reload: _updateEntityProfile,), transition: Transition.rightToLeftWithFade);
+                                    },
+                                    icon :  Icon(CupertinoIcons.pen, ), title: "Edit Property",subtitle: ""
+                                  ),
+
+                            // Exit or Delete
+                            admin.first != currentUser.uid
+                                ? entity.pid.toString().contains(currentUser.uid)
+                                ? RowButton(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      dialogRemoveEntity(context, 'Exit');
+                                    },
+                                    icon : Icon(CupertinoIcons.minus_circle,), title:"Exit Property", subtitle:""
+                                  )
+                                : SizedBox()
+                                : RowButton(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      dialogRemoveEntity(context, 'Delete');
+                                    },
+                                    icon : Icon(CupertinoIcons.delete,), title:"Remove Property", subtitle:""
+                                  ),
+
+                            // Leases
+                            !admin.contains(currentUser.uid)
+                                ? SizedBox()
+                                : RowButton(
+                                    onTap:() {
+                                      Get.to(() => Leases(entity: entity, unit: UnitModel(id: ""), lease: LeaseModel(lid: ""),), transition: Transition.rightToLeft);
+                                    },
+                                    icon : Icon(CupertinoIcons.doc_text,), title:"Leases", subtitle:""
+                                  ),
+
+                            // Add Floor
+                            !admin.contains(currentUser.uid)
+                                ? SizedBox()
+                                : RowButton(
+                                    onTap:() {
+                                      Get.to(()=>CreateUnits(
+                                        getUnits: _getDetails,
+                                        floor:  highestId+1,
+                                        entity: entity,
+                                        addToUnitList: _addToUnitList,
+                                        removeFromList: _removeFromList,
+                                        updateUnit: _updateUnit,
+                                        updateUnitData: _updateUnitData,
+                                      ), transition: Transition.rightToLeftWithFade);
+                                  }, icon : Icon(CupertinoIcons.add), title:"Add Floor", subtitle:""
+                                ),
+
+
                             // NOTIFICATIONS
                             entity.checked.contains("REMOVE") || !entity.pid.toString().contains(currentUser.uid) ? SizedBox() : RowButton(onTap:() {
                               Get.to(()=> Notifications(reload: _getDetails, updateCount: _updateCount, eid: entity.eid,), transition: Transition.rightToLeft);
@@ -581,20 +600,37 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
 
                             // UTILITIES
                             duty.duties.toString().contains("UTILITIES") || admin.contains(currentUser.uid)
-                                ?  RowButton(onTap:() {
-                              Get.to(()=>Utilities(entity: entity, reload: (){
-                                _getData();
-                                widget.reload();
-                              },), transition: Transition.rightToLeft);
-                            },  icon :Icon(CupertinoIcons.lightbulb), title:"Utilities", subtitle:"")
+                                ?  RowButton(
+                                    onTap:() {
+                                        Get.to(()=>Utilities(entity: entity, reload: (){
+                                          _getData();
+                                          widget.reload();
+                                        },), transition: Transition.rightToLeft);
+                                      },  icon :Icon(CupertinoIcons.lightbulb), title:"Utilities", subtitle:"")
+                                      : SizedBox(),
+
+                            // Requests
+                            admin.contains(currentUser.uid) || entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
+                                ? RowButton(
+                                      onTap:() {
+
+                                      },
+                                      icon :Icon(CupertinoIcons.arrowshape_turn_up_right), title:"Request", subtitle:""
+                                  )
                                 : SizedBox(),
 
-                            duty.duties.toString().contains("PAYMENTS") || admin.contains(currentUser.uid)
-                                ? RowButton(
-                                onTap:() {
-                                  Get.to(() =>Payments(eid: entity.eid,unitid: '',tid: '', lid: '',),transition: Transition.rightToLeft);
-                                },  icon :LineIcon.wallet(), title:"Payments", subtitle:"")
+                            // Payments
+                            admin.contains(currentUser.uid) || duty.duties.toString().contains("PAYMENTS") || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
+                                ?  RowButton(
+                                      onTap:() {
+                                        Get.to(() =>Payments(eid: entity.eid,unitid: '',tid: _unitList.any((test) => test.tid.toString().contains(currentUser.uid))?currentUser.uid:'', lid: '', from: 'Prop',),transition: Transition.rightToLeft);
+                                      },
+                                    icon :LineIcon.wallet(), title:"Payments", subtitle:""
+                                  )
                                 : SizedBox(),
+
+
+
                             !admin.contains(currentUser.uid) ? SizedBox() :RowButton(onTap:() {
                               Get.to(()=>Report(entity: widget.entity, unitid: '', tid: '', lid: '',), transition: Transition.rightToLeft);
                             },  icon :Icon(CupertinoIcons.chart_bar_alt_fill,), title:"Reports & Analytics", subtitle:"Beta"),
@@ -668,9 +704,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                 ),
                 DoubleCallAction(
                   action: ()async{
-                    Navigator.pop(context);
-                    Navigator.pop(context);
                     if(action=="Delete"){
+                      Navigator.pop(context);
+                      Navigator.pop(context);
                       if(admin.first.toString()==currentUser.uid){
                         await Data().removeEntity(entity, widget.reload, context);
                       } else {
@@ -683,7 +719,19 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                         );
                       }
                     } else {
-                      await Data().exitEntity(context, entity, widget.reload);
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      setState(() {
+                        _loading = true;
+                      });
+                      await Data().exitEntity(context, entity, widget.reload).then((value){
+                        if(value==false){
+                          setState(() {
+                            _loading = value;
+                          });
+
+                        }
+                      });
                     }
                   },
                   title: "Remove",titleColor: Colors.red,
@@ -763,5 +811,28 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   }
   void _updateCount(){
 
+  }
+}
+class buildButton extends StatelessWidget {
+  const buildButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white10
+        : Colors.black12;
+    return Tooltip(
+      message: "More options",
+      child: InkWell(
+          onTap: (){
+            Scaffold.of(context).openEndDrawer();
+          },
+          hoverColor: color1,
+          borderRadius: BorderRadius.circular(5),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Icon(Icons.menu),
+          )),
+    );
   }
 }

@@ -10,7 +10,6 @@ import 'package:showcaseview/showcaseview.dart';
 import '../../main.dart';
 import '../../models/units.dart';
 import '../../models/users.dart';
-import '../../views/unit/unit_profile_page.dart';
 
 class DialogGrid extends StatefulWidget {
   final List<UnitModel> units;
@@ -67,11 +66,7 @@ class _DialogGridState extends State<DialogGrid> {
           double _prdAmount = 0;
           return InkWell(
             onTap: (){
-              unit.tid == currentUser.uid
-                   ? Get.to(()=> ShowCaseWidget(
-                    builder:  (_) => UnitProfilePage(unit: unit, entity: widget.entity,),
-                  ), transition: Transition.rightToLeft)
-                  : Get.to(()=> ShowCaseWidget(
+              Get.to(()=> ShowCaseWidget(
                 builder: (_) => UnitProfile(unit: unit, reload: _getUnit, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
               ), transition: Transition.rightToLeft);
             },
