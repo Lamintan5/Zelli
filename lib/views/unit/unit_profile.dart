@@ -679,7 +679,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Platform.isAndroid || Platform.isIOS
-                                ?  currentTenant.uid==currentUser.uid?SizedBox(): CardButton(
+                                ?  currentTenant.uid==currentUser.uid
+                                ? SizedBox()
+                                : CardButton(
                                 text: "PHONE",
                                 backcolor: reverse,
                                 forecolor: normal,
@@ -697,18 +699,23 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 }
                             )
                                 :  SizedBox(),
-                            currentTenant.uid==currentUser.uid?SizedBox():CardButton(
-                                text: "CHAT",
-                                backcolor: reverse,
-                                forecolor: normal,
-                                icon: Icon(CupertinoIcons.bubble_left, color: normal,size: 20),
-                                onTap: (){
-                                  Platform.isAndroid || Platform.isIOS
-                                      ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: currentTenant), transition: Transition.rightToLeft)
-                                      : Get.to(() => WebChat(selected: currentTenant), transition: Transition.rightToLeft);
-                                }
-                            ),
-                            CardButton(
+
+                            currentTenant.uid==currentUser.uid
+                                ?SizedBox()
+                                : CardButton(
+                                    text: "CHAT",
+                                    backcolor: reverse,
+                                    forecolor: normal,
+                                    icon: Icon(CupertinoIcons.bubble_left, color: normal,size: 20),
+                                    onTap: (){
+                                      Platform.isAndroid || Platform.isIOS
+                                          ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: currentTenant), transition: Transition.rightToLeft)
+                                          : Get.to(() => WebChat(selected: currentTenant), transition: Transition.rightToLeft);
+                                    }
+                                ),
+
+                            paidDeposit == deposit
+                                ? CardButton(
                                 text:
                                 "RENT",
                                 backcolor: reverse,
@@ -717,7 +724,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 onTap: (){
                                   dialogRecordPayments(context, "RENT",accrued);
                                 }
-                            ),
+                            )
+                                : SizedBox(),
                             paidDeposit < deposit
                                 ?  CardButton(
                                 text:
@@ -731,15 +739,17 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                             )
                                 :SizedBox(),
 
-                                CardButton(
-                                text: "UTILITY",
-                                backcolor: reverse,
-                                forecolor: normal,
-                                icon: Icon(CupertinoIcons.lightbulb, color: normal,size: 20),
-                                onTap: (){
-                                  dialogUtil(context);
-                                }
-                            ),
+                            paidDeposit == deposit
+                                ?CardButton(
+                                    text: "UTILITY",
+                                    backcolor: reverse,
+                                    forecolor: normal,
+                                    icon: Icon(CupertinoIcons.lightbulb, color: normal,size: 20),
+                                    onTap: (){
+                                      dialogUtil(context);
+                                    }
+                                )
+                                : SizedBox(),
                           ],
                         ),
                         SizedBox(height: 10),

@@ -59,6 +59,7 @@ class _CoTenantsState extends State<CoTenants> {
         _tenants.add(e);
       }
     });
+    _tenants.remove("");
     _users = _users.where((usr)=>_tenants.any((tnt) => usr.uid==tnt)).toList();
     setState(() {
 
@@ -198,29 +199,33 @@ class _CoTenantsState extends State<CoTenants> {
                                         IntrinsicHeight(
                                           child: Row(
                                             children: [
-                                              widget.unit.lid != widget.lease.lid || user.uid == currentUser.uid?SizedBox():
-                                              _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
+                                              widget.unit.lid != widget.lease.lid || user.uid == currentUser.uid || _tenants.length <= 1
+                                                  ?SizedBox()
+                                                  : _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
                                                   ? BottomCallButtons(
-                                                  onTap: () {
-                                                    dialogRemoveTenant(context, user);
-                                                  },
-                                                  icon: Icon(CupertinoIcons.person_badge_minus,
-                                                      color: secondaryColor),
-                                                  actionColor: secondaryColor,
-                                                  backColor: Colors.transparent,
-                                                  title: "Remove"
-                                              )
+                                                        onTap: () {
+                                                          dialogRemoveTenant(context, user);
+                                                        },
+                                                        icon: Icon(
+                                                            CupertinoIcons.person_badge_minus,
+                                                            color: secondaryColor
+                                                        ),
+                                                        actionColor: secondaryColor,
+                                                        backColor: Colors.transparent,
+                                                        title: "Remove"
+                                                    )
                                                   : SizedBox(),
-                                              widget.unit.lid != widget.lease.lid|| user.uid == currentUser.uid?SizedBox():
+                                              widget.unit.lid != widget.lease.lid|| user.uid == currentUser.uid || _tenants.length <= 1
+                                                  ?SizedBox():
                                               _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
                                                   ? Padding(
-                                                padding: EdgeInsets.symmetric(vertical: 10),
-                                                child: VerticalDivider(
-                                                  thickness: 1,
-                                                  width: 15,
-                                                  color: secondaryColor,
-                                                ),
-                                              ) :SizedBox(),
+                                                      padding: EdgeInsets.symmetric(vertical: 10),
+                                                      child: VerticalDivider(
+                                                        thickness: 1,
+                                                        width: 15,
+                                                        color: secondaryColor,
+                                                      ),
+                                                    ) :SizedBox(),
                                               BottomCallButtons(
                                                   onTap: () {
                                                     Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid, from: 'tenant',),transition: Transition.rightToLeft);

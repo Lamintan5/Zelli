@@ -25,7 +25,6 @@ import '../../utils/colors.dart';
 import '../../views/property/prop_view.dart';
 import '../../widgets/frosted_glass.dart';
 import '../../widgets/logo/prop_logo.dart';
-import '../../widgets/logo/row_logo_single.dart';
 import '../../widgets/profile_images/current_profile.dart';
 import '../../widgets/star_items/small_star.dart';
 import '../../widgets/text/text_format.dart';
