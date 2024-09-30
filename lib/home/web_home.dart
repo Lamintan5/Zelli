@@ -28,6 +28,7 @@ import '../models/data.dart';
 import '../models/messages.dart';
 import '../models/notifications.dart';
 import '../models/units.dart';
+import '../models/users.dart';
 import '../resources/services.dart';
 import '../resources/socket.dart';
 import '../utils/colors.dart';
@@ -37,6 +38,7 @@ import '../widgets/logo/prop_logo.dart';
 import '../widgets/profile_images/current_profile.dart';
 import '../widgets/star_items/small_star.dart';
 import '../widgets/text/text_format.dart';
+import 'actions/chat/web_chat.dart';
 import 'actions/notifications.dart';
 import 'options/edit_profile.dart';
 
@@ -198,7 +200,7 @@ class _WebHomeState extends State<WebHome> {
                         SizedBox(height: 5,),
                         InkWell(
                           onTap: (){
-                            // Get.to(()=>WebChat(selected: UserModel(uid: "")), transition: Transition.rightToLeft);
+                            Get.to(()=>WebChat(selected: UserModel(uid: "")), transition: Transition.rightToLeft);
                           },
                           hoverColor: color1,
                           borderRadius: BorderRadius.circular(5),
