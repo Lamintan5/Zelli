@@ -300,6 +300,32 @@ class Data{
     sharedPreferences.setStringList('myduties', uniqueDuties);
     myDuties = uniqueDuties;
   }
+  Future<void> addOrUpdateMessagesList(List<MessModel> newDataList)async{
+    List<String> uniqueMessages= [];
+    List<MessModel> _messages = [];
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _messages = myMess.map((jsonString) => MessModel.fromJson(json.decode(jsonString))).toList();
+    for (var newMessages in newDataList) {
+      int existingMessIndex = _messages.indexWhere((mess) => mess.mid == newMessages.mid);
+      if (existingMessIndex != -1) {
+        MessModel existingMess = _messages[existingMessIndex];
+        if (existingMess.toJson().toString() != newMessages.toJson().toString()) {
+          _messages[existingMessIndex] = newMessages;
+        }
+      } else {
+        _messages.add(newMessages);
+      }
+    }
+    for (var existingMessages in _messages) {
+      bool existsInNewDataList = newDataList.any((newMess) => newMess.mid == existingMessages.mid);
+      if (!existsInNewDataList && existingMessages.checked.toString().contains("true")) {
+        existingMessages.checked = "REMOVED";
+      }
+    }
+    uniqueMessages = _messages.map((model) => jsonEncode(model.toJson())).toList();
+    sharedPreferences.setStringList('mymess', uniqueMessages);
+    myMess = uniqueMessages;
+  }
 
   Future<void> addEntity(EntityModel entity) async {
     List<EntityModel> _entity = [];

@@ -29,6 +29,7 @@ import '../../widgets/logo/row_logo_single.dart';
 import '../../widgets/profile_images/current_profile.dart';
 import '../../widgets/star_items/small_star.dart';
 import '../../widgets/text/text_format.dart';
+import '../actions/chat/chat_screen.dart';
 import '../options/edit_profile.dart';
 import '../options/options_screen.dart';
 
@@ -144,7 +145,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                       onPressed: (){
                         // Get.to(()=>Search(),transition: Transition.rightToLeft);
                       },
-                      icon: Icon(Icons.search)
+                      icon: Icon(CupertinoIcons.compass)
                   ),
                   SizedBox(width: 10,),
                   IconButton(
@@ -170,7 +171,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                   SizedBox(width: 10,),
                   IconButton(
                       onPressed: (){
-                        // Get.to(() => ChatScreen(updateCount: _updateChat,), transition: Transition.rightToLeft);
+                        Get.to(() => ChatScreen(updateCount: _updateCount,), transition: Transition.rightToLeft);
                       },
                       icon: Obx((){
                         List<MessModel> _count = socketManager.messages.where((msg) => msg.sourceId != currentUser.uid && msg.seen =="").toList();

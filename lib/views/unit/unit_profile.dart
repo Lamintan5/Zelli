@@ -23,6 +23,7 @@ import 'package:showcaseview/showcaseview.dart';
 import '../../home/actions/chat/message_screen.dart';
 import '../../home/actions/chat/web_chat.dart';
 import '../../home/tabs/report.dart';
+import '../../models/charge.dart';
 import '../../models/data.dart';
 import '../../models/messages.dart';
 import '../../models/month_model.dart';
@@ -736,7 +737,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 forecolor: normal,
                                 icon: Icon(CupertinoIcons.lightbulb, color: normal,size: 20),
                                 onTap: (){
-                                  // dialogUtil(context);
+                                  dialogUtil(context);
                                 }
                             ),
                           ],
@@ -1480,16 +1481,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         )
                       : SizedBox(),
 
-                  _admin.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
+                  _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
                       ? RowButton(
                       onTap: (){
-                        // dialogChargers(context);
+                        dialogChargers(context);
                       },
                       icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""
                   )
                       : SizedBox(),
 
-                  _admin.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
+                  _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                           // dialogMaintain(context);
@@ -1507,7 +1508,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   )
                       : SizedBox(),
 
-                  _pids.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid)
+                  _pids.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                             Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: "", lid: currentLease.lid, from: 'unit',), transition: Transition.rightToLeft);
@@ -1516,7 +1517,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       )
                       : SizedBox(),
 
-                  _pids.contains(currentUser.uid) || currentLease.ctid.toString().contains(currentUser.uid)
+                  _pids.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                             Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(), lid: lid,), transition: Transition.rightToLeft);
@@ -1811,7 +1812,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                DialogTitle(title: account.split("").join(" ")),
+                DialogTitle(title: account.split("").join(" ").toUpperCase()),
                 RichText(
                     text: TextSpan(
                         children: [
@@ -2040,6 +2041,167 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         })
                   ],
                 ),
+              )
+            ],
+          );
+        });
+  }
+  void dialogUtil(BuildContext context){
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white12
+        : Colors.black12;
+    final color = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white24
+        : Colors.black26;
+    final bgColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white;
+    final size = MediaQuery.of(context).size;
+    List<String> _util = entity.utilities!.split("&");
+    List<UtilsModel> _utils = [];
+    if (entity.utilities!="") {
+      _utils = _util.map((jsonString) => UtilsModel.fromJson(json.decode(jsonString))).toList();
+      _utils.removeWhere((element) => element.text=="");
+    } else {
+      _utils = [];
+    }
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            )
+        ),
+        backgroundColor: bgColor,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        useSafeArea: true,
+        constraints: BoxConstraints(
+            maxHeight: size.height - 100,
+            minHeight: size.height/2 + 100,
+            maxWidth: 500,minWidth: 400
+        ),
+        context: context,
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "U T I L I T I E S"),
+              _utils.length == 0
+                  ? SizedBox(height: size.height/2 ,width: 350,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.warning_amber, color: Colors.yellow,size: 50,),
+                    SizedBox(height: 10,),
+                    Text(
+                      "This property currently lacks utility configuration. To establish utility services, kindly navigate to your property menu and access the utilities section",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: secondaryColor),
+                    ),
+                    SizedBox(height: 10,),
+                    OutlinedButton(onPressed: (){Navigator.pop(context);}, child: Text("CLOSE"))
+                  ],
+                ),
+              )
+                  : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _utils.length,
+                  itemBuilder: (context, index){
+                    UtilsModel utils = _utils[index];
+                    UtilModel util = Data().utilList.firstWhere((element) => element.text == utils.text);
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: InkWell(
+                        onTap: (){
+                          dialogRecordPayments(context, utils.text, double.parse(utils.amount));
+                        },
+                        borderRadius: BorderRadius.circular(5),
+                        hoverColor: color1,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 5,),
+                              util.icon,
+                              SizedBox(width: 20,),
+                              Expanded(child: Text(utils.text)),
+                              Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}", style: TextStyle(color: secondaryColor),),
+                              SizedBox(width: 10,),
+                              Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  })
+            ],
+          );
+        });
+  }
+  void dialogChargers(BuildContext context){
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white12
+        : Colors.black12;
+    final color = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white24
+        : Colors.black26;
+    final bgColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white;
+    final size = MediaQuery.of(context).size;
+    List<String> _util = entity.utilities!.split("&");
+    List<UtilsModel> _utils = [];
+    if (entity.utilities!="") {
+      _utils = _util.map((jsonString) => UtilsModel.fromJson(json.decode(jsonString))).toList();
+    } else {
+      _utils = [];
+    }
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              topLeft: Radius.circular(20),
+            )
+        ),
+        backgroundColor: bgColor,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        useSafeArea: true,
+        constraints: BoxConstraints(
+            maxHeight: size.height/2 + 100,
+            minHeight: size.height/2,
+            maxWidth: 500,minWidth: 400
+        ),
+        context: context,
+        builder: (context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DialogTitle(title: "C H A R G E S"),
+              Expanded(
+                child: ListView.builder(
+                    itemCount: Data().charge.length,
+                    itemBuilder: (context, index){
+                      ChargeModel charge = Data().charge[index];
+                      return ListTile(
+                        onTap: (){
+                          // dialogPayCharge(context, charge.title);
+                        },
+                        leading: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: color1,
+                          child: Icon(Icons.money_off),
+                        ),
+                        title: Text(charge.title),
+                        subtitle: Text(charge.message, style: TextStyle(fontSize: 11, color: secondaryColor),),
+                        trailing: Icon(Icons.chevron_right),
+                      );
+                    }),
               )
             ],
           );

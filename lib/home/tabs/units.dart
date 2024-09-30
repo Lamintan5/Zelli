@@ -70,8 +70,18 @@ class _UnitsState extends State<Units> {
           Column(
             children: [
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('  ${_units.length} Units', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                  Text('  Units', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                  InkWell(
+                    onTap: (){},
+                    hoverColor: color1,
+                    borderRadius: BorderRadius.circular(5),
+                    child: Padding(
+                      padding: const EdgeInsets.all(5.0),
+                      child: Icon(Icons.filter_list),
+                    ),
+                  )
                 ],
               ),
               SizedBox(height: 10,),

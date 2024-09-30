@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Zelli/models/entities.dart';
 import 'package:Zelli/models/payments.dart';
@@ -7,10 +8,14 @@ import 'package:Zelli/models/users.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 
+import '../../home/actions/chat/message_screen.dart';
+import '../../home/actions/chat/web_chat.dart';
 import '../../main.dart';
+import '../../models/messages.dart';
 import '../../utils/colors.dart';
 import '../profile_images/current_profile.dart';
 import '../profile_images/user_profile.dart';
@@ -349,25 +354,25 @@ class _ItemPayState extends State<ItemPay> {
                                 ],
                               ),
                               onTap: (){
-                                // Platform.isIOS || Platform.isAndroid
-                                //     ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: user,), transition: Transition.rightToLeft)
-                                //     : Get.to(() => WebChat(selected: user,), transition: Transition.rightToLeft);
+                                Platform.isIOS || Platform.isAndroid
+                                    ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: user,), transition: Transition.rightToLeft)
+                                    : Get.to(() => WebChat(selected: user,), transition: Transition.rightToLeft);
                               },
                             ),
-                          if(user.uid != currentUser.uid)
-                            PopupMenuItem(
-                              child: Row(
-                                children: [
-                                  Icon(CupertinoIcons.phone),
-                                  SizedBox(width: 10,),
-                                  Text("Call")
-                                ],
+                          if(Platform.isAndroid || Platform.isIOS)
+                            if(user.uid != currentUser.uid)
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.phone),
+                                    SizedBox(width: 10,),
+                                    Text("Call")
+                                  ],
+                                ),
+                                onTap: (){
+
+                                },
                               ),
-                              onTap: (){
-
-                              },
-                            ),
-
                         ];
                       })
                 ],
@@ -378,6 +383,9 @@ class _ItemPayState extends State<ItemPay> {
       ),
     );
   }
+  _updateCount(){}
+  _changeMess(MessModel messModel){}
+
   int getMonthsBetween(DateTime startDate, DateTime endDate) {
     int yearDifference = endDate.year - startDate.year;
     int monthDifference = endDate.month - startDate.month;
