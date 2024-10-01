@@ -1491,7 +1491,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
                   widget.unit.tid.toString() == ''|| unit.lid!=lid
                       ? SizedBox()
-                      : _admin.contains(currentUser.uid)
+                      : _admin.contains(currentUser.uid) || unit.tid.toString().split(",").first == currentUser.uid
                       ? RowButton(
                           onTap: (){
                             // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
@@ -1701,29 +1701,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             mainAxisSize: MainAxisSize.min,
             children: [
               DialogTitle(title: "T E R M I N A T E"),
-              RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Are you certain you want to proceed with terminating ",
-                          style: TextStyle(color: secondaryColor, ),
-                        ),
-                        TextSpan(
-                          text: "${currentTenant.username}'s ",
-                        ),
-                        TextSpan(
-                          text: "lease for this unit?",
-                          style: TextStyle(color: secondaryColor, ),
-                        ),
-                      ]
-                  )
-              ),
               DialogTerminate(
                 unit: unit, lease: currentLease, reload: (){
                 widget.reload();
                 _getData();
-              },),
+              }, tenant: currentTenant, entity: entity,),
             ],
           ),
         ),
