@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:Zelli/auth/sign_up.dart';
-import 'package:Zelli/models/entities.dart';
 import 'package:Zelli/resources/socket.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,12 +13,6 @@ import '../home/home_screen.dart';
 import '../home/web_home.dart';
 import '../main.dart';
 import '../models/data.dart';
-import '../models/messages.dart';
-import '../models/notifications.dart';
-import '../models/payments.dart';
-import '../models/stars.dart';
-import '../models/lease.dart';
-import '../models/units.dart';
 import '../models/users.dart';
 import '../resources/services.dart';
 import '../utils/colors.dart';
