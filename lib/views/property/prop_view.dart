@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:Zelli/home/tabs/payments.dart';
 import 'package:Zelli/home/tabs/tenants.dart';
+import 'package:Zelli/home/tabs/units.dart';
 import 'package:Zelli/models/duties.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/resources/socket.dart';
@@ -17,6 +18,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../../create/create_units.dart';
 import '../../home/actions/notifications.dart';
@@ -34,6 +36,7 @@ import '../../widgets/dialogs/dialog_title.dart';
 import '../../widgets/logo/prop_logo.dart';
 import '../../widgets/profile_images/user_profile.dart';
 import '../../widgets/star_items/drop_star.dart';
+import '../unit/unit_profile.dart';
 
 class PropertyView extends StatefulWidget {
   final Function removeEntity;
@@ -46,6 +49,7 @@ class PropertyView extends StatefulWidget {
 }
 
 class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMixin{
+  TextEditingController _search = TextEditingController();
   late TabController _tabController;
   List<UnitModel> _unitList = [];
   List<UserModel> _users = [];
@@ -61,6 +65,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
 
   bool _loading = false;
   bool _loadingAction = false;
+
+  bool isMember = false;
+  bool isTenant = false;
 
   int highestId = 0;
 
@@ -103,6 +110,11 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
         _managers.add(userModel);
       }
     });
+
+    isMember = _pidList.contains(currentUser.uid);
+    isTenant = _unitList.any((test) => test.tid.toString().contains(currentUser.uid));
+
+
     if (_managers.isNotEmpty) {
       image1 = _managers.length > 0 ? _managers[0].image.toString() : '';
       image2 = _managers.length > 1 ? _managers[1].image.toString() : '';
@@ -133,7 +145,6 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
-
     final size = MediaQuery.of(context).size;
     final color5 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white54
@@ -150,6 +161,15 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
     final color2 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white24
         : Colors.black26;
+    List filteredList = [];
+    if (_search.text.toString() != null && _search.text.isNotEmpty) {
+      _unitList.forEach((item) {
+        if (item.title.toString().toLowerCase().contains(_search.text.toString().toLowerCase()))
+          filteredList.add(item);
+      });
+    } else {
+      filteredList = _unitList;
+    }
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -165,21 +185,22 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
               actions: [
                 _loading ? SizedBox(width: 20,height: 20, child: CircularProgressIndicator(color: reverse,strokeWidth: 2,)) : SizedBox(),
                 SizedBox(width: 10,),
-                admin.contains(currentUser.uid) || entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
+                admin.contains(currentUser.uid) || isMember || isTenant
                     ? Tooltip(
-                  message: "Community",
-                  child: InkWell(
-                      onTap: (){
+                      message: "Community",
+                      child: InkWell(
+                          onTap: (){
 
-                      },
-                      hoverColor: color1,
-                      borderRadius: BorderRadius.circular(5),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Icon(CupertinoIcons.bubble_middle_bottom),
-                      )
-                  ),
-                ) : SizedBox(),
+                          },
+                          hoverColor: color1,
+                          borderRadius: BorderRadius.circular(5),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(CupertinoIcons.ellipses_bubble, size: 22,),
+                          )
+                      ),
+                    )
+                    : SizedBox(),
                 SizedBox(width: 5,),
                 buildButton(),
               ],
@@ -436,7 +457,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                 preferredSize: Size.fromHeight(20),
                 child: entity.checked.contains("REMOVE")
                     ? SizedBox(height: 20,)
-                    : Container(
+                    : isMember
+                    ? Container(
                   width: 220,
                   height: 30,
                   margin: EdgeInsets.only(left: 10, bottom: 20),
@@ -462,7 +484,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                       Tab(text: 'Payments'),
                     ],
                   ),
-                ),
+                )
+                    : SizedBox(),
               ),
             ),
             SliverToBoxAdapter(
@@ -486,19 +509,138 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                         ),
                       ],
                     )
-                  : Container(
-                width: double.maxFinite,
-                height: MediaQuery.of(context).size.height - 35,
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    PropUnit(title: entity.title.toString(), entity: entity, max: highestId+1,),
-                    Tenants(entity: entity),
-                    Payments(eid: entity.eid, unitid: "", tid: "", lid: "", from: '',),
-                  ],
-                ),
-              ),
+                  : isMember
+                  ? Container(
+                    width: double.maxFinite,
+                    height: MediaQuery.of(context).size.height - 35,
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        PropUnit(title: entity.title.toString(), entity: entity, max: highestId+1,),
+                        Tenants(entity: entity),
+                        Payments(eid: entity.eid, unitid: "", tid: "", lid: "", from: '',),
+                      ],
+                    ),
+                  )
+                  : isTenant
+                  ? Container(
+                    height: MediaQuery.of(context).size.height - 35,
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Column(
+                        children: [
+                          SizedBox(
+                            width: 800,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Units", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold,)),
+                                InkWell(
+                                  onTap: (){},
+                                  borderRadius: BorderRadius.circular(5),
+                                  hoverColor: color1,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(5.0),
+                                    child: Icon(Icons.filter_list),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 10,),
+                          Expanded(
+                              child: SizedBox(
+                                width: 800,
+                                child: GridView.builder(
+                                    physics: const BouncingScrollPhysics(),
+                                    gridDelegate:  SliverGridDelegateWithMaxCrossAxisExtent(
+                                        maxCrossAxisExtent: 120,
+                                        childAspectRatio: 3 / 2,
+                                        crossAxisSpacing: 1,
+                                        mainAxisSpacing: 1
+                                    ),
+                                    itemCount: filteredList.length,
+                                    itemBuilder: (context, index){
+                                      UnitModel unit = filteredList[index];
+                                      double _accrdAmount = 0;
+                                      double _prdAmount = 0;
+                                      final currentMonth = DateTime.now().month;
+                                      UserModel user = UserModel(uid: "");
+                                      user = _users.firstWhere((test) => test.uid == unit.tid!.split(",").first, orElse: ()=> UserModel(uid: ""));
+                                      void _removeTenant(){
+                                        unit.tid ="";
+                                        setState(() {
+                                        });
+                                      }
+                                      return InkWell(
+                                        onTap: (){
+                                          Get.to(()=> ShowCaseWidget(
+                                            builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
+                                          ), transition: Transition.rightToLeft);
+                                        },
+                                        borderRadius: BorderRadius.circular(5),
+                                        splashColor: CupertinoColors.activeBlue,
+                                        child: Stack (
+                                          children: [
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: color1,
+                                                    width: 1
+                                                ),
+                                                color: unit.tid == ''
+                                                    ? CupertinoColors.activeBlue
+                                                    : _accrdAmount > 0.0
+                                                    ?Colors.red
+                                                    : _prdAmount > 0.0
+                                                    ? Colors.green
+                                                    : color1,
+                                                borderRadius: BorderRadius.circular(5),
+                                              ),
+                                              child: Center(
+                                                  child: Text(unit.title.toString(),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: 14,
+                                                    ),
+                                                  )
+                                              ),
+                                            ),
+                                            unit.tid == ""
+                                                ? SizedBox()
+                                                :Positioned(
+                                                right: 5,
+                                                bottom: 5,
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                                        ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
+                                                        : unit.checked.toString().contains("EDIT")
+                                                        ? Icon(Icons.edit, color: Colors.red,size: 20,)
+                                                        : unit.checked == "false"
+                                                        ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
+                                                        : SizedBox(),
+                                                    SizedBox(width: 3,),
+                                                    user.uid==""
+                                                        ? SizedBox()
+                                                        : UserProfile(image: user.image.toString(), radius: 10,)
+                                                  ],
+                                                )
+                                            ),
+
+                                          ],
+                                        ),
+                                      );
+                                    }),
+                              )
+                          ),
+                        ],
+                      ),
+                  )
+                  : SizedBox(),
             ),
           ],
         ),

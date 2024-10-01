@@ -41,6 +41,8 @@ class _WebChatState extends State<WebChat> {
   late GlobalKey<AnimatedListState> _key;
 
   bool isShowEmojiContainer = false;
+  bool isFilled = false;
+
   final isDialOpen =ValueNotifier(false);
   FocusNode focusNode = FocusNode();
   bool isShowSendButton = false;
@@ -201,19 +203,44 @@ class _WebChatState extends State<WebChat> {
                           controller: _serchController,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            hintText: "Search...",
+                            hintText: "Search",
                             fillColor: color1,
-                            prefixIcon: Icon(CupertinoIcons.search, color: secondaryColor,),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(5),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
                             isDense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                            hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                            prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                            prefixIconConstraints: BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 30
+                            ),
+                            suffixIcon: isFilled?InkWell(
+                                onTap: (){
+                                  _serchController.clear();
+                                  setState(() {
+                                    isFilled = false;
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(100),
+                                child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                            ) :SizedBox(),
+                            suffixIconConstraints: BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 30
+                            ),
+                            contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                           ),
-                          onChanged: (text) {
-                            setState(() {});
+                          onChanged: (value) {
+                            setState(() {
+                              if(value.isNotEmpty){
+                                isFilled = true;
+                              } else {
+                                isFilled = false;
+                              }
+                            });
                           },
                         ),
                         SizedBox(height: 10,),

@@ -50,10 +50,12 @@ class _LeasesState extends State<Leases> {
   List<String> admin = [];
 
   String expanded = "";
+
   bool _loading = false;
+  bool isFilled = false;
 
   double amount = 0;
-  int units = 0;
+
 
   _getDetails(){
     _getData();
@@ -142,19 +144,43 @@ class _LeasesState extends State<Leases> {
               controller: _search,
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
-                hintText: "🔎 Search for tenants...",
-                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                hintText: "Search",
                 fillColor: color1,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(5),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 10),
+                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                prefixIconConstraints: BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 30
+                ),
+                suffixIcon: isFilled?InkWell(
+                    onTap: (){
+                      _search.clear();
+                      setState(() {
+                        isFilled = false;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(100),
+                    child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                ) :SizedBox(),
+                suffixIconConstraints: BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 30
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
               ),
-              onChanged: (text) => setState(() {}),
+              onChanged: (value) => setState(() {
+                if(value.isNotEmpty){
+                  isFilled = true;
+                } else {
+                  isFilled = false;
+                }
+              }),
             ),
           ),
           Expanded(
@@ -165,11 +191,11 @@ class _LeasesState extends State<Leases> {
                   itemBuilder: (context, index){
                     UserModel user = filteredList[index];
 
-                    List<LeaseModel> _filtTenant = _leases.where((e) => e.tid == user.uid).toList();
-                    List<UnitModel> _filtUnt = _units.isEmpty? [] : _units.where((u) => _filtTenant.any((t) => t.uid == u.id)).toList();
+                    List<LeaseModel> _filtLease = _leases.where((e) => e.tid == user.uid).toList();
+                    List<UnitModel> _filtUnt =  _units.where((unt) => _filtLease.any((lease) => lease.uid.toString().split(",").first == unt.id)).toList();
                     _filtPay = _pay.where((p) => p.tid == user.uid).toList();
                     amount = _filtPay.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
-                    units = _filtUnt.length;
+                    var units = _filtUnt.length;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0,),
@@ -243,7 +269,7 @@ class _LeasesState extends State<Leases> {
                                               ],
                                             ),
                                           ),
-                                          _filtTenant.length < 2? SizedBox() :Container(
+                                          _filtLease.length < 2? SizedBox() :Container(
                                             padding: EdgeInsets.symmetric(vertical: 2, horizontal: 3),
                                             decoration: BoxDecoration(
                                                 color: color1,
@@ -253,7 +279,7 @@ class _LeasesState extends State<Leases> {
                                               children: [
                                                 Icon(CupertinoIcons.doc_text ,size: 12,color: secondaryColor,),
                                                 SizedBox(width: 5,),
-                                                Text('${_filtTenant.length} leases', style: TextStyle(fontSize: 11, color: secondaryColor),)
+                                                Text('${_filtLease.length} leases', style: TextStyle(fontSize: 11, color: secondaryColor),)
                                               ],
                                             ),
                                           ),
@@ -295,7 +321,7 @@ class _LeasesState extends State<Leases> {
                                     children: [
                                       BottomCallButtons(
                                           onTap: () {
-                                            dialogLeases(context, user, _filtTenant);
+                                            dialogLeases(context, user, _filtLease);
                                           },
                                           icon: Icon(CupertinoIcons.doc_text ,
                                               color: secondaryColor),

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../main.dart';
@@ -84,7 +85,7 @@ class _ManagersState extends State<Managers> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text("Entity Managers"),
+        title: Text("Managers", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold,)),
         actions: [
           !admin.contains(currentUser.uid) ? SizedBox() : IconButton(
               onPressed: (){

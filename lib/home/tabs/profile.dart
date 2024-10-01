@@ -46,6 +46,9 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
   List<UnitModel> _unit = [];
   late TabController _tabController;
   final socketManager = Get.find<SocketManager>();
+
+  bool isFilled = false;
+
   int countNotif = 0;
   int countMess = 0;
 
@@ -184,7 +187,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                           badgeContent: Text(NumberFormat.compact().format(countMess), style: TextStyle(fontSize: 10),),
                           showBadge:countMess==0?false:true,
                           position: badges.BadgePosition.topEnd(end: -5, top: -4),
-                          child: LineIcon.comment(),
+                          child: Icon(CupertinoIcons.ellipses_bubble),
                         );
                       })
                   ),
@@ -357,7 +360,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                               controller: _search,
                               keyboardType: TextInputType.text,
                               decoration: InputDecoration(
-                                hintText: "🔎  Search for your Entities...",
+                                hintText: "Search",
                                 fillColor: color1,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.all(
@@ -367,9 +370,35 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                 ),
                                 filled: true,
                                 isDense: true,
-                                contentPadding: EdgeInsets.all(10),
+                                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                                prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                                prefixIconConstraints: BoxConstraints(
+                                    minWidth: 40,
+                                    minHeight: 30
+                                ),
+                                suffixIcon: isFilled?InkWell(
+                                    onTap: (){
+                                      _search.clear();
+                                      setState(() {
+                                        isFilled = false;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                                ) :SizedBox(),
+                                suffixIconConstraints: BoxConstraints(
+                                    minWidth: 40,
+                                    minHeight: 30
+                                ),
+                                contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                               ),
-                              onChanged:  (value) => setState((){}),
+                              onChanged:  (value) => setState((){
+                                if(value.isNotEmpty){
+                                  isFilled = true;
+                                } else {
+                                  isFilled = false;
+                                }
+                              }),
                             ),
                             SizedBox(height: 20,),
                             Expanded(

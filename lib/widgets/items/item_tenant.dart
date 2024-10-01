@@ -191,24 +191,6 @@ class _ItemTenantState extends State<ItemTenant> {
                     children: [
                       BottomCallButtons(
                           onTap: () {
-                           
-                          },
-                          icon: Icon(CupertinoIcons.shift,
-                              color: secondaryColor),
-                          actionColor: secondaryColor,
-                          backColor: Colors.transparent,
-                            title: "Requests"
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: VerticalDivider(
-                          thickness: 1,
-                          width: 15,
-                          color: secondaryColor,
-                        ),
-                      ),
-                      BottomCallButtons(
-                          onTap: () {
                             Get.to(()=>Payments(eid: widget.entity.eid, unitid: "", tid: widget.user.uid, lid: '', from: 'item',),transition: Transition.rightToLeft);
                           },
                           icon: LineIcon.wallet(color: secondaryColor,),

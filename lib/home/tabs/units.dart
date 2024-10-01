@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:Zelli/main.dart';
 import 'package:Zelli/models/users.dart';
+import 'package:Zelli/utils/colors.dart';
 import 'package:Zelli/widgets/profile_images/current_profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _UnitsState extends State<Units> {
   List<UnitModel> _units = [];
   List<EntityModel> _entity = [];
   List<UserModel> _users = [];
+  bool isFilled = false;
 
   _getData(){
     _entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
@@ -67,146 +69,175 @@ class _UnitsState extends State<Units> {
     return Scaffold(
       body: SafeArea(
           child:
-          Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('  Units', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
-                  InkWell(
-                    onTap: (){},
-                    hoverColor: color1,
-                    borderRadius: BorderRadius.circular(5),
-                    child: Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: Icon(Icons.filter_list),
-                    ),
-                  )
-                ],
-              ),
-              SizedBox(height: 10,),
-              Container(
-                width: 500,
-                child: TextFormField(
-                  controller: _search,
-                  keyboardType: TextInputType.text,
-                  decoration: InputDecoration(
-                    hintText: "🔎  Search for Units...",
-                    fillColor: color1,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(5)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Units', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+                    InkWell(
+                      onTap: (){},
+                      hoverColor: color1,
+                      borderRadius: BorderRadius.circular(5),
+                      child: Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: Icon(Icons.filter_list),
                       ),
-                      borderSide: BorderSide.none,
-                    ),
-                    filled: true,
-                    isDense: true,
-                    contentPadding: EdgeInsets.all(10),
-                  ),
-                  onChanged:  (value) => setState((){}),
+                    )
+                  ],
                 ),
-              ),
-              SizedBox(height: 10,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  MapKeys(color: cont2, text: 'Occupied'),
-                  MapKeys(color: CupertinoColors.systemBlue, text: 'Available'),
-                  MapKeys(color: Colors.green, text: 'Prepaid'),
-                  MapKeys(color: Colors.red, text: 'Accrual'),
-                ],
-              ),
-              SizedBox(height: 10,),
-              Expanded(
-                  child: GridView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      physics: const BouncingScrollPhysics(),
-                      gridDelegate:  SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: 120,
-                          childAspectRatio: 3 / 2,
-                          crossAxisSpacing: 1,
-                          mainAxisSpacing: 1
+                SizedBox(height: 10,),
+                Container(
+                  width: 500,
+                  child: TextFormField(
+                    controller: _search,
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      hintText: "Search",
+                      hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                      fillColor: color1,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(5)
+                        ),
+                        borderSide: BorderSide.none,
                       ),
-                      itemCount: filteredList.length,
-                      itemBuilder: (context, index){
-                        EntityModel entity = EntityModel(eid: "");
-                        UnitModel unit = filteredList[index];
-                        double _accrdAmount = 0;
-                        double _prdAmount = 0;
-                        final currentMonth = DateTime.now().month;
-                        entity = _entity.firstWhere((element) => element.eid == unit.eid, orElse: ()=>EntityModel(eid: "", title: "", image: ""));
-                        UserModel user = UserModel(uid: "");
-                        user = _users.firstWhere((test) => test.uid == unit.tid!.split(",").first, orElse: ()=> UserModel(uid: ""));
-                        void _removeTenant(){
-                          unit.tid ="";
-                          setState(() {
-                          });
-                        }
-                        return InkWell(
+                      prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                      prefixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                      ),
+                      suffixIcon: isFilled?InkWell(
                           onTap: (){
-                             Get.to(()=> ShowCaseWidget(
-                                    builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
-                                  ), transition: Transition.rightToLeft);
+                            _search.clear();
+                            setState(() {
+                              isFilled = false;
+                            });
                           },
-                          borderRadius: BorderRadius.circular(5),
-                          splashColor: CupertinoColors.activeBlue,
-                          child: Stack (
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: color1,
-                                      width: 1
+                          borderRadius: BorderRadius.circular(100),
+                          child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                      ) :SizedBox(),
+                      suffixIconConstraints: BoxConstraints(
+                          minWidth: 40,
+                          minHeight: 30
+                      ),
+                      filled: true,
+                      isDense: true,
+                      contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
+                    ),
+                    onChanged:  (value) => setState((){
+                      if(value.isNotEmpty){
+                        isFilled = true;
+                      } else {
+                        isFilled = false;
+                      }
+
+                    }),
+                  ),
+                ),
+                SizedBox(height: 10,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    MapKeys(color: cont2, text: 'Occupied'),
+                    MapKeys(color: CupertinoColors.systemBlue, text: 'Available'),
+                    MapKeys(color: Colors.green, text: 'Prepaid'),
+                    MapKeys(color: Colors.red, text: 'Accrual'),
+                  ],
+                ),
+                SizedBox(height: 10,),
+                Expanded(
+                    child: GridView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        gridDelegate:  SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 120,
+                            childAspectRatio: 3 / 2,
+                            crossAxisSpacing: 1,
+                            mainAxisSpacing: 1
+                        ),
+                        itemCount: filteredList.length,
+                        itemBuilder: (context, index){
+                          EntityModel entity = EntityModel(eid: "");
+                          UnitModel unit = filteredList[index];
+                          double _accrdAmount = 0;
+                          double _prdAmount = 0;
+                          final currentMonth = DateTime.now().month;
+                          entity = _entity.firstWhere((element) => element.eid == unit.eid, orElse: ()=>EntityModel(eid: "", title: "", image: ""));
+                          UserModel user = UserModel(uid: "");
+                          user = _users.firstWhere((test) => test.uid == unit.tid!.split(",").first, orElse: ()=> UserModel(uid: ""));
+                          void _removeTenant(){
+                            unit.tid ="";
+                            setState(() {
+                            });
+                          }
+                          return InkWell(
+                            onTap: (){
+                               Get.to(()=> ShowCaseWidget(
+                                      builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
+                                    ), transition: Transition.rightToLeft);
+                            },
+                            borderRadius: BorderRadius.circular(5),
+                            splashColor: CupertinoColors.activeBlue,
+                            child: Stack (
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color: color1,
+                                        width: 1
+                                    ),
+                                    color: unit.tid == ''
+                                        ? CupertinoColors.activeBlue
+                                        : _accrdAmount > 0.0
+                                        ?Colors.red
+                                        : _prdAmount > 0.0
+                                        ? Colors.green
+                                        : color1,
+                                    borderRadius: BorderRadius.circular(5),
                                   ),
-                                  color: unit.tid == ''
-                                      ? CupertinoColors.activeBlue
-                                      : _accrdAmount > 0.0
-                                      ?Colors.red
-                                      : _prdAmount > 0.0
-                                      ? Colors.green
-                                      : color1,
-                                  borderRadius: BorderRadius.circular(5),
+                                  child: Center(
+                                      child: Text(unit.title.toString(),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14,
+                                        ),
+                                      )
+                                  ),
                                 ),
-                                child: Center(
-                                    child: Text(unit.title.toString(),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 14,
-                                      ),
+                                unit.tid == ""
+                                    ? SizedBox()
+                                    :Positioned(
+                                    right: 5,
+                                    bottom: 5,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                            ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
+                                            : unit.checked.toString().contains("EDIT")
+                                            ? Icon(Icons.edit, color: Colors.red,size: 20,)
+                                            : unit.checked == "false"
+                                            ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
+                                            : SizedBox(),
+                                        SizedBox(width: 3,),
+                                        user.uid==""
+                                            ? SizedBox()
+                                            : UserProfile(image: user.image.toString(), radius: 10,)
+                                      ],
                                     )
                                 ),
-                              ),
-                              unit.tid == ""
-                                  ? SizedBox()
-                                  :Positioned(
-                                  right: 5,
-                                  bottom: 5,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
-                                          ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
-                                          : unit.checked.toString().contains("EDIT")
-                                          ? Icon(Icons.edit, color: Colors.red,size: 20,)
-                                          : unit.checked == "false"
-                                          ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
-                                          : SizedBox(),
-                                      SizedBox(width: 3,),
-                                      user.uid==""
-                                          ? SizedBox()
-                                          : UserProfile(image: user.image.toString(), radius: 10,)
-                                    ],
-                                  )
-                              ),
 
-                            ],
-                          ),
-                        );
-                      })
-              ),
-            ],
+                              ],
+                            ),
+                          );
+                        })
+                ),
+              ],
+            ),
           )
       ),
     );

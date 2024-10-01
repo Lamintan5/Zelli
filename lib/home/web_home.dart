@@ -21,8 +21,6 @@ import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:badges/badges.dart' as badges;
 
-import '../api/crypto.dart';
-import '../api/currency_service.dart';
 import '../main.dart';
 import '../models/data.dart';
 import '../models/messages.dart';
@@ -60,6 +58,8 @@ class _WebHomeState extends State<WebHome> {
   final socketManager = Get.find<SocketManager>();
   bool _expand = true;
   bool _loading = false;
+  bool isFilled = false;
+
   String encryptedText = "";
   List<LeaseModel> _tenants = [];
 
@@ -94,9 +94,6 @@ class _WebHomeState extends State<WebHome> {
     SocketManager().setData();
     // convert = CurrencyService().convertCurrency(toCurrency: TFormat().getCurrencyCode().toString(), amount: 1000);
   }
-
-
-
 
 
 
@@ -453,7 +450,7 @@ class _WebHomeState extends State<WebHome> {
                   controller: _search,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    hintText: "🔎  Search for your Entities...",
+                    hintText: "Search",
                     fillColor: color1,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(
@@ -461,11 +458,37 @@ class _WebHomeState extends State<WebHome> {
                       ),
                       borderSide: BorderSide.none,
                     ),
+                    hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                    prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                    prefixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                    ),
+                    suffixIcon: isFilled?InkWell(
+                        onTap: (){
+                          _search.clear();
+                          setState(() {
+                            isFilled = false;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(100),
+                        child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                    ) :SizedBox(),
+                    suffixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                     filled: true,
                     isDense: true,
-                    contentPadding: EdgeInsets.all(10),
                   ),
-                  onChanged:  (value) => setState((){}),
+                  onChanged:  (value) => setState((){
+                    if(value.isNotEmpty){
+                      isFilled = true;
+                    } else {
+                      isFilled = false;
+                    }
+                  }),
                 ),
                 SizedBox(height: 20,),
                 Expanded(

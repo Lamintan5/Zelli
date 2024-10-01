@@ -234,7 +234,7 @@ class _LogInState extends State<LogIn> {
                                         obsecure = !obsecure;
                                       });
                                     },
-                                    icon: Icon(obsecure?Icons.remove_red_eye: Icons.remove_red_eye_outlined)
+                                    icon: Icon(obsecure?CupertinoIcons.eye: CupertinoIcons.eye_slash)
                                 ),
                                 prxIcon:Icon(Icons.lock_outline),
                               ),

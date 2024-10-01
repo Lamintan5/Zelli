@@ -60,7 +60,6 @@ class UnitProfile extends StatefulWidget {
 class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin {
   late TabController _tabController;
   late TextEditingController _search;
-  late TextEditingController _searchPay;
 
   EntityModel entity = EntityModel(eid: "");
   UnitModel unit = UnitModel(id: "");
@@ -104,6 +103,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   String lid = "";
 
   bool _loading = false;
+  bool isFilled = false;
 
   double _position1 = 20.0;
   double _position2 = 20.0;
@@ -124,9 +124,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
     lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0, orElse: ()=>MonthModel(year: DateTime.now().year, monthName: "Jan", month: DateTime.now().month, amount: 0, balance: 0));
-    // monthsList.forEach((mnth){
-    //   print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
-    // });
+    monthsList.forEach((mnth){
+      print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
+    });
     setState(() {
     });
   }
@@ -342,8 +342,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _search = TextEditingController();
-    _searchPay = TextEditingController();
-
     _getData();
   }
 
@@ -352,7 +350,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     // TODO: implement dispose
     super.dispose();
     _search.dispose();
-    _searchPay.dispose();
   }
 
   @override
@@ -393,17 +390,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
       filteredTenants = _users.where((test) => _leases.any((element) => element.tid == test.uid)).toList();
     }
 
-    List<PaymentsModel> filteredPayList = [];
-    if (_searchPay.text.toString() != null && _searchPay.text.isNotEmpty) {
-      _current.forEach((item) {
-        if (item.amount.toString().toLowerCase().contains(_searchPay.text.toString().toLowerCase())
-            || item.type.toString().toLowerCase().contains(_searchPay.text.toString().toLowerCase())
-            || item.method.toString().toLowerCase().contains(_searchPay.text.toString().toLowerCase()))
-          filteredPayList.add(item);
-      });
-    } else {
-      filteredPayList = _current;
-    }
     return Scaffold(
       body: SafeArea(
           child: CustomScrollView(
@@ -449,28 +435,46 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                           color: unit.tid==""&&currentTenant.uid==""?CupertinoColors.activeBlue:color1,
                                           width: 1
                                       ),
-                                      color: unit.tid==""&&currentTenant.uid==""?CupertinoColors.activeBlue:color1
+                                      color: unit.tid==""&&currentTenant.uid==""
+                                          ?CupertinoColors.activeBlue
+                                          : paidDeposit!=deposit
+                                          ? color1
+                                          : accrued > 0
+                                          ? Colors.red
+                                          : color1,
                                   ),
                                   child: Center(child: Text(unit.title.toString(), style: TextStyle(fontWeight: FontWeight.w600),)),
                                 ),
                                 Positioned(
                                     right: 5,
                                     bottom: 8,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
-                                            ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
-                                            : unit.checked.toString().contains("EDIT")
-                                            ? Icon(Icons.edit, color: Colors.red,size: 20,)
-                                            : unit.checked == "false"
-                                            ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
-                                            : SizedBox(),
-                                        SizedBox(width: 3,),
-                                        currentTenant.uid==""
-                                            ? SizedBox()
-                                            : UserProfile(image: currentTenant.image.toString(), radius: 10,)
-                                      ],
+                                    child: Container(
+                                        padding: EdgeInsets.all(1.3),
+                                      decoration: BoxDecoration(
+                                        color: normal,
+                                        borderRadius: BorderRadius.circular(50)
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(width: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false")?2:0,),
+
+                                          unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                              ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
+                                              : unit.checked.toString().contains("EDIT")
+                                              ? Icon(Icons.edit, color: Colors.red,size: 20,)
+                                              : unit.checked == "false"
+                                              ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
+                                              : SizedBox(),
+
+                                          SizedBox(width: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false")?3:0,),
+                                          currentTenant.uid==""
+                                              ? SizedBox()
+                                              : UserProfile(image: currentTenant.image.toString(), radius: 10,)
+                                        ],
+                                      ),
                                     )
                                 )
                               ],
@@ -547,7 +551,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ],
                               ),
                             ),
-                            lid == "" ? SizedBox() : InkWell(
+                            lid == ""
+                                ? SizedBox()
+                                : InkWell(
                               onTap: (){
                                 Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
                               },
@@ -714,19 +720,19 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     }
                                 ),
 
-                            paidDeposit == deposit
+                            paidDeposit == deposit && currentLease.lid == unit.lid
                                 ? CardButton(
-                                text:
-                                "RENT",
-                                backcolor: reverse,
-                                forecolor: normal,
-                                icon: Icon(CupertinoIcons.house,color: normal,size: 20),
-                                onTap: (){
-                                  dialogRecordPayments(context, "RENT",accrued);
-                                }
-                            )
+                                    text:
+                                    "RENT",
+                                    backcolor: reverse,
+                                    forecolor: normal,
+                                    icon: Icon(CupertinoIcons.house,color: normal,size: 20),
+                                    onTap: (){
+                                      dialogRecordPayments(context, "RENT",accrued);
+                                    }
+                                )
                                 : SizedBox(),
-                            paidDeposit < deposit
+                            paidDeposit < deposit && currentLease.lid == unit.lid
                                 ?  CardButton(
                                 text:
                                 "DEPOSIT",
@@ -911,19 +917,43 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               controller: _search,
                               keyboardType: TextInputType.text,
                               decoration: InputDecoration(
-                                hintText: "🔎 Search for tenants...",
-                                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                                hintText: "Search",
                                 fillColor: color1,
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(5),
                                   borderSide: BorderSide.none,
                                 ),
                                 filled: true,
                                 isDense: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 10),
+                                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                                prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                                prefixIconConstraints: BoxConstraints(
+                                    minWidth: 40,
+                                    minHeight: 30
+                                ),
+                                suffixIcon: isFilled?InkWell(
+                                    onTap: (){
+                                      _search.clear();
+                                      setState(() {
+                                        isFilled = false;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                                ) :SizedBox(),
+                                suffixIconConstraints: BoxConstraints(
+                                    minWidth: 40,
+                                    minHeight: 30
+                                ),
+                                contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                               ),
-                              onChanged: (text) => setState(() {}),
+                              onChanged: (value) => setState(() {
+                                if(value.isNotEmpty){
+                                  isFilled = true;
+                                } else {
+                                  isFilled = false;
+                                }
+                              }),
                             ),
                           ),
                           Expanded(
@@ -1144,6 +1174,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     )
                     : Container(
                   height: MediaQuery.of(context).size.height - 35,
+                  padding: EdgeInsets.symmetric(horizontal: 8),
                   child: TabBarView(
                       controller: _tabController,
                       children: [
@@ -1153,7 +1184,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               child: SizedBox(width: width,
                                 child: GroupedListView(
                                   physics: BouncingScrollPhysics(),
-                                  padding: EdgeInsets.all(5),
                                   order: GroupedListOrder.DESC,
                                   elements: monthsList,
                                   groupBy: (months) => DateTime(
@@ -1199,7 +1229,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     var amount = double.parse(month.amount.toString());
                                     var balance = double.parse(month.amount.toString());
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+                                      padding: const EdgeInsets.only(bottom: 5.0,),
                                       child: InkWell(
                                         onTap: (){
                                           Get.to(() => Payments(eid: unit.eid!, unitid: unit.id!, tid: "", lid: lid, month: month.month.toString(),year: month.year.toString(), type: "RENT", from: 'unit',), transition: Transition.rightToLeft);
@@ -1264,7 +1294,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           children: [
                             Container(
                               width: 800,
-                              margin: EdgeInsets.symmetric(horizontal:  10),
                               child: GridView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
@@ -1328,35 +1357,27 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         Column(
                           children: [
                             SizedBox(height: 10,),
-                            Container(
-                              width: 500,
-                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                              child: TextFormField(
-                                controller: _searchPay,
-                                keyboardType: TextInputType.text,
-                                decoration: InputDecoration(
-                                  hintText: "🔎 Search by amount, account or transaction type",
-                                  hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
-                                  fillColor: color1,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 10),
-                                ),
-                                onChanged: (text) => setState(() {}),
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Payments", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+                                InkWell(
+                                    onTap: (){},
+                                    borderRadius: BorderRadius.circular(5),
+                                    hoverColor: color1,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Icon(Icons.filter_list),
+                                    )
+                                )
+                              ],
                             ),
                             Expanded(
                               child: SizedBox(width: 500,
                                 child: GroupedListView(
                                   physics: BouncingScrollPhysics(),
-                                  padding: EdgeInsets.all(5),
                                   order: GroupedListOrder.DESC,
-                                  elements: filteredPayList,
+                                  elements: _current,
                                   groupBy: (_filterpay) => DateTime(
                                     DateTime.parse(_filterpay.current.toString()).year,
                                     DateTime.parse(_filterpay.current.toString()).month,
@@ -1368,7 +1389,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     final yesterday = today.subtract(Duration(days: 1));
                                     final time = DateTime.parse(payment.current.toString());
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
                                       child: Row(
                                         children: [
                                           Expanded(
@@ -1491,14 +1512,14 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         )
                       : SizedBox(),
 
-                  _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
-                      ? RowButton(
-                      onTap: (){
-                        dialogChargers(context);
-                      },
-                      icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""
-                  )
-                      : SizedBox(),
+                  // _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
+                  //     ? RowButton(
+                  //     onTap: (){
+                  //       dialogChargers(context);
+                  //     },
+                  //     icon : Icon(CupertinoIcons.money_dollar_circle), title: "Cost",subtitle: ""
+                  // )
+                  //     : SizedBox(),
 
                   _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
                       ? RowButton(

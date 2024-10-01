@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:Zelli/models/entities.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
 import '../../models/units.dart';
 import '../../models/users.dart';
+import '../../utils/colors.dart';
 import '../../widgets/items/item_tenant.dart';
 
 class Tenants extends StatefulWidget {
@@ -21,6 +23,7 @@ class _TenantsState extends State<Tenants> {
   List<UserModel> _user = [];
   List<UnitModel> _units = [];
   List<String> _tntList = [];
+  bool isFilled = false;
 
   _getData(){
     _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
@@ -67,16 +70,17 @@ class _TenantsState extends State<Tenants> {
             children: [
               Row(
                 children: [
-                  Text('  ${_user.length.toString()} Tenants', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),),
+                  Text('Tenants', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
                 ],
               ),
               SizedBox(height: 10,),
-              SizedBox(width: 500,
+              SizedBox(
+                width: 500,
                 child: TextFormField(
                   controller: _search,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    hintText: "🔎  Search for Tenants...",
+                    hintText: "Search",
                     fillColor: color1,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(
@@ -86,9 +90,37 @@ class _TenantsState extends State<Tenants> {
                     ),
                     filled: true,
                     isDense: true,
-                    contentPadding: EdgeInsets.all(10),
+                    hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                    prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                    prefixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                    ),
+                    suffixIcon: isFilled
+                        ? InkWell(
+                        onTap: (){
+                          _search.clear();
+                          setState(() {
+                            isFilled = false;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(100),
+                        child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                    )
+                        : SizedBox(),
+                    suffixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                   ),
-                  onChanged:  (value) => setState((){}),
+                  onChanged:  (value) => setState((){
+                    if(value.isNotEmpty){
+                      isFilled = true;
+                    } else {
+                      isFilled = false;
+                    }
+                  }),
                 ),
               ),
               SizedBox(height: 10,),
