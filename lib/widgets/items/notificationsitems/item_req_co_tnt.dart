@@ -114,8 +114,8 @@ class _ItemReqCoTntState extends State<ItemReqCoTnt> {
     final reverse = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
-    final bold = TextStyle(fontWeight: FontWeight.w700,fontSize: 13,color: reverse);
-    final style = TextStyle(fontSize: 13,color: reverse);
+    final bold = TextStyle(fontWeight: FontWeight.w700,fontSize: 13,color: notifModel.actions==""?reverse:secondaryColor);
+    final style = TextStyle(fontSize: 13,color: notifModel.actions==""?reverse:secondaryColor);
     return Card(
       margin: EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -182,7 +182,7 @@ class _ItemReqCoTntState extends State<ItemReqCoTnt> {
                           : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(user.username.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: reverse),),
+                          Text(user.username.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color:  notifModel.actions==""?reverse:secondaryColor),),
                           notifModel.actions == ""
                               ? RichText(
                               maxLines: _isExpanded?100:1,

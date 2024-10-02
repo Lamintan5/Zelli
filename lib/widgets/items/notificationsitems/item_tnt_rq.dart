@@ -221,8 +221,8 @@ class _ItemTntRqState extends State<ItemTntRq> {
     final color2 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white54
         : Colors.black54;
-    final bold = TextStyle(fontWeight: FontWeight.w800,fontSize: 13,color: reverse);
-    final style = TextStyle(fontSize: 13,color: reverse);
+    final bold = TextStyle(fontWeight: FontWeight.w700,fontSize: 13,color: notifModel.actions==""?reverse:secondaryColor);
+    final style = TextStyle(fontSize: 13,color: notifModel.actions==""?reverse:secondaryColor);
     return Card(
       margin: EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -284,7 +284,7 @@ class _ItemTntRqState extends State<ItemTntRq> {
                             : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(sender.username.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: reverse),),
+                            Text(sender.username.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color:  notifModel.actions==""?reverse:secondaryColor),),
                             notifModel.actions == ""
                                 ? RichText(
                               maxLines: _isExpanded?100:1,

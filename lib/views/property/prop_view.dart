@@ -6,6 +6,7 @@ import 'package:Zelli/home/tabs/tenants.dart';
 import 'package:Zelli/home/tabs/units.dart';
 import 'package:Zelli/models/duties.dart';
 import 'package:Zelli/models/lease.dart';
+import 'package:Zelli/resources/services.dart';
 import 'package:Zelli/resources/socket.dart';
 import 'package:Zelli/views/property/activities/edit_property.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
@@ -53,6 +54,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   late TabController _tabController;
   List<UnitModel> _unitList = [];
   List<UserModel> _users = [];
+
+  List<UserModel> _newUsers = [];
   List<UserModel> _managers = [];
 
   List<String> _pidList = [];
@@ -87,7 +90,14 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
 
   Future<void> _getDetails() async {
     _getData();
-    SocketManager().getDetails();
+    _pidList.forEach((pid)async{
+      if(!_managers.any((test) => test.uid == pid)){
+        List<UserModel>  _new = await Services().getCrntUsr(pid);
+        UserModel user = _new.first;
+        _newUsers.add(user);
+        await Data().addUser(user);
+      }
+    });
     _getData();
   }
 

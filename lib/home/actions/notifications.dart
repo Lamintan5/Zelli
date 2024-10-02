@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:Zelli/main.dart';
 import 'package:Zelli/resources/services.dart';
 import 'package:Zelli/widgets/items/notificationsitems/item_req_co_tnt.dart';
+import 'package:Zelli/widgets/items/notificationsitems/item_terminate.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -124,6 +125,8 @@ class _NotificationsState extends State<Notifications> {
                                       ? ItemMainReq(notif: notification, getEntity: widget.reload, from:  eid!=""?"Entity":'Notification')
                                       : notification.type == 'RQCOTNT'
                                       ? ItemReqCoTnt(notif: notification, getEntity: widget.reload, from: eid!=""?"Entity":'Notification', remove: _remove,)
+                                      : notification.type == "TRMLEASE"
+                                      ? ItemTerminate(notif: notification, getEntity: widget.reload, remove: _remove, from: eid!=""?"Entity":'Notification')
                                       : SizedBox(),
                                 ),
                               );

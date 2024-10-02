@@ -1,95 +1,75 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:Zelli/models/messages.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:uuid/uuid.dart';
 
-import '../../../../main.dart';
-import '../../../../models/data.dart';
-import '../../../../models/entities.dart';
-import '../../../../models/notifications.dart';
-import '../../../../models/units.dart';
-import '../../../../models/users.dart';
-import '../../../../resources/services.dart';
 import '../../../home/actions/chat/message_screen.dart';
 import '../../../home/actions/chat/web_chat.dart';
+import '../../../main.dart';
+import '../../../models/data.dart';
+import '../../../models/entities.dart';
+import '../../../models/messages.dart';
+import '../../../models/notifications.dart';
+import '../../../models/units.dart';
+import '../../../models/users.dart';
+import '../../../resources/services.dart';
 import '../../../utils/colors.dart';
 import '../../logo/prop_logo.dart';
 import '../../profile_images/user_profile.dart';
 import '../../shimmer_widget.dart';
 import '../../text/text_format.dart';
 
-class ItemReqTnt extends StatefulWidget {
+class ItemTerminate extends StatefulWidget {
   final NotifModel notif;
   final Function getEntity;
   final Function remove;
   final String from;
-  const ItemReqTnt({super.key, required this.notif, required this.getEntity, required this.from, required this.remove});
+  const ItemTerminate({super.key, required this.notif, required this.getEntity, required this.remove, required this.from});
 
   @override
-  State<ItemReqTnt> createState() => _ItemReqTntState();
+  State<ItemTerminate> createState() => _ItemTerminateState();
 }
 
-class _ItemReqTntState extends State<ItemReqTnt> {
-  List<EntityModel> _entity = [];
-  List<EntityModel> _newEntity = [];
-  List<UserModel> _newUser = [];
+class _ItemTerminateState extends State<ItemTerminate> {
   List<UserModel> _user = [];
+  List<String> uidList = [];
   List<UnitModel> _unit = [];
-  List<UnitModel> _newUnit = [];
+
+  NotifModel notifModel = NotifModel(nid: "");
   UnitModel unitmodel = UnitModel(id: "", title: "");
   EntityModel entityModel = EntityModel(eid: "",title: "",image: "");
   UserModel sender = UserModel(uid: "", username: "", image: "");
   UserModel receiver = UserModel(uid: "", username: "", image: "");
-  UserModel user = UserModel(uid: "", username: "", image: "");
-  bool _loading = false;
-  List<String> uidList = [];
 
-  NotifModel notifModel = NotifModel(nid: "");
   bool _isExpanded = false;
+  bool _loading = false;
 
   _getDetails()async{
     _getData();
-    _newEntity = await Services().getOneEntity(notifModel.eid.toString());
-    _newUser = await Services().getCrntUsr(uidList.first);
-    _newUnit = await Services().getCrrntUnit(notifModel.text.toString().split(",").first);
-    await Data().addNotMyEntity(_newEntity);
-    await Data().addOrUpdateUserList(_newUser);
-    await Data().updateSeen(notifModel);
-    widget.getEntity();
     _getData();
   }
 
   _getData(){
     notifModel = widget.notif;
-    _entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
+    _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
-
-    entityModel = _entity.any((test) => test.eid == notifModel.eid)
-        ? _entity.firstWhere((element) => element.eid == notifModel.eid, orElse: () => EntityModel(eid: ""))
-        : notMyEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).firstWhere((element)
-    => element.eid == notifModel.eid, orElse: () => EntityModel(eid: "", title: "", image: "", checked: "false"));
-
-    unitmodel = _unit.any((test) => test.id == notifModel.text.toString().split(",").first)
-        ? _unit.firstWhere((element) => element.id == notifModel.text.toString().split(",").first, orElse: () => UnitModel(id: "", title: notifModel.text.toString().split(",").last))
-        : _newUnit.firstWhere((element) => element.id == notifModel.text.toString().split(",").first, orElse: () => UnitModel(id: "", title: notifModel.text.toString().split(",").last));
+    entityModel = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).firstWhere((test) =>
+     test.eid == notifModel.eid, orElse: ()=> EntityModel(eid: "", title: ""));
+    _user.add(currentUser);
 
     uidList.add(notifModel.sid.toString());
     uidList.add(notifModel.rid.toString());
     uidList.remove(currentUser.uid);
 
-    _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
-    _user.add(currentUser);
+    unitmodel =  _unit.firstWhere((element) => element.id == notifModel.text.toString().split(",").first, orElse: () => UnitModel(id: "", title: notifModel.text.toString().split(",").last));
 
-    user = _user.firstWhere((element) => element.uid == uidList.first, orElse: () => UserModel(uid: "", username: "", image: ""));
     sender = _user.firstWhere((element) => element.uid == notifModel.sid, orElse: () => UserModel(uid: "", username: "", image: ""));
     receiver = _user.firstWhere((element) => element.uid == notifModel.rid, orElse: () => UserModel(uid: "", username: "", image: ""));
 
@@ -123,6 +103,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
         : Colors.black;
     final bold = TextStyle(fontWeight: FontWeight.w700,fontSize: 13,color: notifModel.actions==""?reverse:secondaryColor);
     final style = TextStyle(fontSize: 13,color: notifModel.actions==""?reverse:secondaryColor);
+
     return Card(
       margin: EdgeInsets.only(bottom: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -135,9 +116,9 @@ class _ItemReqTntState extends State<ItemReqTnt> {
               children: [
                 Row(
                   children: [
-                    Icon(CupertinoIcons.arrow_up_right_circle, size: 12,color: secondaryColor,),
+                    Icon(CupertinoIcons.xmark_circle, size: 12,color: secondaryColor,),
                     SizedBox(width: 5,),
-                    Text("REQUEST", style: TextStyle(color: secondaryColor),),
+                    Text("TERMINATE", style: TextStyle(color: secondaryColor),),
                     notifModel.actions == ""? SizedBox() :  Text("•  ${TFormat().toCamelCase("${notifModel.actions}")}", style: TextStyle(color: secondaryColor),),
                     Expanded(child: SizedBox()),
                     InkWell(
@@ -164,169 +145,122 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10,),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    entityModel.eid == "" || user.uid ==""
+                   sender.uid ==""
                         ? ShimmerWidget.circular(width: 40, height: 40)
-                        : user.uid != currentUser.uid
-                        ? UserProfile(image: user.image!, radius: 20,)
+                        : sender.uid != currentUser.uid
+                        ? UserProfile(image: sender.image!, radius: 20,)
                         : PropLogo(entity: entityModel, radius: 20),
                     SizedBox(width: 15,),
                     Expanded(
-                      child: user.uid == "" || entityModel.eid == ""
+                      child: sender.uid == ""
                           ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ShimmerWidget.rectangular(width: 100, height: 10),
-                          SizedBox(height: 5,),
-                          ShimmerWidget.rectangular(width: double.infinity, height: 10),
-                          SizedBox(height: 5,),
-                          ShimmerWidget.rectangular(width: double.infinity, height: 10),
-                        ],
-                      )
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ShimmerWidget.rectangular(width: 100, height: 10),
+                              SizedBox(height: 5,),
+                              ShimmerWidget.rectangular(width: double.infinity, height: 10),
+                              SizedBox(height: 5,),
+                              ShimmerWidget.rectangular(width: double.infinity, height: 10),
+                            ],
+                          )
                           : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(user.username.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color:  notifModel.actions==""?reverse:secondaryColor),),
+                          Text(sender.username.toString(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: notifModel.actions==""?reverse:secondaryColor),),
                           notifModel.actions == ""
                               ? RichText(
                               maxLines: _isExpanded?100:1,
                               overflow: TextOverflow.ellipsis,
-                              text: widget.notif.rid == currentUser.uid ? TextSpan(
+                              text: widget.notif.pid.toString().contains(currentUser.uid)
+                                  ? TextSpan(
                                   children: [
                                     TextSpan(
-                                        text: "You have received a request to commence leasing ",
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: "${unitmodel.title} ",
+                                        text: "${sender.username.toString()} ",
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: "at ",
+                                        text: "has submitted a lease termination notice for unit ",
                                         style: style
                                     ),
                                     TextSpan(
-                                        text: "${entityModel.title} ",
+                                        text: unitmodel.id==""? "${notifModel.text.toString().split(",").last}, " : "${unitmodel.title}, ",
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: "as a ",
-                                        style: style
-                                    ),
-                                    unitmodel.tid == null
-                                        ?  TextSpan(
-                                        text: "Tenant",
-                                        style: style
-                                    )
-                                        : WidgetSpan(
-                                        child: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
-                                            decoration: BoxDecoration(
-                                                color:unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange.withOpacity(0.2) : unitmodel.tid != ""? Colors.red.withOpacity(0.2) :Colors.lightBlueAccent.withOpacity(0.2),
-                                                borderRadius: BorderRadius.circular(5)
-                                            ),
-                                            child: Text("Tenant", style: TextStyle(color: unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange : unitmodel.tid != ""? Colors.red : CupertinoColors.activeBlue, fontWeight: FontWeight.w700),)
-                                        )
-                                    )
-                                  ]
-                              ) : TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: 'An invitation has been sent to ',
+                                        text: "with a planned vacate date of ",
                                         style: style
                                     ),
                                     TextSpan(
-                                        text: "${receiver.username.toString()} ",
+                                        text: "${DateFormat.yMMMEd().format(DateTime.parse(notifModel.text.toString().split(",")[1]))}",
                                         style: bold
-                                    ),
-                                    TextSpan(
-                                        text: 'to initiate the leasing process for Unit ',
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: '${unitmodel.title} ',
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: 'at ',
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: '${entityModel.title.toString()}. ',
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: 'This request was submitted by ',
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: '${sender.username.toString()} ',
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: 'and is currently awaiting a response from the recipient.',
-                                        style: style
                                     ),
                                   ]
                               )
+                                  : notifModel.sid == currentUser.uid? TextSpan(
+                                  children: [
+                                    TextSpan(
+                                        text: 'You have submitted a lease termination notice for unit ',
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: unitmodel.id==""? "${notifModel.text.toString().split(",").last}, " : "${unitmodel.title}, ",
+                                        style: bold
+                                    ),
+                                    TextSpan(
+                                        text: 'with a planned vacate date of ',
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: "${DateFormat.yMMMEd().format(DateTime.parse(notifModel.text.toString().split(",")[1]))}",
+                                        style: bold
+                                    ),
+                                  ]
+                              ) : TextSpan()
                           )
                               : notifModel.actions == "ACCEPTED"
                               ? RichText(
                               maxLines: _isExpanded?100:1,
                               overflow: TextOverflow.ellipsis,
-                              text:widget.notif.rid == currentUser.uid ? TextSpan(
+                              text:widget.notif.sid == currentUser.uid
+                                  ? TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: "Your commercial lease agreement for ",style: style
+                                        text: "Your request to terminate the lease for unit ",style: style
                                     ),
                                     TextSpan(
-                                        text: '${unitmodel.title} ',
+                                        text: unitmodel.id==""? "${notifModel.text.toString().split(",").last}, " : "${unitmodel.title}, ",
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: " at ",style: style
+                                        text: " has been approved.  Please note that you are required to vacate by ",style: style
                                     ),
                                     TextSpan(
-                                        text: '${entityModel.title} ',
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: "commenced on ",style: style
-                                    ),
-                                    TextSpan(
-                                        text: '${DateFormat.yMMMd().format(DateTime.parse(notifModel.time.toString()))}',
+                                        text: "${DateFormat.yMMMEd().format(DateTime.parse(notifModel.text.toString().split(",")[1]))}",
                                         style: bold
                                     ),
                                   ]
                               ) : TextSpan(
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: '${receiver.username.toString()}\'s ',
+                                        text: '${sender.username.toString()}\'s ',
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: "commercial lease agreement for unit ",style: style
+                                        text: "request to terminate the lease for unit ",style: style
                                     ),
                                     TextSpan(
-                                        text: '${unitmodel.title.toString()} ',
+                                        text: unitmodel.id==""? "${notifModel.text.toString().split(",").last}, " : "${unitmodel.title}, ",
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: "at ",
+                                        text: "has been approved. Tenant is required to vacate by",
                                         style: style
                                     ),
                                     TextSpan(
-                                        text: '${entityModel.title.toString()} ',
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: "commenced on ",style: style
-                                    ),
-                                    TextSpan(
-                                        text: '${DateFormat.yMMMd().format(DateTime.parse(notifModel.time.toString()))}.',
+                                        text: "${DateFormat.yMMMEd().format(DateTime.parse(notifModel.text.toString().split(",")[1]))}",
                                         style: bold
                                     ),
                                   ]
@@ -335,64 +269,38 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                               : RichText(
                               maxLines: _isExpanded?100:1,
                               overflow: TextOverflow.ellipsis,
-                              text:widget.notif.rid == currentUser.uid ? TextSpan(
-                                  children: [
+                              text:widget.notif.sid == currentUser.uid
+                                  ? TextSpan(
+                                  children: <TextSpan>[
                                     TextSpan(
-                                        text: "You have declined the request to commence leasing  ",style: style
+                                        text: "Your request to terminate the lease for unit ",style: style
                                     ),
                                     TextSpan(
-                                        text: unitmodel.title.toString(),
+                                        text: unitmodel.id==""? "${notifModel.text.toString().split(",").last}, " : "${unitmodel.title}, ",
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text: " at ",style: style
+                                        text: "has been denied. Please contact your property manager for more clarifications ",style: style
                                     ),
-                                    TextSpan(
-                                        text: '${entityModel.title.toString()} ',
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: "as a ",style: style
-                                    ),
-                                    unitmodel.tid == null
-                                        ?  TextSpan(
-                                        text: "Tenant",
-                                        style: style
-                                    )
-                                        : WidgetSpan(
-                                        child: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
-                                            decoration: BoxDecoration(
-                                                color:unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange.withOpacity(0.2) : unitmodel.tid != ""? Colors.red.withOpacity(0.2) :Colors.lightBlueAccent.withOpacity(0.2),
-                                                borderRadius: BorderRadius.circular(5)
-                                            ),
-                                            child: Text("Tenant", style: TextStyle(color:unitmodel.tid.toString().contains(currentUser.uid) ? Colors.orange : unitmodel.tid != ""? Colors.red : CupertinoColors.activeBlue, fontWeight: FontWeight.w700),)
-                                        )
-                                    ),
+
                                   ]
-                              ) : TextSpan(
+                              )
+                                  : TextSpan(
                                   style: DefaultTextStyle.of(context).style,
                                   children: <TextSpan>[
                                     TextSpan(
-                                        text: '${receiver.username.toString()}\'s ',
+                                        text: '${sender.username.toString()}\'s ',
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text:'request to initiate leasing ',style: style
+                                        text:'request to terminate the lease for unit ',style: style
                                     ),
                                     TextSpan(
-                                        text: '${unitmodel.title} ',
+                                        text: unitmodel.id==""? "${notifModel.text.toString().split(",").last}, " : "${unitmodel.title}, ",
                                         style: bold
                                     ),
                                     TextSpan(
-                                        text:'at ',style: style
-                                    ),
-                                    TextSpan(
-                                        text: '${entityModel.title.toString()} ',
-                                        style:bold
-                                    ),
-                                    TextSpan(
-                                        text: ' was rejected.',style: style
+                                        text: 'was rejected.',style: style
                                     ),
                                   ]
                               )
@@ -403,7 +311,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                     SizedBox(width: 15,),
                   ],
                 ),
-                notifModel.rid == currentUser.uid && notifModel.actions == ""
+                notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions == ""
                     ? AnimatedSize(
                   duration: Duration(milliseconds: 500),
                   alignment: Alignment.topCenter,
@@ -413,31 +321,13 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                     margin: EdgeInsets.only(top: 10),
                     child: Row(
                       children: [
-                        entityModel.eid == "" || unitmodel.tid == null
+                       unitmodel.tid == null
                             ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5,))
                             :  Expanded(
                           child: InkWell(
                             onTap: (){
-                              if(unitmodel.tid == ""){
-                                _action("ACCEPTED");
-                              } else if(unitmodel.tid != ""){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text("This unit is now being leased"),
-                                      width: 500,
-                                      showCloseIcon: true,
-                                  )
-                                );
-                              } else if(unitmodel.tid == null){
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(Data().failed),
-                                      width: 500,
-                                      showCloseIcon: true,
-                                    )
-                                );
-                              }
-                              },
+                              _action("ACCEPTED");
+                            },
                             borderRadius: BorderRadius.circular(5),
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 8),
@@ -451,7 +341,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                           ),
                         ),
                         SizedBox(width: 5,),
-                        entityModel.eid == ""|| unitmodel.tid == null
+                        unitmodel.tid == null
                             ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5))
                             :  Expanded(
                           child: InkWell(
@@ -504,11 +394,11 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                 children: [
                                   LineIcon.box(color: secondaryColor,size: 12,),
                                   SizedBox(width: 5,),
-                                  Text(unitmodel.title.toString(), style: TextStyle(fontSize: 11),),
+                                  Text(unitmodel.id == "" ? notifModel.text.toString().split(",").last : unitmodel.title.toString(), style: TextStyle(fontSize: 11),),
                                 ],
                               )
                           ),
-                          notifModel.rid == currentUser.uid && notifModel.actions=="" && unitmodel.tid == ""
+                          notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions==""
                               ? Container(
                               padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
                               decoration: BoxDecoration(
@@ -539,21 +429,23 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                 await Data().deleteNotif(context, notifModel, widget.remove);
                               },
                             ),
-                            PopupMenuItem(
-                              child: Row(
-                                children: [
-                                  Icon(CupertinoIcons.ellipses_bubble),
-                                  SizedBox(width: 10,),
-                                  Text("Message")
-                                ],
+                            if(sender.uid!=currentUser.uid)
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.ellipses_bubble),
+                                    SizedBox(width: 10,),
+                                    Text("Message")
+                                  ],
+                                ),
+                                onTap: (){
+                                  Platform.isIOS || Platform.isAndroid
+                                      ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: sender,), transition: Transition.rightToLeft)
+                                      : Get.to(() => WebChat(selected: sender,), transition: Transition.rightToLeft);
+                                },
                               ),
-                              onTap: (){
-                                Platform.isIOS || Platform.isAndroid
-                                    ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: user,), transition: Transition.rightToLeft)
-                                    : Get.to(() => WebChat(selected: user,), transition: Transition.rightToLeft);
-                              },
-                            ),
-                            if(user.phone.toString()!=""&&Platform.isAndroid||Platform.isIOS)
+
+                            if(sender.uid!=currentUser.uid&&sender.phone.toString()!=""&&Platform.isAndroid||Platform.isIOS)
                               PopupMenuItem(
                                 child: Row(
                                   children: [
@@ -563,7 +455,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                   ],
                                 ),
                                 onTap: (){
-                                  if(user.phone==""||user.phone==null){
+                                  if(sender.phone==""||sender.phone==null){
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text(Data().noPhone),
@@ -572,12 +464,12 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                                         )
                                     );
                                   } else {
-                                    _callNumber(user.phone.toString());
+                                    _callNumber(sender.phone.toString());
                                   }
                                 },
                               ),
 
-                            if(notifModel.rid==currentUser.uid && notifModel.actions=="REJECTED")
+                            if(notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions=="REJECTED")
                               PopupMenuItem(
                                 child: Row(
                                   children: [
@@ -601,29 +493,12 @@ class _ItemReqTntState extends State<ItemReqTnt> {
     );
   }
   void _action(String actions)async{
-    String lid = "";
-    Uuid uuid = Uuid();
     setState(() {
       _loading = true;
-      lid = uuid.v1();
     });
     await Services.updateNotifAct(notifModel.nid, actions).then((response)async{
       print("Response $response");
       if(response=="success"){
-        if(actions=="ACCEPTED"){
-          await Services.updateUnitTid(notifModel.text.toString().split(",").first, currentUser.uid, lid).then((value)async{
-            print("Value $value");
-            if(value=="success"){
-              Services.addLeases(lid, currentUser.uid, notifModel.eid.toString(), notifModel.text.toString(), notifModel.pid.toString(), DateTime.now().toString(), "",).then((state){
-                print("State $state");
-              });
-              unitmodel.tid = currentUser.uid;
-              unitmodel.lid = lid;
-              await Data().addEntity(entityModel);
-              await Data().addUnit(unitmodel);
-            }
-          });
-        }
         notifModel.actions=actions;
         notifModel.time=DateTime.now().toString();
         await Data().addNotification(notifModel);
@@ -664,16 +539,6 @@ class _ItemReqTntState extends State<ItemReqTnt> {
     });
   }
   void _undo()async{
-    List<EntityModel> _entity = [];
-    List<UnitModel> _unit = [];
-    List<String> uniqueEntities = [];
-    List<String> uniqueUnit = [];
-
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-    _entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
-    _unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
-
     setState(() {
       _loading = true;
     });
@@ -686,23 +551,9 @@ class _ItemReqTntState extends State<ItemReqTnt> {
             showCloseIcon: true,
           ),
         );
-
-        unitmodel.tid = "";
         notifModel.actions="";
         notifModel.time=DateTime.now().toString();
-
-
         await Data().addNotification(notifModel);
-
-        _entity.removeWhere((test) => test.eid == entityModel.eid);
-        _unit.removeWhere((test) => test.id == unitmodel.id);
-
-        uniqueEntities = _entity.map((model) => jsonEncode(model.toJson())).toList();
-        uniqueUnit = _unit.map((model) => jsonEncode(model.toJson())).toList();
-        sharedPreferences.setStringList('myentity', uniqueEntities);
-        sharedPreferences.setStringList('myunit', uniqueUnit);
-        myEntity = uniqueEntities;
-        myUnits = uniqueUnit;
       }
       setState(() {
         _loading = false;

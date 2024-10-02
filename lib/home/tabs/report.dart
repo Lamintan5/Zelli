@@ -91,7 +91,7 @@ class _ReportState extends State<Report> {
         ? Colors.white
         : Colors.black;
     final color1 = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white12
+        ? Colors.white10
         : Colors.black12;
     final color2 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white24

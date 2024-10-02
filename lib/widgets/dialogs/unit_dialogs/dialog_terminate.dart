@@ -34,6 +34,7 @@ class DialogTerminate extends StatefulWidget {
 class _DialogTerminateState extends State<DialogTerminate> {
   List<UserModel> _users = [];
   List<UserModel> _newUsers = [];
+  List<String> _tokens = [];
 
   DateTime _dateTime = DateTime.now();
 
@@ -108,7 +109,6 @@ class _DialogTerminateState extends State<DialogTerminate> {
       checked: "true",
       time: "",
     );
-
     Services.addNotification(notification).then((response) {
       if(response=="Success"){
         _socketSend();
@@ -160,11 +160,11 @@ class _DialogTerminateState extends State<DialogTerminate> {
       "pid":_pidList,
       "message":message,
       "time":DateTime.now().toString(),
-      "type":"RQTNT",
+      "type":"TRMLEASE",
       "actions":"",
-      "text":"${widget.unit.id.toString()},${widget.unit.title.toString()}",
+      "text":"${widget.unit.id.toString()},${_dateTime},${widget.unit.title.toString()}",
       "title": widget.entity.title,
-      "token": _users.map((test)=>test.token).toList(),
+      "token": _tokens,
       "profile": "${Services.HOST}logos/LEGO_logo.svg.png",
     });
   }
@@ -179,6 +179,8 @@ class _DialogTerminateState extends State<DialogTerminate> {
       UserModel user = _newUsers.first;
       if(!_users.any((test) => test.uid==pid)){
         _users.add(user);
+        _tokens.addAll(user.token.toString().split(","));
+        _tokens.remove("");
         setState(() {
           _loading = false;
         });
@@ -285,7 +287,7 @@ class _DialogTerminateState extends State<DialogTerminate> {
                     onTap: (){
                       if(!_loading){
                         if(widget.tenant.uid == currentUser.uid){
-
+                          _send();
                         } else {
                           _terminate();
                         }

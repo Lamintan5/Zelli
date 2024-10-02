@@ -327,6 +327,28 @@ class Data{
     myMess = uniqueMessages;
   }
 
+  Future<void> addUser(UserModel user) async {
+    List<UserModel> _users = [];
+    List<String> uniqueUser = [];
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
+
+    bool exists = false;
+    for (int i = 0; i < _users.length; i++) {
+      if (_users[i].uid == user.uid) {
+        _users[i] = user;
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      _users.add(user);
+    }
+
+    uniqueUser = _users.map((model) => jsonEncode(model.toJsonAdd())).toList();
+    sharedPreferences.setStringList('myusers', uniqueUser);
+    myUsers = uniqueUser;
+  }
   Future<void> addEntity(EntityModel entity) async {
     List<EntityModel> _entity = [];
     List<String> uniqueEntities = [];
