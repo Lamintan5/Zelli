@@ -277,12 +277,7 @@ class _OptionsState extends State<Options> {
     });
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
-    List<UserModel> _user = [];
-    _user = await Services().getCrntUsr(currentUser.uid);
-    var tokens = _user.first.token.toString().split(",");
-    tokens.remove(currentUser.token);
-
-    await Services.updateToken(currentUser.uid, tokens.join(",")).then((response){
+    await Services.updateToken(currentUser.uid, "").then((response){
       if(response=="success"){
         setState(() {
           _loading = false;
@@ -294,11 +289,10 @@ class _OptionsState extends State<Options> {
         preferences.remove('image');
         preferences.remove('email');
         preferences.remove('phone');
-        preferences.remove('type');
-        preferences.remove('url');
         preferences.remove('status');
         preferences.remove('token');
         preferences.remove('password');
+        preferences.remove('country');
         // preferences.remove('unit_profile_showcase');
         preferences.remove('myentity');
         preferences.remove('notmyentity');
@@ -312,7 +306,7 @@ class _OptionsState extends State<Options> {
         preferences.remove('mythird');
         preferences.remove('mystars');
         preferences.remove('myduties');
-        currentUser = UserModel(uid: "", email: "", phone: "", username: "", image: "", token: "");
+        currentUser = UserModel(uid: "", email: "", phone: "", username: "", image: "", token: "", status: "", firstname: "", lastname: "", password: "", time: "", country: "");
         myEntity = [];
         notMyEntity = [];
         myUnits = [];

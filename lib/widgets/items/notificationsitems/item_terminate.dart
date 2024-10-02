@@ -194,7 +194,7 @@ class _ItemTerminateState extends State<ItemTerminate> {
                                         style: style
                                     ),
                                     TextSpan(
-                                        text: "${DateFormat.yMMMEd().format(DateTime.parse(notifModel.text.toString().split(",")[1]))}",
+                                        text: "${notifModel.text.toString()}",
                                         style: bold
                                     ),
                                   ]

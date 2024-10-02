@@ -1,5 +1,13 @@
 
+import 'package:Zelli/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../models/users.dart';
+import '../resources/socket.dart';
+import 'login.dart';
 
 
 class FetchingData extends StatefulWidget {
@@ -10,6 +18,7 @@ class FetchingData extends StatefulWidget {
 }
 
 class _FetchingDataState extends State<FetchingData> {
+  final socketManager = Get.find<SocketManager>();
 
 
   @override
@@ -34,6 +43,13 @@ class _FetchingDataState extends State<FetchingData> {
         children: [
           Row(),
           Text("S T U D I O 5 I V E", style: TextStyle(fontSize: 25, fontWeight: FontWeight.w100, color: reverse)),
+          TextButton(onPressed: ()async{
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.clear();  // This will clear all the stored data.
+            print("All SharedPreferences cleared.");
+            await DefaultCacheManager().emptyCache();
+            Get.to(()=>LogIn(), transition: Transition.rightToLeft);
+          }, child: Text("Log out"))
         ],
       ),
     );

@@ -21,7 +21,7 @@ late List<CameraDescription> cameras;
 DateTime today = DateTime.now();
 DateTime justToday = DateTime(today.year, today.month, today.day);
 UserModel currentUser = UserModel(uid: "");
-String domain = "192.168.0.103";
+String domain = "192.168.1.100";
 List<String> myEntity = [];
 List<String> notMyEntity = [];
 List<String> myUnits = [];
@@ -101,16 +101,16 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       currentUser = UserModel(
           uid: obtainId == null || obtainId == ""? "": obtainId,
-          firstname: obtainFirst,
-          lastname: obtainLast,
-          username: obtainUsername,
-          email: obtainEmail,
-          phone: obtainPhone,
-          image: obtainImage,
-          password: obtainPass,
-          status: obtainStatus,
-          token: obtainToken,
-          country: obtainCountry
+          firstname: obtainFirst == null || obtainFirst == ""? "":obtainFirst,
+          lastname: obtainLast == null || obtainLast == ""? "":obtainLast,
+          username: obtainUsername == null || obtainUsername == ""? "":obtainUsername,
+          email: obtainEmail == null || obtainEmail == ""? "":obtainEmail,
+          phone: obtainPhone == null || obtainPhone == ""? "":obtainPhone,
+          image: obtainImage == null || obtainImage == ""? "":obtainImage,
+          password: obtainPass == null || obtainPass == ""? "":obtainPass,
+          status: obtainStatus == null || obtainStatus == ""? "":obtainStatus,
+          token: obtainToken == null || obtainToken == ""? "":obtainToken,
+          country: obtainCountry == null || obtainCountry == ""? "":obtainCountry
       );
       domain = obtainDomain == null || obtainDomain == "" ? "192.168.0.103" : obtainDomain;
       myEntity = obtainMyEntity == null ? [] :  obtainMyEntity;

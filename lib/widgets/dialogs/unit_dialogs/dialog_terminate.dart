@@ -100,7 +100,7 @@ class _DialogTerminateState extends State<DialogTerminate> {
       rid: widget.unit.pid.toString().split(",").first,
       eid: widget.unit.eid!,
       pid: widget.unit.pid.toString(),
-      text: "${widget.unit.id.toString()},${widget.unit.title.toString()}",
+      text: "${widget.unit.id.toString()},${_dateTime},${widget.unit.title.toString()}",
       message: message,
       actions: "",
       type: "TRMLEASE",
