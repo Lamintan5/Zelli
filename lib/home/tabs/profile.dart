@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:Zelli/home/actions/notifications.dart';
+import 'package:Zelli/home/tabs/explore.dart';
 import 'package:Zelli/home/tabs/tenants.dart';
 import 'package:Zelli/models/units.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -145,7 +146,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                   SizedBox(width: 10,),
                   IconButton(
                       onPressed: (){
-                        // Get.to(()=>Search(),transition: Transition.rightToLeft);
+                        Get.to(()=>Explore(from: "home",),transition: Transition.rightToLeft);
                       },
                       icon: Icon(CupertinoIcons.compass)
                   ),

@@ -350,6 +350,18 @@ class Services{
       return <UserModel>[];
     }
   }
+  // GET ALL ENTITY
+  Future<List<EntityModel>> getAllEntity()async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_ALL;
+    final response = await http.post(Uri.parse(_ENTITY),body: map);
+    if(response.statusCode==200) {
+      List<EntityModel> entity = entityFromJson(response.body);
+      return entity;
+    } else {
+      return <EntityModel>[];
+    }
+  }
   // GET ONE ENTITY
   Future<List<EntityModel>> getOneEntity(String eid)async{
     var map = new Map<String, dynamic>();
@@ -420,6 +432,18 @@ class Services{
     var map = new Map<String, dynamic>();
     map["action"] = _GET_CURRENT;
     map["id"] = id;
+    final response = await http.post(Uri.parse(_UNIT),body: map);
+    if(response.statusCode==200) {
+      List<UnitModel> unit = unitFromJson(response.body);
+      return unit;
+    } else {
+      return <UnitModel>[];
+    }
+  }
+  // GET ALL UNIT
+  Future<List<UnitModel>> getAllUnit()async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_ALL;
     final response = await http.post(Uri.parse(_UNIT),body: map);
     if(response.statusCode==200) {
       List<UnitModel> unit = unitFromJson(response.body);

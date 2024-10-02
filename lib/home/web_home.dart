@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:Zelli/create/create_property.dart';
 import 'package:Zelli/home/options/options_screen.dart';
+import 'package:Zelli/home/tabs/explore.dart';
 import 'package:Zelli/home/tabs/payments.dart';
 import 'package:Zelli/home/tabs/report.dart';
 import 'package:Zelli/home/tabs/tenants.dart';
@@ -362,6 +363,8 @@ class _WebHomeState extends State<WebHome> {
                       ? SizedBox()
                       : nav==4
                       ? Expanded(child: Payments(eid: '',unitid: '',tid: '', lid: '', from: '',))
+                      : nav == 5
+                      ? Expanded(child: Explore())
                       :SizedBox()
                 ],
               )

@@ -128,8 +128,7 @@ class _SmallStarState extends State<SmallStar> {
               glowColor: Colors.amber,
               itemSize: widget.size,
               unratedColor: color2,
-              itemPadding:
-              EdgeInsets.symmetric(horizontal: 1.0),
+              itemPadding: EdgeInsets.symmetric(horizontal: 0),
               itemBuilder: (context, _) => Icon(
                 Icons.star,
                 color: Colors.amber,
