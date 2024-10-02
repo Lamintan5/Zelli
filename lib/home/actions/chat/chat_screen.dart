@@ -18,13 +18,23 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  TextEditingController _serchController = TextEditingController();
+  late TextEditingController _search;
+
+  bool isFilled = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     widget.updateCount();
+    _search = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _search.dispose();
   }
 
   @override
@@ -44,9 +54,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
     List<ChatsModel> chats = [];
 
-    if (_serchController.text.isNotEmpty) {
+    if (_search.text.isNotEmpty) {
       chats = mychats.where((item) =>
-          item.title.toString().toLowerCase().contains(_serchController.text.toLowerCase()))
+          item.title.toString().toLowerCase().contains(_search.text.toLowerCase()))
           .toList();
     } else {
       chats = mychats;
@@ -78,25 +88,51 @@ class _ChatScreenState extends State<ChatScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 8.0),
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
+              Container(
+                width: 500,
                 child: TextFormField(
-                  controller: _serchController,
+                  controller: _search,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    hintText: "Search...🔎",
+                    hintText: "Search",
                     fillColor: color1,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(5)
+                      ),
                       borderSide: BorderSide.none,
                     ),
+                    hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                    prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                    prefixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                    ),
+                    suffixIcon: isFilled?InkWell(
+                        onTap: (){
+                          _search.clear();
+                          setState(() {
+                            isFilled = false;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(100),
+                        child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                    ) :SizedBox(),
+                    suffixIconConstraints: BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 30
+                    ),
+                    contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                     filled: true,
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   ),
-                  onChanged: (text) {
-                    setState(() {});
-                  },
+                  onChanged:  (value) => setState((){
+                    if(value.isNotEmpty){
+                      isFilled = true;
+                    } else {
+                      isFilled = false;
+                    }
+                  }),
                 ),
               ),
               Expanded(
