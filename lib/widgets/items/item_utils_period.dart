@@ -327,7 +327,7 @@ class _ItemUtilPeriodState extends State<ItemUtilPeriod> {
                     itemCount: payments.length,
                     itemBuilder: (context, index){
                       PaymentsModel paymentsModel = payments[index];
-                      return ItemPay(payments: paymentsModel, removePay: removePay,from: "Entity",);
+                      return ItemPay(payments: paymentsModel, removePay: removePay,from: "Entity", entity: widget.entity, unit: widget.unit,);
                     }),
                 SizedBox(height: 10,)
               ],

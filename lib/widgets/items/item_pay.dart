@@ -25,7 +25,10 @@ class ItemPay extends StatefulWidget {
   final PaymentsModel payments;
   final Function removePay;
   final String from;
-  const ItemPay({super.key, required this.payments, required this.removePay, required this.from});
+  final EntityModel entity;
+  final UnitModel unit;
+  const ItemPay({super.key, required this.payments, required this.removePay, required this.from,
+    required this.entity, required this.unit});
 
   @override
   State<ItemPay> createState() => _ItemPayState();
@@ -55,11 +58,12 @@ class _ItemPayState extends State<ItemPay> {
     _enty = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
     _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
-    entity = _enty.firstWhere((element) => element.eid == widget.payments.eid, orElse: ()=> EntityModel(eid: "", image: "", title: "N/A"));
+    entity = _enty.firstWhere((element) => element.eid == widget.payments.eid,
+        orElse: ()=> widget.entity);
     payer = widget.payments.payerid == currentUser.uid
         ? currentUser
         : _user.firstWhere((element) => element.uid == widget.payments.payerid, orElse: () => UserModel(uid: "", image: "", username: "N/A"));
-    unit = _unit.firstWhere((element) => element.id == widget.payments.uid, orElse: ()=> UnitModel(id: "", title: "N/A"));
+    unit = _unit.firstWhere((element) => element.id == widget.payments.uid, orElse: ()=> widget.unit);
     user = widget.payments.tid.toString().split(",").first == currentUser.uid
         ? currentUser
         : _user.firstWhere((element) => element.uid == widget.payments.tid.toString().split(",").first,
@@ -102,7 +106,8 @@ class _ItemPayState extends State<ItemPay> {
             children: [
               Row(
                 children: [
-                  Text(widget.payments.type.toString().split(",").last,
+                  Text(
+                    widget.payments.type.toString().split(",").last,
                     style: TextStyle(
                       color: secondaryColor,
                     ),
@@ -133,7 +138,6 @@ class _ItemPayState extends State<ItemPay> {
 
                 ],
               ),
-              SizedBox(height: 10,),
               Row(
                 children: [
                   widget.from =="Entity" || widget.from == "Home"
@@ -231,7 +235,6 @@ class _ItemPayState extends State<ItemPay> {
                   SizedBox(width: 15,),
                 ],
               ),
-              SizedBox(height: 10,),
               Row(
                 children: [
                   Expanded(

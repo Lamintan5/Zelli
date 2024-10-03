@@ -362,7 +362,7 @@ class _WebHomeState extends State<WebHome> {
                       : nav==3
                       ? SizedBox()
                       : nav==4
-                      ? Expanded(child: Payments(eid: '',unitid: '',tid: '', lid: '', from: '',))
+                      ? Expanded(child: Payments(entity: EntityModel(eid: ""),unit: UnitModel(id: ""),tid: '', lid: '', from: '',))
                       : nav == 5
                       ? Expanded(child: Explore())
                       :SizedBox()

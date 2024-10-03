@@ -791,7 +791,7 @@ class _TestUnitState extends State<TestUnit> with TickerProviderStateMixin {
                                     );
                                   },
                                   indexedItemBuilder : (BuildContext context, PaymentsModel payment, int index) {
-                                    return ItemPay(payments: payment, removePay: _removePay, from: 'Unit',);
+                                    return ItemPay(payments: payment, removePay: _removePay, from: 'Unit', entity: EntityModel(eid: ""), unit: UnitModel(),);
                                   },
                                 ),
                               ),

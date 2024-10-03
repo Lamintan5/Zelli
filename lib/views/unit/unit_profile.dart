@@ -31,6 +31,7 @@ import '../../models/lease.dart';
 import '../../models/units.dart';
 import '../../models/util.dart';
 import '../../models/utils.dart';
+import '../../resources/services.dart';
 import '../../utils/colors.dart';
 import '../../widgets/buttons/bottom_call_buttons.dart';
 import '../../widgets/buttons/call_actions/double_call_action.dart';
@@ -105,6 +106,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
   bool _loading = false;
   bool isFilled = false;
+  bool isMember = false;
+  bool isTenant = false;
 
   double _position1 = 20.0;
   double _position2 = 20.0;
@@ -114,6 +117,20 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   String image1 = '';
   String image2 = '';
   String image3 = '';
+
+  _getDetails()async{
+    _getData();
+    if(currentLease.ctid.toString().split(",").length > 1){
+      currentLease.ctid.toString().split(",").forEach((tid)async{
+        if(!_tenants.any((test) => test.uid == tid)){
+          List<UserModel>  _new = await Services().getCrntUsr(tid);
+          UserModel user = _new.first;
+          await Data().addUser(user);
+        }
+      });
+    }
+    _getData();
+  }
 
   _getData(){
     lid = widget.leasid.isEmpty? widget.unit.lid.toString() : widget.leasid;
@@ -136,6 +153,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test)=> test.eid == unit.eid, orElse: ()=> widget.entity);
     _admin = entity.admin.toString().split(",");
     _pids = entity.pid.toString().split(",");
+    isMember = entity.pid.toString().split(",").contains(currentUser.uid);
+    isTenant = unit.tid.toString().contains(currentUser.uid);
   }
 
   _getUser(){
@@ -343,7 +362,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _search = TextEditingController();
-    _getData();
+    _getDetails();
   }
 
   @override
@@ -403,7 +422,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 toolbarHeight: 40,
                 title: Text(entity.title.toString()),
                 actions: [
-                  Showcase(
+                  isMember || isTenant
+                      ? Showcase(
                     key: _keyThree,
                     description: 'Get more options',
                     child: buildButton(),
@@ -413,6 +433,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     tooltipBorderRadius: BorderRadius.circular(5),
                     descTextStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
                   )
+                      : SizedBox()
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
@@ -791,7 +812,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                             onTap: (){
                                               dialogAddTenant(context);
                                             },
-                                            child: Text("Add Tenant", style: activeBlue,
+                                            child: Text(
+                                              isMember
+                                                  ?"Add Tenant"
+                                                  :"Start Leasing",
+                                              style: activeBlue,
                                             )
                                         )
                                     ),
@@ -1004,9 +1029,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                     ),
                                                   ),
                                                   Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.end,
                                                     children: [
                                                       Text(
-                                                        _admin.contains(user.uid)? "_admin" : "",
+                                                        _admin.contains(user.uid)? "admin" : "",
                                                         style: TextStyle(fontSize: 12, color: Colors.green),
                                                       ),
                                                       Wrap(
@@ -1054,9 +1080,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                       child: CircularProgressIndicator(color: reverse, strokeWidth: 3)
                                                   )
                                                       : SizedBox(),
-                                                  user.uid==currentUser.uid
-                                                      ? SizedBox()
-                                                      : AnimatedRotation(
+                                                  AnimatedRotation(
                                                     duration: Duration(milliseconds: 500),
                                                     turns: expanded == user.uid ? 0.5 : 0.0,
                                                     child: Icon(Icons.keyboard_arrow_down, color: secondaryColor,),
@@ -1065,9 +1089,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                               ),
                                             ),
                                           ),
-                                          user.uid==currentUser.uid
-                                              ?  SizedBox()
-                                              :  AnimatedSize(
+                                          AnimatedSize(
                                             duration: Duration(milliseconds: 500),
                                             alignment: Alignment.topCenter,
                                             curve: Curves.easeInOut,
@@ -1098,22 +1120,24 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                       ),
                                                       BottomCallButtons(
                                                           onTap: () {
-                                                            Get.to(()=>Payments(eid: entity.eid, unitid: unit.id.toString(), tid: "", lid: currentLease.lid, from: 'unit',),transition: Transition.rightToLeft);
+                                                            Get.to(()=>Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid, from: 'unit',),transition: Transition.rightToLeft);
                                                           },
                                                           icon: LineIcon.wallet(color: secondaryColor,),
                                                           actionColor: secondaryColor,
                                                           backColor: Colors.transparent,
                                                           title: "Payments"),
 
-                                                      Platform.isAndroid || Platform.isIOS ? Padding(
+                                                      Platform.isAndroid || Platform.isIOS
+                                                          ?  user.uid == currentUser.uid? SizedBox() : Padding(
                                                         padding: EdgeInsets.symmetric(vertical: 10),
                                                         child: VerticalDivider(
                                                           thickness: 1,
                                                           width: 15,
                                                           color: secondaryColor,
                                                         ),
-                                                      ) : SizedBox(),
-                                                      Platform.isAndroid || Platform.isIOS? BottomCallButtons(
+                                                      )
+                                                          : SizedBox(),
+                                                      Platform.isAndroid || Platform.isIOS? user.uid == currentUser.uid? SizedBox() : BottomCallButtons(
                                                           onTap: () {
                                                             if(user.phone.toString()==""){
                                                               ScaffoldMessenger.of(context).showSnackBar(
@@ -1134,7 +1158,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                           actionColor: secondaryColor,
                                                           backColor: Colors.transparent,
                                                           title: "Call") : SizedBox(),
-                                                      Padding(
+                                                      user.uid == currentUser.uid? SizedBox() :Padding(
                                                         padding: EdgeInsets.symmetric(vertical: 10),
                                                         child: VerticalDivider(
                                                           thickness: 1,
@@ -1142,7 +1166,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                           color: secondaryColor,
                                                         ),
                                                       ),
-                                                      BottomCallButtons(
+
+                                                      user.uid == currentUser.uid? SizedBox() : BottomCallButtons(
                                                           onTap: () {
                                                             Platform.isAndroid || Platform.isIOS
                                                                 ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: user), transition: Transition.rightToLeft)
@@ -1233,7 +1258,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                       padding: const EdgeInsets.only(bottom: 5.0,),
                                       child: InkWell(
                                         onTap: (){
-                                          Get.to(() => Payments(eid: unit.eid!, unitid: unit.id!, tid: "", lid: lid, month: month.month.toString(),year: month.year.toString(), type: "RENT", from: 'unit',), transition: Transition.rightToLeft);
+                                          Get.to(() => Payments(entity: entity, unit: unit, tid: "", lid: lid, month: month.month.toString(),year: month.year.toString(), type: "RENT", from: 'unit',), transition: Transition.rightToLeft);
                                         },
                                         borderRadius: BorderRadius.circular(5),
                                         child: Container(
@@ -1428,7 +1453,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     );
                                   },
                                   indexedItemBuilder : (BuildContext context, PaymentsModel payment, int index) {
-                                    return ItemPay(payments: payment, removePay: _removePay, from: 'Unit',);
+                                    return ItemPay(payments: payment, removePay: _removePay, from: 'Unit', entity: entity,unit:unit ,);
                                   },
                                 ),
                               ),
@@ -1543,7 +1568,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   _pids.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
-                            Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: "", lid: currentLease.lid, from: 'unit',), transition: Transition.rightToLeft);
+                            Get.to(()=>Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid, from: 'unit',), transition: Transition.rightToLeft);
                           },
                           icon : LineIcon.wallet(), title: "Payments",subtitle: ""
                       )
@@ -1927,7 +1952,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       child: InkWell(
                         onTap: (){
                           Navigator.pop(context);
-                          Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                          Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                             month: month.month.toString(),year: month.year.toString(),type: "DEPOSIT", from: 'unit',),transition: Transition.rightToLeft);
                         },
                         borderRadius: BorderRadius.circular(5),
@@ -1945,7 +1970,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   : TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")),
                               SizedBox(width: 10,),
                               InkWell(
-                                onTap: (){Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                                onTap: (){Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                                   month: month.month.toString(),year: month.year.toString(),type: "DEPOSIT", from: 'unit',),transition: Transition.rightToLeft);},
                                 borderRadius: BorderRadius.circular(5),
                                 hoverColor: color1,
@@ -1965,7 +1990,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       child: InkWell(
                         onTap: (){
                           Navigator.pop(context);
-                          Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                          Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                             month: month.month.toString(),year: month.year.toString(),type: "RENT", from: 'unit',),transition: Transition.rightToLeft);
                         },
                         borderRadius: BorderRadius.circular(5),
@@ -1983,7 +2008,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   :TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.balance)}")),
                               SizedBox(width: 10),
                               InkWell(
-                                onTap: (){Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                                onTap: (){Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                                   month: month.month.toString(),year: month.year.toString(),type: "RENT", from: 'unit',),transition: Transition.rightToLeft);},
                                 borderRadius: BorderRadius.circular(5),
                                 hoverColor: color1,
@@ -2011,7 +2036,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                             child: InkWell(
                               onTap: (){
                                 Navigator.pop(context);
-                                Get.to(()=> Payments(eid: unit.eid.toString(), unitid: unit.id.toString(), tid: "", lid: currentLease.lid,
+                                Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                                 month: month.month.toString(),year: month.year.toString(),type: utils.text, from: 'unit',),transition: Transition.rightToLeft);},
                               borderRadius: BorderRadius.circular(5),
                               hoverColor: color1,

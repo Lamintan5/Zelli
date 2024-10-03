@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:Zelli/models/entities.dart';
+import 'package:Zelli/models/units.dart';
 import 'package:flutter/material.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
@@ -9,15 +11,15 @@ import '../../models/payments.dart';
 import '../../widgets/items/item_pay.dart';
 
 class Payments extends StatefulWidget {
-  final String eid;
-  final String unitid;
+  final EntityModel entity;
+  final UnitModel unit;
   final String tid;
   final String lid;
   final String month;
   final String year;
   final String type;
   final String from;
-  const Payments({super.key, required this.eid, required this.unitid, required this.tid, required this.lid, this.month = "", this.year = "", this.type ="", required this.from});
+  const Payments({super.key, required this.entity, required this.unit, required this.tid, required this.lid, this.month = "", this.year = "", this.type ="", required this.from});
 
   @override
   State<Payments> createState() => _PaymentsState();
@@ -28,16 +30,14 @@ class _PaymentsState extends State<Payments> {
 
   _getData(){
     _pay = myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((test){
-      bool matchesEid = widget.eid.isEmpty || test.eid == widget.eid.toString();
-      bool matchesUnit = widget.unitid.isEmpty || test.uid == widget.unitid;
-      bool matchesTid = widget.tid.isEmpty || test.tid == widget.tid.toString();
+      bool matchesEid = widget.entity.eid.isEmpty || test.eid == widget.entity.eid.toString();
+      bool matchesUnit = widget.unit.id.toString().isEmpty || test.uid == widget.unit.id.toString();
+      bool matchesTid = widget.tid.isEmpty || test.tid.toString().contains(widget.tid.toString());
       bool matchesLid = widget.lid.isEmpty || test.lid == widget.lid.toString();
       bool matchesType = widget.type.isEmpty || test.type == widget.type.toString();
       bool matchesPeriod = widget.month.isEmpty || DateTime.parse(test.time!).month == int.parse(widget.month) && DateTime.parse(test.time!).year == int.parse(widget.year);
       return matchesEid && matchesUnit && matchesTid && matchesLid && matchesPeriod && matchesType;
     }).toList();
-    _pay = widget.eid ==""?_pay
-        :_pay.where((test) => test.eid==widget.eid).toList();
     _pay.sort((a, b) => DateTime.parse(a.time.toString()).compareTo(DateTime.parse(b.time.toString())));
     setState(() {
     });
@@ -159,7 +159,7 @@ class _PaymentsState extends State<Payments> {
                       );
                     },
                     indexedItemBuilder : (BuildContext context, PaymentsModel payment, int index) {
-                      return ItemPay(payments: payment, from: 'Home', removePay: removePay,);
+                      return ItemPay(payments: payment, from: 'Home', removePay: removePay, entity: widget.entity, unit: widget.unit,);
                     },
                   ),
                 ),

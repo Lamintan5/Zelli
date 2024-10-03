@@ -5,10 +5,11 @@ import '../home/tabs/payments.dart';
 import '../home/tabs/profile.dart';
 import '../home/tabs/report.dart';
 import '../home/tabs/units.dart';
+import '../models/units.dart';
 
 List<Widget> homeScreenItems = [
   Profile(),
   Units(),
-  Payments(eid: '',unitid: '',tid: '', lid: '', from: '',),
+  Payments(entity: EntityModel(eid: ""),unit: UnitModel(id: ""),tid: '', lid: '', from: '',),
   Report(entity: EntityModel(eid: ""), unitid: '', tid: '', lid: '',),
 ];

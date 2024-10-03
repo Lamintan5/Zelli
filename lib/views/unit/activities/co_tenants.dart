@@ -228,7 +228,7 @@ class _CoTenantsState extends State<CoTenants> {
                                                     ) :SizedBox(),
                                               BottomCallButtons(
                                                   onTap: () {
-                                                    Get.to(()=>Payments(eid: widget.unit.eid.toString(), unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid, from: 'tenant',),transition: Transition.rightToLeft);
+                                                    Get.to(()=>Payments(entity: widget.entity, unit: widget.unit, tid: user.uid, lid: widget.lease.lid, from: 'tenant',),transition: Transition.rightToLeft);
                                                   },
                                                   icon: LineIcon.wallet(color: secondaryColor,),
                                                   actionColor: secondaryColor,

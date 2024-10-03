@@ -55,7 +55,6 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   List<UserModel> _users = [];
   List<EntityModel> _entity = [];
 
-  List<UserModel> _newUsers = [];
   List<UserModel> _managers = [];
 
   List<String> _pidList = [];
@@ -98,7 +97,6 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
       if(!_managers.any((test) => test.uid == pid)){
         List<UserModel>  _new = await Services().getCrntUsr(pid);
         UserModel user = _new.first;
-        _newUsers.add(user);
         await Data().addUser(user);
       }
     });
@@ -548,7 +546,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                       children: [
                         PropUnit(title: entity.title.toString(), entity: entity, max: highestId+1,),
                         Tenants(entity: entity),
-                        Payments(eid: entity.eid, unitid: "", tid: "", lid: "", from: '',),
+                        Payments(entity: entity, unit: UnitModel(id: ""), tid: "", lid: "", from: '',),
                       ],
                     ),
                   )
@@ -838,7 +836,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                             admin.contains(currentUser.uid) || duty.duties.toString().contains("PAYMENTS") || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
                                 ?  RowButton(
                                       onTap:() {
-                                        Get.to(() =>Payments(eid: entity.eid,unitid: '',tid: _unitList.any((test) => test.tid.toString().contains(currentUser.uid))?currentUser.uid:'', lid: '', from: 'Prop',),transition: Transition.rightToLeft);
+                                        Get.to(() =>Payments(entity: entity,unit: UnitModel(id: ""),tid: _unitList.any((test) => test.tid.toString().contains(currentUser.uid))?currentUser.uid:'', lid: '', from: 'Prop',),transition: Transition.rightToLeft);
                                       },
                                     icon :LineIcon.wallet(), title:"Payments", subtitle:""
                                   )

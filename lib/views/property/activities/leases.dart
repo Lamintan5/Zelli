@@ -339,7 +339,7 @@ class _LeasesState extends State<Leases> {
                                       ),
                                       BottomCallButtons(
                                           onTap: () {
-                                            Get.to(()=>Payments(eid: widget.entity.eid, unitid: widget.unit.id.toString(), tid: user.uid, lid: widget.lease.lid, from: 'lease',),transition: Transition.rightToLeft);
+                                            Get.to(()=>Payments(entity: widget.entity, unit: widget.unit, tid: user.uid, lid: widget.lease.lid, from: 'lease',),transition: Transition.rightToLeft);
                                           },
                                           icon: LineIcon.wallet(color: secondaryColor,),
                                           actionColor: secondaryColor,

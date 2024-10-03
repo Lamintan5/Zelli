@@ -51,12 +51,12 @@ class _ItemTenantState extends State<ItemTenant> {
   _getData(){
     admin = widget.entity.admin.toString().split(",");
     _units = widget.entity.eid == ""
-        ?  myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) => unt.tid == widget.user.uid).toList()
-        : myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) => unt.tid == widget.user.uid && unt.eid == widget.entity.eid).toList();
+        ?  myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) => unt.tid.toString().contains(widget.user.uid)).toList()
+        : myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) => unt.tid.toString().contains(widget.user.uid) && unt.eid == widget.entity.eid).toList();
     _pay = widget.entity.eid == ""
-        ? myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((pay) => pay.type!.split(",").first != "EXP" && pay.tid == widget.user.uid.toString()).toList()
+        ? myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((pay) => pay.type!.split(",").first != "EXP" && pay.tid.toString().contains(widget.user.uid.toString())).toList()
         : myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((pay) =>
-    pay.type!.split(",").first != "EXP" && pay.tid == widget.user.uid.toString() && pay.eid == widget.entity.eid).toList();
+    pay.type!.split(",").first != "EXP" && pay.tid.toString().contains(widget.user.uid) && pay.eid == widget.entity.eid).toList();
     amount = _pay.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
     units = _units.length;
 
@@ -191,7 +191,7 @@ class _ItemTenantState extends State<ItemTenant> {
                     children: [
                       BottomCallButtons(
                           onTap: () {
-                            Get.to(()=>Payments(eid: widget.entity.eid, unitid: "", tid: widget.user.uid, lid: '', from: 'item',),transition: Transition.rightToLeft);
+                            Get.to(()=>Payments(entity: widget.entity, unit: UnitModel(id: "" ), tid: widget.user.uid, lid: '', from: 'item',),transition: Transition.rightToLeft);
                           },
                           icon: LineIcon.wallet(color: secondaryColor,),
                           actionColor: secondaryColor,
