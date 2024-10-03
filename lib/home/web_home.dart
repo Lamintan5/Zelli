@@ -53,6 +53,7 @@ class _WebHomeState extends State<WebHome> {
   TextEditingController _search = TextEditingController();
 
   List<EntityModel> _entity = [];
+  List<UnitModel> _unit = [];
 
   EntityModel enty = EntityModel(eid: "", title: "N/A");
 
@@ -81,6 +82,7 @@ class _WebHomeState extends State<WebHome> {
 
   _getData(){
     _entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
+    _unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).toList();
     _tenants = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).toList();
     setState(() {
     });
@@ -544,6 +546,9 @@ class _WebHomeState extends State<WebHome> {
                             List<UnitModel> _unitList = [];
                             int available = 0;
                             int noTenant = 0;
+                            _unitList = _unit.where((test) => test.eid == entity.eid).toList();
+                            noTenant = _unitList.where((test) => test.tid.toString() != "").toList().length;
+                            available = _unitList.where((test) => test.tid.toString() == "").toList().length;
                             return InkWell(
                               onTap: (){
                                 Get.to(()=>PropertyView(entity: entity,removeEntity: _removeEntity, reload: _getData,), transition: Transition.rightToLeftWithFade);

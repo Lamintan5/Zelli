@@ -452,6 +452,9 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                         List<UnitModel> _unitList = [];
                                         int available = 0;
                                         int noTenant = 0;
+                                        _unitList = _unit.where((test) => test.eid == entity.eid).toList();
+                                        noTenant = _unitList.where((test) => test.tid.toString() != "").toList().length;
+                                        available = _unitList.where((test) => test.tid.toString() == "").toList().length;
                                         return InkWell(
                                           onTap: (){
                                             Get.to(()=>PropertyView(entity: entity,removeEntity: _removeEntity, reload: _getData,), transition: Transition.rightToLeftWithFade);
@@ -464,7 +467,8 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                             ),
                                             child: Stack(
                                               children: [
-                                                SizedBox(width: double.infinity, height: double.infinity,
+                                                SizedBox(
+                                                  width: double.infinity, height: double.infinity,
                                                   child: ClipRRect(
                                                     borderRadius: BorderRadius.circular(10),
                                                     child: entity.image == ""
