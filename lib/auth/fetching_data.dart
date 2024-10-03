@@ -42,14 +42,10 @@ class _FetchingDataState extends State<FetchingData> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(),
-          Text("S T U D I O 5 I V E", style: TextStyle(fontSize: 25, fontWeight: FontWeight.w100, color: reverse)),
-          TextButton(onPressed: ()async{
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.clear();  // This will clear all the stored data.
-            print("All SharedPreferences cleared.");
-            await DefaultCacheManager().emptyCache();
-            Get.to(()=>LogIn(), transition: Transition.rightToLeft);
-          }, child: Text("Log out"))
+          Text(
+              "S T U D I O 5 I V E",
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w100, color: reverse)
+          ),
         ],
       ),
     );

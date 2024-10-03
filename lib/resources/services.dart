@@ -44,6 +44,7 @@ class Services{
   static const String _GET_MY  = 'GET_MY';
   static const String _GET_CURRENT_PROP  = 'GET_CURRENT_PROP';
   static const String _GET_ALL  = 'GET_ALL';
+  static const String _GET_BY_ENTITY  = 'GET_BY_ENTITY';
   static const String _UPDATE  = 'UPDATE';
   static const String _UPDATE_PASS  = 'UPDATE_PASS';
   static const String _UPDATE_TOKEN  = 'UPDATE_TOKEN';
@@ -444,6 +445,19 @@ class Services{
   Future<List<UnitModel>> getAllUnit()async{
     var map = new Map<String, dynamic>();
     map["action"] = _GET_ALL;
+    final response = await http.post(Uri.parse(_UNIT),body: map);
+    if(response.statusCode==200) {
+      List<UnitModel> unit = unitFromJson(response.body);
+      return unit;
+    } else {
+      return <UnitModel>[];
+    }
+  }
+  // GET UNITS BY EID
+  Future<List<UnitModel>> getEntityUnit(String eid)async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_BY_ENTITY;
+    map["eid"] = eid;
     final response = await http.post(Uri.parse(_UNIT),body: map);
     if(response.statusCode==200) {
       List<UnitModel> unit = unitFromJson(response.body);

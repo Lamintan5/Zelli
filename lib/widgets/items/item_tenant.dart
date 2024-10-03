@@ -209,7 +209,7 @@ class _ItemTenantState extends State<ItemTenant> {
                           onTap: () {
                             _units.length == 1
                                 ? Get.to(()=> ShowCaseWidget(
-                                  builder: (context) => UnitProfile(unit: _units.first,  reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
+                                  builder: (context) => UnitProfile(unit: _units.first,  reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: widget.entity,),
                                 ), transition: Transition.rightToLeft)
                                 : dialogChooseUnit(context, _units);
                           },

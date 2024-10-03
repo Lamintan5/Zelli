@@ -3,11 +3,9 @@ import 'dart:io';
 
 import 'package:Zelli/home/tabs/payments.dart';
 import 'package:Zelli/home/tabs/tenants.dart';
-import 'package:Zelli/home/tabs/units.dart';
 import 'package:Zelli/models/duties.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/resources/services.dart';
-import 'package:Zelli/resources/socket.dart';
 import 'package:Zelli/views/property/activities/edit_property.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/property/activities/utilities.dart';
@@ -53,7 +51,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   TextEditingController _search = TextEditingController();
   late TabController _tabController;
   List<UnitModel> _unitList = [];
+  List<UnitModel> _units = [];
   List<UserModel> _users = [];
+  List<EntityModel> _entity = [];
 
   List<UserModel> _newUsers = [];
   List<UserModel> _managers = [];
@@ -68,7 +68,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
 
   bool _loading = false;
   bool _loadingAction = false;
-
+  bool isFilled = false;
   bool isMember = false;
   bool isTenant = false;
 
@@ -90,6 +90,10 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
 
   Future<void> _getDetails() async {
     _getData();
+    if(!isMember && !isTenant){
+      _entity = await Services().getAllEntity();
+      _units = await Services().getEntityUnit(widget.entity.eid);
+    }
     _pidList.forEach((pid)async{
       if(!_managers.any((test) => test.uid == pid)){
         List<UserModel>  _new = await Services().getCrntUsr(pid);
@@ -99,18 +103,32 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
       }
     });
     _getData();
+    if(!isMember && !isTenant){
+      _units.where((test) => test.tid.toString() == "").toList().forEach((unt){
+        if(!_unitList.any((u) => u.id.toString().contains(unt.id.toString()))){
+          _unitList.add(unt);
+        }
+      });
+    }
   }
 
   void _getData() {
-    entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((element) => element.eid == widget.entity.eid,
-        orElse: () => EntityModel(eid: "", image: "", title: "", time: ""));
-    _unitList = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((element) => element.eid == entity.eid).toList();
+    _unitList = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((element) => element.eid == widget.entity.eid).toList();
     _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
+    isMember = widget.entity.pid.toString().split(",").contains(currentUser.uid);
+    isTenant = _unitList.any((test) => test.tid.toString().contains(currentUser.uid));
+
+    entity = isMember || isTenant ?  myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((element) => element.eid == widget.entity.eid,
+        orElse: () => EntityModel(eid: "", image: "", title: "N/A", time: ""))
+        : ! isMember && !isTenant
+        ? _entity.firstWhere((element) => element.eid == widget.entity.eid,orElse: () => EntityModel(eid: "", image: "", title: "N/A", time: ""))
+        : EntityModel(eid: "", image: "", title: "N/A", time: "");
     duty = myDuties.map((jsonString) => DutiesModel.fromJson(json.decode(jsonString))).firstWhere((test) =>
       test.pid.toString() == currentUser.uid, orElse: ()=>DutiesModel(did: "", duties: ""));
     _users.add(currentUser);
+
     highestId = _unitList.fold(0, (maxId, unit) => int.parse(unit.floor.toString()).compareTo(maxId) > 0 ? int.parse(unit.floor.toString()) : maxId);
-    _pidList = entity.pid.toString().split(",");
+    _pidList = widget.entity.pid.toString().split(",");
     admin = entity.admin.toString().split(",");
     _pidList.forEach((uid){
       var userModel = _users.firstWhere((element) => element.uid == uid, orElse: ()=> UserModel(uid: "", image: ""));
@@ -121,8 +139,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
       }
     });
 
-    isMember = _pidList.contains(currentUser.uid);
-    isTenant = _unitList.any((test) => test.tid.toString().contains(currentUser.uid));
+
 
 
     if (_managers.isNotEmpty) {
@@ -212,9 +229,12 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                     )
                     : SizedBox(),
                 SizedBox(width: 5,),
-                buildButton(),
+                admin.contains(currentUser.uid) || isMember || isTenant
+                    ? buildButton() : SizedBox(),
               ],
-              flexibleSpace: FlexibleSpaceBar(
+              flexibleSpace: entity.eid.isEmpty
+                  ? Center(child: CircularProgressIndicator(color: reverse,strokeWidth: 3,))
+                  : FlexibleSpaceBar(
                 background: SafeArea(
                   child: Stack(
                     children: [
@@ -260,14 +280,13 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                         ),
                       ),
                       Positioned(
-                        top: 85,
+                        top: 90,
                         right: 8,
                         child: Column(
                           children: [
                             entity.checked.contains("REMOVE")
                                 ? SizedBox()
-                                : entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
-                                ? InkWell(
+                                :  InkWell(
                           onTap: (){
                             Get.to(()=>Managers(entity: entity, reload: _getDetails),transition: Transition.rightToLeft);
                           },
@@ -323,9 +342,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                               Text('Managers', overflow: TextOverflow.ellipsis, style: TextStyle(color: secondaryColor, fontSize: 10),)
                             ],
                           ),
-                        )
-                                : Text(""),
-                            entity.checked.contains("false") || entity.checked.contains("EDIT") || entity.checked.contains("DELETE") || entity.checked.contains("REMOVED")
+                        ),
+                            isMember || isTenant
+                                ? entity.checked.contains("false") || entity.checked.contains("EDIT") || entity.checked.contains("DELETE") || entity.checked.contains("REMOVED")
                                 ? Card(
                               color: Colors.red,
                               shape: RoundedRectangleBorder(
@@ -455,7 +474,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                 ),
                               ),
                             )
-                                : SizedBox()
+                                : SizedBox() : SizedBox()
                           ],
                         ),
                       ),
@@ -463,7 +482,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                   ),
                 ),
               ),
-              bottom: PreferredSize(
+              bottom:  PreferredSize(
                 preferredSize: Size.fromHeight(20),
                 child: entity.checked.contains("REMOVE")
                     ? SizedBox(height: 20,)
@@ -499,7 +518,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
               ),
             ),
             SliverToBoxAdapter(
-              child: entity.checked.contains("REMOVE")
+              child:entity.eid.isEmpty? SizedBox() : entity.checked.contains("REMOVE")
                   ? Column(
                       children: [
                         Row(),
@@ -533,14 +552,14 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                       ],
                     ),
                   )
-                  : isTenant
-                  ? Container(
+                  : Container(
                     height: MediaQuery.of(context).size.height - 35,
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Column(
                         children: [
-                          SizedBox(
+                          Container(
                             width: 800,
+                            margin: EdgeInsets.only(bottom: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -557,9 +576,55 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                               ],
                             ),
                           ),
-                          SizedBox(height: 10,),
+                          Container(
+                            width: 800,
+                            child: TextFormField(
+                              controller: _search,
+                              keyboardType: TextInputType.text,
+                              decoration: InputDecoration(
+                                hintText: "Search",
+                                fillColor: color1,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(
+                                      Radius.circular(5)
+                                  ),
+                                  borderSide: BorderSide.none,
+                                ),
+                                hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                                prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                                prefixIconConstraints: BoxConstraints(
+                                    minWidth: 40,
+                                    minHeight: 30
+                                ),
+                                suffixIcon: isFilled?InkWell(
+                                    onTap: (){
+                                      _search.clear();
+                                      setState(() {
+                                        isFilled = false;
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(100),
+                                    child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                                ) :SizedBox(),
+                                suffixIconConstraints: BoxConstraints(
+                                    minWidth: 40,
+                                    minHeight: 30
+                                ),
+                                contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
+                                filled: true,
+                                isDense: true,
+                              ),
+                              onChanged:  (value) => setState((){
+                                if(value.isNotEmpty){
+                                  isFilled = true;
+                                } else {
+                                  isFilled = false;
+                                }
+                              }),
+                            ),
+                          ),
                           Expanded(
-                              child: SizedBox(
+                              child: Container(
                                 width: 800,
                                 child: GridView.builder(
                                     physics: const BouncingScrollPhysics(),
@@ -585,7 +650,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                       return InkWell(
                                         onTap: (){
                                           Get.to(()=> ShowCaseWidget(
-                                            builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
+                                            builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: widget.entity,),
                                           ), transition: Transition.rightToLeft);
                                         },
                                         borderRadius: BorderRadius.circular(5),
@@ -640,7 +705,6 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                                   ],
                                                 )
                                             ),
-
                                           ],
                                         ),
                                       );
@@ -649,8 +713,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                           ),
                         ],
                       ),
-                  )
-                  : SizedBox(),
+                  ),
             ),
           ],
         ),

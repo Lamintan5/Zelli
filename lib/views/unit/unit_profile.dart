@@ -45,13 +45,14 @@ import '../../widgets/items/item_utils_period.dart';
 import '../../widgets/profile_images/user_profile.dart';
 
 class UnitProfile extends StatefulWidget {
+  final EntityModel entity;
   final UnitModel unit;
   final UserModel user;
   final Function reload;
   final Function removeTenant;
   final Function removeFromList;
   final String leasid;
-  const UnitProfile({super.key, required this.unit, required this.reload, required this.removeTenant, required this.removeFromList, required this.user, required this.leasid});
+  const UnitProfile({super.key, required this.unit, required this.reload, required this.removeTenant, required this.removeFromList, required this.user, required this.leasid, required this.entity});
 
   @override
   State<UnitProfile> createState() => _UnitProfileState();
@@ -132,7 +133,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   }
 
   _getEntity(){
-    entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test)=> test.eid == unit.eid, orElse: ()=> EntityModel(eid: "", title: "N/A", due: "1", late: "1"));
+    entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test)=> test.eid == unit.eid, orElse: ()=> widget.entity);
     _admin = entity.admin.toString().split(",");
     _pids = entity.pid.toString().split(",");
   }
@@ -181,7 +182,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   }
 
   _getUnit(){
-    unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).firstWhere((test) => test.id==widget.unit.id, orElse: ()=>UnitModel(id: "", title: "N/A", tid: ""));
+    unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).firstWhere((test) => test.id==widget.unit.id, orElse: ()=>widget.unit);
     floor = int.parse(unit.floor.toString());
     room = int.parse(unit.room.toString());
     deposit = double.parse(unit.deposit.toString());
@@ -1751,7 +1752,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       child: InkWell(
                         onTap: (){
                           Navigator.push(context, (MaterialPageRoute(builder: (context) => ShowCaseWidget(
-                            builder:  (_) => UnitProfile(unit: unit, reload: (){}, removeTenant: (){}, removeFromList: (){}, user: user, leasid: lease.lid,),
+                            builder:  (_) => UnitProfile(unit: unit, reload: (){}, removeTenant: (){}, removeFromList: (){}, user: user, leasid: lease.lid, entity: widget.entity,),
                           ))));
                         },
                         splashColor: CupertinoColors.activeBlue,

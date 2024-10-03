@@ -357,7 +357,7 @@ class _LeasesState extends State<Leases> {
                                           onTap: () {
                                             _filtUnt.length == 1
                                                 ? Get.to(()=> ShowCaseWidget(
-                                              builder: (context) => UnitProfile(unit: _filtUnt.first,  reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: user, leasid: '',),
+                                              builder: (context) => UnitProfile(unit: _filtUnt.first,  reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: user, leasid: '', entity: widget.entity,),
                                             ), transition: Transition.rightToLeft)
                                                 : dialogChooseUnit(context, _filtUnt, user);
                                           },  
@@ -507,7 +507,7 @@ class _LeasesState extends State<Leases> {
 
                             } else {
                               Get.to(() =>  ShowCaseWidget(
-                                builder:  (_) => UnitProfile(unit: unit, reload: (){}, removeTenant: (){}, removeFromList: (){}, user: user, leasid: lease.lid,),
+                                builder:  (_) => UnitProfile(unit: unit, reload: (){}, removeTenant: (){}, removeFromList: (){}, user: user, leasid: lease.lid, entity: widget.entity,),
                               ), transition: Transition.rightToLeft);
                             }
                           },

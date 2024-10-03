@@ -175,7 +175,7 @@ class _UnitsState extends State<Units> {
                           return InkWell(
                             onTap: (){
                                Get.to(()=> ShowCaseWidget(
-                                      builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
+                                      builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: EntityModel(eid: "", title: "N/A"),),
                                     ), transition: Transition.rightToLeft);
                             },
                             borderRadius: BorderRadius.circular(5),

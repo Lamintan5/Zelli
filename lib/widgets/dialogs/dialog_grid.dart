@@ -67,7 +67,7 @@ class _DialogGridState extends State<DialogGrid> {
           return InkWell(
             onTap: (){
               Get.to(()=> ShowCaseWidget(
-                builder: (_) => UnitProfile(unit: unit, reload: _getUnit, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '',),
+                builder: (_) => UnitProfile(unit: unit, reload: _getUnit, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: widget.entity,),
               ), transition: Transition.rightToLeft);
             },
             borderRadius: BorderRadius.circular(5),
