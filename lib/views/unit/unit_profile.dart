@@ -41,6 +41,7 @@ import '../../widgets/dialogs/dialog_add_tenant.dart';
 import '../../widgets/dialogs/dialog_edit_unit.dart';
 import '../../widgets/dialogs/dialog_title.dart';
 import '../../widgets/dialogs/unit_dialogs/dialog_terminate.dart';
+import '../../widgets/dialogs/unit_dialogs/dialog_tnt_rq.dart';
 import '../../widgets/items/item_pay.dart';
 import '../../widgets/items/item_utils_period.dart';
 import '../../widgets/profile_images/user_profile.dart';
@@ -810,7 +811,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     WidgetSpan(
                                         child: InkWell(
                                             onTap: (){
-                                              dialogAddTenant(context);
+                                              isMember
+                                                  ? dialogAddTenant(context)
+                                                  : dialogRequest(context);
                                             },
                                             child: Text(
                                               isMember
@@ -2245,6 +2248,47 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             ],
           );
         });
+  }
+  void dialogRequest(BuildContext context){
+    final reverse = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: Container(
+            width: 450,
+            padding: EdgeInsets.all(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DialogTitle(title: 'R E Q U E S T'),
+                RichText(
+                  textAlign: TextAlign.center,
+                    text: TextSpan(
+                        children: [
+                          TextSpan(
+                              text: "Would you like to submit a request to initiate the lease for unit ",
+                              style: TextStyle(color: secondaryColor)
+                          ),
+
+                          TextSpan(
+                              text: "${unit.title}.",
+                              style: TextStyle(color: reverse)
+                          ),
+                        ]
+                    )
+                ),
+                DialogTntRq(entity: entity, unit: unit,),
+              ],
+            ),
+          ),
+        )
+    );
   }
 
   void _addPay(PaymentsModel paymentsModel, double paid, String account){

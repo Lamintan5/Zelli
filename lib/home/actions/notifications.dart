@@ -120,7 +120,7 @@ class _NotificationsState extends State<Notifications> {
                                       : notification.type == 'RQTNT'
                                       ? ItemReqTnt(notif: notification, getEntity: widget.reload, from: eid!=""?"Entity":'Notification', remove: _remove,)
                                       : notification.type == 'TNTRQ'
-                                      ? ItemTntRq(notif: notification, getEntity: widget.reload, from:  eid!=""?"Entity":'Notification')
+                                      ? ItemTntRq(notif: notification, getEntity: widget.reload, from:  eid!=""?"Entity":'Notification', remove: _remove,)
                                       :notification.type == 'MNTNRQ'
                                       ? ItemMainReq(notif: notification, getEntity: widget.reload, from:  eid!=""?"Entity":'Notification')
                                       : notification.type == 'RQCOTNT'

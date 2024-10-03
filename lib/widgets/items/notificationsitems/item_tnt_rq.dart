@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Zelli/models/data.dart';
+import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/widgets/logo/prop_logo.dart';
 import 'package:Zelli/widgets/profile_images/user_profile.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:uuid/uuid.dart';
 
 import '../../../../main.dart';
 import '../../../../models/entities.dart';
@@ -18,6 +21,8 @@ import '../../../../models/notifications.dart';
 import '../../../../models/units.dart';
 import '../../../../models/users.dart';
 import '../../../../resources/services.dart';
+import '../../../home/actions/chat/message_screen.dart';
+import '../../../home/actions/chat/web_chat.dart';
 import '../../../models/messages.dart';
 import '../../../utils/colors.dart';
 import '../../shimmer_widget.dart';
@@ -25,8 +30,9 @@ import '../../shimmer_widget.dart';
 class ItemTntRq extends StatefulWidget {
   final NotifModel notif;
   final Function getEntity;
+  final Function remove;
   final String from;
-  const ItemTntRq({super.key, required this.notif, required this.getEntity, required this.from});
+  const ItemTntRq({super.key, required this.notif, required this.getEntity, required this.from, required this.remove});
 
   @override
   State<ItemTntRq> createState() => _ItemTntRqState();
@@ -45,22 +51,12 @@ class _ItemTntRqState extends State<ItemTntRq> {
   List<String> newEnty = [];
 
   bool _loading = false;
-  bool _accepting = false;
-  bool _rejecting = false;
 
   bool _isExpanded = false;
   NotifModel notifModel = NotifModel(nid: "");
 
   _getDetails()async{
     _getData();
-    // _unit = await Services().getCrrntUnit(notifModel.text.toString());
-    // _entity = await Services().getOneEntity(notifModel.eid.toString());
-    // _newUser = await Services().getOneUser(notifModel.sid!);
-    // _receiver = await Services().getOneUser(notifModel.rid!);
-    // _newUser.addAll(_receiver);
-    // await Data().addOrUpdateUserList(_newUser);
-    // await Data().updateOrAddUnits(_unit);
-    // await Data().updateOrAddEntity(_entity);
     _getData();
   }
 
@@ -68,136 +64,16 @@ class _ItemTntRqState extends State<ItemTntRq> {
     notifModel = widget.notif;
     _user = myUsers.map((jsonString) => UserModel.fromJson(json.decode  (jsonString))).toList();
     unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).firstWhere((element) =>
-    element.id == notifModel.text, orElse: ()=>UnitModel(id: "", title: "", tid: ""));
+    element.id == notifModel.text.toString().split(",").first, orElse: ()=>UnitModel(id: "", title: "", tid: ""));
     entityModel = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).firstWhere((element) =>
     element.eid == notifModel.eid, orElse: ()=>EntityModel(eid:"", title: ""));
+
     newEnty = _entity.map((entityModel) => jsonEncode(entityModel.toJson())).toList();
     sender = _user.firstWhere((element) => element.uid == notifModel.sid, orElse: ()=>UserModel(uid: "", username: "", image: ""));
     receiver = _user.firstWhere((element) =>  notifModel.rid!.contains(element.uid), orElse: ()=>UserModel(uid: "", username: "", image: ""));
-
     setState(() {
 
     });
-  }
-
-  _actionUpdate(String action)async{
-    final dilogbg = Theme.of(context).brightness == Brightness.dark
-        ? Colors.grey[900]
-        : Colors.white;
-    final reverse = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
-    NotifModel notification = NotifModel(
-      nid: notifModel.nid,
-      text: notifModel.text,
-      type: notifModel.type,
-      actions: action,
-    );
-    setState(() {
-      if(action=="ACCEPT"){
-        _accepting = true;
-      } else if(action=="REJECTED"){
-        _rejecting = true;
-      }
-    });
-    // _unit = await Services().getCrrntUnit(notifModel.text.toString());
-    var newUnit = _unit.isEmpty? UnitModel(tid: "") : _unit.first;
-    if(newUnit.tid==""){
-      // Services.updateNotification(notification).then((response){
-      //   if(response=='success'){
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(
-      //         backgroundColor: dilogbg,
-      //         content: Text(action=="ACCEPT"?'Request Accepted Successfully':'Request declined', style: TextStyle(color: reverse,)),
-      //         action: SnackBarAction(
-      //           onPressed: (){
-      //             setState(() {
-      //               // _undo();
-      //             });
-      //           },
-      //           label: 'Undo',
-      //         ),
-      //       ),
-      //     );
-      //     if(action=='ACCEPT'){
-      //       setState(() {
-      //         if(action=="ACCEPT"){
-      //           _accepting = false;
-      //         } else if(action=="REJECTED"){
-      //           _rejecting = false;
-      //         }
-      //       });
-      //       setState(() {
-      //         notifModel.actions = 'ACCEPT';
-      //         Services.addTenants(
-      //           notifModel.sid!,
-      //           notifModel.eid.toString(),
-      //           notifModel.text.toString(),
-      //           notifModel.pid.toString(),
-      //           DateTime.now().toString(),
-      //           "",).then((response){
-      //           if(response=='success'){
-      //             Services.updateUnitTid(notifModel.text.toString(), notifModel.sid!);
-      //             widget.getEntity();
-      //           }
-      //         });
-      //       });
-      //     } else if(action=='REJECTED'){
-      //       widget.getEntity();
-      //       setState(() {
-      //         notifModel.actions = 'REJECTED';
-      //       });
-      //     }
-      //   } else if(response=='failed'){
-      //     setState(() {
-      //       if(action=="ACCEPT"){
-      //         _accepting = false;
-      //       } else if(action=="REJECTED"){
-      //         _rejecting = false;
-      //       }
-      //     });
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(
-      //         backgroundColor: dilogbg,
-      //         content: Text('Request was not sent', style: TextStyle(color: reverse,),),
-      //         action: SnackBarAction(
-      //           onPressed: _actionUpdate(action),
-      //           label: 'Try Again',
-      //         ),
-      //       ),
-      //     );
-      //   } else {
-      //     setState(() {
-      //       if(action=="ACCEPT"){
-      //         _accepting = false;
-      //       } else if(action=="REJECTED"){
-      //         _rejecting = false;
-      //       }
-      //     });
-      //     ScaffoldMessenger.of(context).showSnackBar(
-      //       SnackBar(
-      //         backgroundColor: dilogbg,
-      //         content: Text('mmhmm🤔 something went wrong.', style: TextStyle(color: reverse,)),
-      //       ),
-      //     );
-      //   }
-      // });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: dilogbg,
-          content: Text('This unit is currently under lease. Kindly contact your agent for further assistance.', style: TextStyle(color: reverse,)),
-          action: SnackBarAction(
-            onPressed: (){
-              setState(() {
-                // _undo();
-              });
-            },
-            label: 'Undo',
-          ),
-        ),
-      );
-    }
   }
 
   @override
@@ -235,6 +111,8 @@ class _ItemTntRqState extends State<ItemTntRq> {
               children: [
                 Row(
                   children: [
+                    Icon(CupertinoIcons.xmark_circle, size: 12,color: secondaryColor,),
+                    SizedBox(width: 5,),
                     Text("REQUEST", style: TextStyle(color: secondaryColor),),
                     Expanded(child: SizedBox()),
                     InkWell(
@@ -262,7 +140,6 @@ class _ItemTntRqState extends State<ItemTntRq> {
                     ),
                   ],
                 ),
-                SizedBox(height: 10,),
                 Row(
                   children: [
                     sender.uid == currentUser.uid
@@ -317,7 +194,7 @@ class _ItemTntRqState extends State<ItemTntRq> {
                                   ]
                               ),
                             )
-                                : notifModel.actions == "ACCEPT"
+                                : notifModel.actions == "ACCEPTED"
                                 ? RichText(
                               maxLines: _isExpanded?100:1,
                               overflow: TextOverflow.ellipsis,
@@ -394,7 +271,7 @@ class _ItemTntRqState extends State<ItemTntRq> {
                             ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5,))
                             :  Expanded(
                           child: InkWell(
-                            onTap: (){_actionUpdate("ACCEPT");},
+                            onTap: (){_action("ACCEPTED");},
                             borderRadius: BorderRadius.circular(5),
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 8),
@@ -412,7 +289,7 @@ class _ItemTntRqState extends State<ItemTntRq> {
                             ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5))
                             :  Expanded(
                           child: InkWell(
-                            onTap: (){_actionUpdate("REJECTED");},
+                            onTap: (){_action("REJECTED");},
                             borderRadius: BorderRadius.circular(5),
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 8),
@@ -466,11 +343,22 @@ class _ItemTntRqState extends State<ItemTntRq> {
                                 ],
                               )
                           ),
+                          entityModel.pid.toString().contains(currentUser.uid) && notifModel.actions=="" && unit.tid == ""
+                              ? Container(
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                              decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(color: color1, width: 0.5)
+                              ),
+                              child: Text("Action Required", style: TextStyle(fontSize: 11, color: Colors.green))
+                          )
+                              :SizedBox(),
                         ],
                       ),
                     ),
                     PopupMenuButton(
-                        icon: Icon(CupertinoIcons.ellipsis),
+                        icon: Icon(Icons.more_horiz),
                         padding: EdgeInsets.all(0),
                         itemBuilder: (context){
                           return [
@@ -482,35 +370,61 @@ class _ItemTntRqState extends State<ItemTntRq> {
                                   Text("Delete")
                                 ],
                               ),
-                              onTap: (){
+                              onTap: ()async{
+                                await Data().deleteNotif(context, notifModel, widget.remove);
                               },
                             ),
-                            PopupMenuItem(
-                              child: Row(
-                                children: [
-                                  Icon(CupertinoIcons.ellipses_bubble),
-                                  SizedBox(width: 10,),
-                                  Text("Message")
-                                ],
+                            if(sender.uid!=currentUser.uid)
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.ellipses_bubble),
+                                    SizedBox(width: 10,),
+                                    Text("Message")
+                                  ],
+                                ),
+                                onTap: (){
+                                  Platform.isIOS || Platform.isAndroid
+                                      ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: sender,), transition: Transition.rightToLeft)
+                                      : Get.to(() => WebChat(selected: sender,), transition: Transition.rightToLeft);
+                                },
                               ),
-                              onTap: (){
-                                // Platform.isIOS || Platform.isAndroid
-                                //     ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: user,), transition: Transition.rightToLeft)
-                                //     : Get.to(() => WebChat(selected: user,), transition: Transition.rightToLeft);;
-                              },
-                            ),
-                            PopupMenuItem(
-                              child: Row(
-                                children: [
-                                  Icon(CupertinoIcons.phone),
-                                  SizedBox(width: 10,),
-                                  Text("Call")
-                                ],
-                              ),
-                              onTap: (){
 
-                              },
-                            ),
+                            if(sender.uid!=currentUser.uid&&sender.phone.toString()!=""&&Platform.isAndroid||Platform.isIOS)
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.phone),
+                                    SizedBox(width: 10,),
+                                    Text("Call")
+                                  ],
+                                ),
+                                onTap: (){
+                                  if(sender.phone==""||sender.phone==null){
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(Data().noPhone),
+                                          width: 500,
+                                          showCloseIcon: true,
+                                        )
+                                    );
+                                  } else {
+                                    _callNumber(sender.phone.toString());
+                                  }
+                                },
+                              ),
+
+                            if(notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions=="REJECTED")
+                              PopupMenuItem(
+                                child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.restart),
+                                    SizedBox(width: 10,),
+                                    Text("Undo")
+                                  ],
+                                ),
+                                onTap: _undo,
+                              ),
                           ];
                         })
                   ],
@@ -519,11 +433,113 @@ class _ItemTntRqState extends State<ItemTntRq> {
               ],
             ),
           ),
+          _loading ? LinearProgressIndicator(backgroundColor: color1,minHeight: 1,) : SizedBox()
         ],
       ),
     );
   }
+
+  void _action(String actions)async{
+    String lid = "";
+    Uuid uuid = Uuid();
+    setState(() {
+      _loading = true;
+      lid = uuid.v1();
+    });
+    await Services.updateNotifAct(notifModel.nid, actions).then((response)async{
+      print("Response $response");
+      if(response=="success"){
+        if(actions=="ACCEPTED"){
+          await Services.updateUnitTid(notifModel.text.toString().split(",").first, sender.uid, lid).then((value)async{
+            print("Value $value");
+            if(value=="success"){
+              LeaseModel lease = LeaseModel(
+                  lid: lid,
+                  tid: sender.uid,
+                  ctid: "",
+                  eid: notifModel.eid,
+                  pid: notifModel.pid.toString(),
+                uid: notifModel.text.toString(),
+                start: DateTime.now().toString(),
+                end: "",
+                checked: "true"
+              );
+              Services.addLeases(lid, sender.uid, notifModel.eid.toString(), notifModel.text.toString(), notifModel.pid.toString(), DateTime.now().toString(), "",).then((state){
+                print("State $state");
+              });
+              unit.tid = sender.uid;
+              unit.lid = lid;
+              await Data().addEntity(entityModel);
+              await Data().addUnit(unit);
+              await Data().addLease(lease);
+            }
+          });
+        }
+        notifModel.actions=actions;
+        notifModel.time=DateTime.now().toString();
+        await Data().addNotification(notifModel);
+        widget.getEntity();
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(actions=="ACCEPTED"?'Request Accepted Successfully':'Request declined'),
+            width: 500,
+            showCloseIcon: true,
+          ),
+        );
+      } else if(response=="failed"){
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Action not processed.'),
+            showCloseIcon: true,
+            width: 500,
+          ),
+        );
+      } else {
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(Data().failed),
+            showCloseIcon: true,
+            width: 500,
+          ),
+        );
+      }
+    });
+  }
+  void _undo()async{
+    setState(() {
+      _loading = true;
+    });
+    await Services.updateNotifAct(notifModel.nid, "").then((response)async{
+      if(response=="success"){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Action restored'),
+            width: 500,
+            showCloseIcon: true,
+          ),
+        );
+        notifModel.actions="";
+        notifModel.time=DateTime.now().toString();
+        await Data().addNotification(notifModel);
+      }
+      setState(() {
+        _loading = false;
+      });
+    });
+  }
+
   _updateCount(){}
   _changeMess(MessModel messModel){}
-
+  _callNumber(String number) async{
+    await FlutterPhoneDirectCaller.callNumber(number);
+  }
 }

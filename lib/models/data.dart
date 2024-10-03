@@ -394,6 +394,28 @@ class Data{
     sharedPreferences.setStringList('myunit', uniqueUnit);
     myUnits = uniqueUnit;
   }
+  Future<void> addLease(LeaseModel lease) async {
+    List<LeaseModel> _lease = [];
+    List<String> uniqueLease = [];
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _lease = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString))).toList();
+
+    bool exists = false;
+    for (int i = 0; i < _lease.length; i++) {
+      if (_lease[i].lid == lease.lid) {
+        _lease[i] = lease;
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      _lease.add(lease);
+    }
+
+    uniqueLease = _lease.map((model) => jsonEncode(model.toJson())).toList();
+    sharedPreferences.setStringList('mylease', uniqueLease);
+    myLease = uniqueLease;
+  }
   Future<void> addNotification(NotifModel notif) async {
     List<NotifModel> _notification = [];
     List<String> uniqueNotif = [];

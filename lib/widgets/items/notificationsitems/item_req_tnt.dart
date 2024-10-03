@@ -21,6 +21,7 @@ import '../../../../models/users.dart';
 import '../../../../resources/services.dart';
 import '../../../home/actions/chat/message_screen.dart';
 import '../../../home/actions/chat/web_chat.dart';
+import '../../../models/lease.dart';
 import '../../../utils/colors.dart';
 import '../../logo/prop_logo.dart';
 import '../../profile_images/user_profile.dart';
@@ -614,6 +615,17 @@ class _ItemReqTntState extends State<ItemReqTnt> {
           await Services.updateUnitTid(notifModel.text.toString().split(",").first, currentUser.uid, lid).then((value)async{
             print("Value $value");
             if(value=="success"){
+              LeaseModel lease = LeaseModel(
+                  lid: lid,
+                  tid: currentUser.uid,
+                  ctid: "",
+                  eid: notifModel.eid,
+                  pid: notifModel.pid.toString(),
+                  uid: notifModel.text.toString(),
+                  start: DateTime.now().toString(),
+                  end: "",
+                  checked: "true"
+              );
               Services.addLeases(lid, currentUser.uid, notifModel.eid.toString(), notifModel.text.toString(), notifModel.pid.toString(), DateTime.now().toString(), "",).then((state){
                 print("State $state");
               });
@@ -621,6 +633,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
               unitmodel.lid = lid;
               await Data().addEntity(entityModel);
               await Data().addUnit(unitmodel);
+              await Data().addLease(lease);
             }
           });
         }
