@@ -451,10 +451,14 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                         List<String> _managers = entity.pid!.split(",");
                                         List<UnitModel> _unitList = [];
                                         int available = 0;
-                                        int noTenant = 0;
+                                        List<String> tnts = [];
                                         _unitList = _unit.where((test) => test.eid == entity.eid).toList();
-                                        noTenant = _unitList.where((test) => test.tid.toString() != "").toList().length;
                                         available = _unitList.where((test) => test.tid.toString() == "").toList().length;
+                                        _unitList.where((test) => test.tid.toString() != "").toList().forEach((tnt){
+                                          if(!tnts.any((element) => element == tnt.tid.toString().split(",").first)){
+                                            tnts.add(tnt.tid.toString().split(",").first);
+                                          }
+                                        });
                                         return InkWell(
                                           onTap: (){
                                             Get.to(()=>PropertyView(entity: entity,removeEntity: _removeEntity, reload: _getData,), transition: Transition.rightToLeftWithFade);
@@ -571,7 +575,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                                                     child: Icon(Icons.people, size: 14, color: color5,),
                                                                   ),
                                                                   TextSpan(
-                                                                      text:  " Tnts:${noTenant} ",
+                                                                      text:  " Tnts:${tnts.length} ",
                                                                       style: TextStyle(color: color5, fontSize: 12)
                                                                   ),
                                                                   WidgetSpan(
