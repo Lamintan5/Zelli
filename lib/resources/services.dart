@@ -133,6 +133,7 @@ class Services{
     return List<DutiesModel>.from(data.map((item)=>DutiesModel.fromJson(item)));
   }
 
+
   // REGISTER USER
   static Future registerUsers(String uid, String username, String first, String last, String email, String phone, String password, File? image, String url,String status, String token, String country) async {
     print('Url : $url');
@@ -161,7 +162,6 @@ class Services{
       return 'error';
     }
   }
-
   // LOGIN USERS
   static Future<String> loginUsers(String email, String password) async {
     try {
@@ -306,6 +306,46 @@ class Services{
       map["type"] = pay.type;
       map["time"] = pay.time;
       final response = await http.post(Uri.parse(_PAY), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // ADD REVIEW
+  static Future addReview(ReviewModel review, File? image) async {
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(_REVIEW));
+      request.fields['action'] = _ADD;
+      request.fields['rid'] = review.rid;
+      request.fields['eid'] = review.eid.toString();
+      request.fields['pid'] = review.pid.toString();
+      request.fields['sid'] = review.sid.toString();
+      request.fields['uid'] = review.uid.toString();
+      request.fields['message'] = review.message.toString();
+      request.fields['star'] = review.star.toString();
+      if (image != null) {
+        var pic = await http.MultipartFile.fromPath("image", image.path);
+        request.files.add(pic);
+      }
+      var response = await request.send();
+      return response;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // ADD STAR
+  static Future<String> addStar(StarModel star) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _ADD;
+      map["sid"] = star.sid;
+      map["pid"] = star.pid;
+      map["eid"] = star.eid;
+      map["rid"] = star.rid;
+      map["uid"] = star.uid;
+      map["rate"] = star.rate;
+      map["type"] = star.type;
+      final response = await http.post(Uri.parse(_STAR), body: map);
       return response.body;
     } catch (e) {
       return 'error';
@@ -492,6 +532,21 @@ class Services{
       return <DutiesModel>[];
     }
   }
+
+  // GET CURRENT REVIEW
+  Future<List<ReviewModel>> getCrntReview(String eid)async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_CURRENT;
+    map["eid"] = eid;
+    final response = await http.post(Uri.parse(_REVIEW),body: map);
+    if(response.statusCode==200) {
+      List<ReviewModel> review = reviewFromJson(response.body);
+      return review;
+    } else {
+      return <ReviewModel>[];
+    }
+  }
+
 
 
   // UPDATE USER TOKEN

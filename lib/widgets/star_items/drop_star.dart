@@ -12,6 +12,7 @@ import '../../main.dart';
 import '../../models/stars.dart';
 import '../../resources/services.dart';
 import '../../utils/colors.dart';
+import '../../views/property/activities/reviews.dart';
 
 class DropStar extends StatefulWidget {
   final EntityModel entity;
@@ -303,7 +304,7 @@ class _DropStarState extends State<DropStar> {
                 TextButton(
                     onPressed: (){
                       hideOverlay();
-                      // Get.to(()=>Reviews(entity: widget.entity), transition: Transition.rightToLeft);
+                      Get.to(()=>Reviews(entity: widget.entity), transition: Transition.rightToLeft);
                     },
                     child: Text("See all Reviews")),
               ],

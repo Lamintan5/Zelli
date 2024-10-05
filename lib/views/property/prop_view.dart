@@ -36,6 +36,7 @@ import '../../widgets/logo/prop_logo.dart';
 import '../../widgets/profile_images/user_profile.dart';
 import '../../widgets/star_items/drop_star.dart';
 import '../unit/unit_profile.dart';
+import 'activities/reviews.dart';
 
 class PropertyView extends StatefulWidget {
   final Function removeEntity;
@@ -72,6 +73,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   bool isTenant = false;
 
   int highestId = 0;
+  int available = 0;
+  int tenants = 0;
 
   double width = 0;
 
@@ -124,6 +127,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
     duty = myDuties.map((jsonString) => DutiesModel.fromJson(json.decode(jsonString))).firstWhere((test) =>
       test.pid.toString() == currentUser.uid, orElse: ()=>DutiesModel(did: "", duties: ""));
     _users.add(currentUser);
+
+    available = _unitList.where((test) => test.tid.toString() == "").toList().length;
+    tenants = _unitList.where((test) => test.tid.toString() != "").toList().length;
 
     highestId = _unitList.fold(0, (maxId, unit) => int.parse(unit.floor.toString()).compareTo(maxId) > 0 ? int.parse(unit.floor.toString()) : maxId);
     _pidList = widget.entity.pid.toString().split(",");
@@ -254,8 +260,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                               children: [
                                 Icon(CupertinoIcons.location, size: 15,color: secondaryColor,),
                                 SizedBox(width: 5),
-                                Text("San Fransisco, CA", style: TextStyle(color: secondaryColor),),
-                                SizedBox(width: 20,),
+                                Text("San Fransisco, CA", style: TextStyle(color: secondaryColor)),
+                                SizedBox(width: 10,),
                                 Icon(CupertinoIcons.calendar, size: 15,color: secondaryColor),
                                 SizedBox(width: 5),
                                 entity.time.toString() ==""? SizedBox() : Text("Created on ${DateFormat.yMMMd().format(DateTime.parse(entity.time!))}", style: TextStyle(color: secondaryColor),),
@@ -265,14 +271,14 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                             entity.checked.contains("REMOVE")
                                 ? SizedBox()
                                 : CardButton(
-                                text: "REVIEWS",
-                                backcolor: reverse,
-                                forecolor: normal,
-                                icon: Icon(CupertinoIcons.star_fill, color: normal, size: 18,),
-                                onTap: (){
-                                  // Get.to(()=>Reviews(entity: entity), transition: Transition.rightToLeft);
-                                }
-                            ),
+                                    text: "REVIEWS",
+                                    backcolor: reverse,
+                                    forecolor: normal,
+                                    icon: Icon(CupertinoIcons.star_fill, color: normal, size: 18,),
+                                    onTap: (){
+                                      Get.to(()=>Reviews(entity: entity), transition: Transition.rightToLeft);
+                                    }
+                                ),
                             SizedBox(height: 20,),
                           ],
                         ),
