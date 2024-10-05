@@ -440,7 +440,7 @@ class _CreatePropertyState extends State<CreateProperty> {
                           strokeWidth: 2,
                         ),
                       )
-                          : Text('Publish', style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600),)),
+                          : Text('Publish', style: TextStyle(fontSize: 15,fontWeight: FontWeight.w600, color: Colors.black),)),
                     ),
                   ),
                 )

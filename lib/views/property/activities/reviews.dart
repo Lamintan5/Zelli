@@ -1,4 +1,5 @@
 import 'package:Zelli/models/entities.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
@@ -74,7 +75,7 @@ class _ReviewsState extends State<Reviews> {
         ? Colors.white54
         : Colors.black54;
     final color1 = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white12
+        ? Colors.white10
         : Colors.black12;
     final color2 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white24
@@ -154,10 +155,9 @@ class _ReviewsState extends State<Reviews> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 30),
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 30),
                       child: _loading
-                          ? LinearProgressIndicator(color: reverse,minHeight: 2,)
+                          ? LinearProgressIndicator(color: CupertinoColors.activeBlue, minHeight: 3,backgroundColor: color2,)
                           : Divider(
                         thickness: 2,
                         height: 1,

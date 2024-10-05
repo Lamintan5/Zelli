@@ -28,6 +28,7 @@ class CreateReview extends StatefulWidget {
 
 class _CreateReviewState extends State<CreateReview> {
   TextEditingController _controller = TextEditingController();
+  final formKey = GlobalKey<FormState>();
   File? _image;
   final picker = ImagePicker();
   double star = 0.0;
@@ -57,204 +58,246 @@ class _CreateReviewState extends State<CreateReview> {
         title: Text('Write your Review'),
         centerTitle: true,
       ),
-      body: Center(
-        child: Container(
-          width: 500,
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      _image == null
-                          ? Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(" Add Photo (Optional)", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
-                            SizedBox(height: 10,),
-                            DottedBorder(
-                                borderType: BorderType.RRect,
-                                color: reverse,
-                                radius: Radius.circular(12),
-                                dashPattern: [5,5],
-                                child: InkWell(
-                                  onTap: (){
-                                    choiceImage();
-                                  },
-                                  child: Container(
-                                    width: 450,
-                                    height: 100,
-                                    child: Center(
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: [
-                                          Icon(Icons.cloud_upload),
-                                          Text("Click Here to upload")
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                            )
-                          ],
-                        ),
-                      )
-                          : SizedBox(
-                        child: Stack(
-                          children: [
-                            InkWell(
-                              onTap: (){
-                                choiceImage();
-                              },
-                              child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: 400,
-                                  ),
-                                  child: Image.file(
-                                    _image!,
-                                    fit: BoxFit.cover,
-                                  )
-                              ),
-                            ),
-                            Align(
-                                alignment: Alignment.topRight,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(onPressed: (){
+      body: Form(
+        key: formKey,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        child: Center(
+          child: Container(
+            width: 500,
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _image == null
+                            ? Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(" Add Photo (Optional)", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                              SizedBox(height: 5,),
+                              DottedBorder(
+                                  borderType: BorderType.RRect,
+                                  color: reverse,
+                                  radius: Radius.circular(12),
+                                  dashPattern: [5,5],
+                                  child: InkWell(
+                                    onTap: (){
                                       choiceImage();
                                     },
-                                        icon: Icon(Icons.change_circle)),
-                                    IconButton(onPressed: (){
-                                      setState(() {
-                                        _image = null;
-                                      });
-                                    },
-                                        icon: Icon(Icons.close)),
-                                  ],
-                                )),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20,),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(" Add Rating", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
-                            SizedBox(height: 10,),
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 10),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: color1,
-                                  border: Border.all(
-                                      width: 1, color:isRated? Colors.red : color1
-                                  )
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  RatingBar.builder(
-                                      initialRating: 0.0,
-                                      minRating: 0.0,
-                                      direction: Axis.horizontal,
-                                      allowHalfRating: true,
-                                      itemCount: 5,
-                                      itemSize: 30.0,
-                                      unratedColor: color2,
-                                      itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
-                                      itemBuilder: (context, _) => Icon(
-                                        Icons.star,
-                                        color: Colors.amber,
+                                    child: Container(
+                                      width: 450,
+                                      height: 100,
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.cloud_upload),
+                                            Text("Click Here to upload")
+                                          ],
+                                        ),
                                       ),
-                                      onRatingUpdate: (rate) {
-                                        setState(() {
-                                          star = rate;
-                                          isRated = false;
-                                        });
-                                      }),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Please provide your feedback by indicating your experience-based rating for this property. Your input is valuable and will contribute to the overall assessment of the property\'s quality.',
-                                      style: TextStyle(color: secondaryColor, fontSize: 11),
-                                      textAlign: TextAlign.center,
                                     ),
                                   )
-                                ],
+                              )
+                            ],
+                          ),
+                        )
+                            : SizedBox(
+                          child: Stack(
+                            children: [
+                              InkWell(
+                                onTap: (){
+                                  choiceImage();
+                                },
+                                child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: 400,
+                                      maxHeight: MediaQuery.of(context).size.height * 1/2
+                                    ),
+                                    child: Center(
+                                      child: Image.file(
+                                        _image!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                ),
                               ),
-                            ),
-                          ],
+                              Align(
+                                  alignment: Alignment.topRight,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        InkWell(
+                                          onTap: (){
+                                            choiceImage();
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                color: Colors.black54,
+                                              borderRadius: BorderRadius.circular(50)
+                                            ),
+                                            child: Icon(CupertinoIcons.arrow_2_circlepath),
+                                          ),
+                                        ),
+                                        SizedBox(width: 10,),
+                                        InkWell(
+                                          onTap: (){
+                                            setState(() {
+                                              _image = null;
+                                            });
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                                color: Colors.black54,
+                                                borderRadius: BorderRadius.circular(50)
+                                            ),
+                                            child: Icon(Icons.close),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )),
+                            ],
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 20,),
-                      Container(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(" Write your Review", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),),
-                            SizedBox(height: 10,),
-                            TextFormField(
-                              enableInteractiveSelection: true,
-                              controller: _controller,
-                              maxLines: 7,
-                              minLines: 4,
-                              maxLength: 400,
-                              maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                              style: TextStyle(fontSize: 13),
-                              decoration: InputDecoration(
-                                hintText: "Would you wish to write a review about this property",
-                                hintStyle: TextStyle(color: secondaryColor, fontSize: 13),
-                                border: inputBorder,
-                                focusedBorder: inputBorder,
-                                enabledBorder: inputBorder,
-                                filled: true,
-                                fillColor: color1,
-                                contentPadding: const EdgeInsets.all(10),
+                        SizedBox(height: 20,),
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(" Add Rating", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                              SizedBox(height: 5,),
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: color1,
+                                    border: Border.all(
+                                        width: 1, color:isRated? Colors.red : color1
+                                    )
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    RatingBar.builder(
+                                        initialRating: 0.0,
+                                        minRating: 0.5,
+                                        direction: Axis.horizontal,
+                                        allowHalfRating: true,
+                                        itemCount: 5,
+                                        itemSize: 30.0,
+                                        unratedColor: color2,
+                                        itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
+                                        itemBuilder: (context, _) => Icon(
+                                          Icons.star,
+                                          color: Colors.amber,
+                                        ),
+                                        onRatingUpdate: (rate) {
+                                          setState(() {
+                                            star = rate;
+                                            isRated = false;
+                                          });
+                                        }),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Please provide your feedback by indicating your experience-based rating for this property. Your input is valuable and will contribute to the overall assessment of the property\'s quality.',
+                                        style: TextStyle(color: secondaryColor, fontSize: 11),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 20,),
+                        Container(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(" Write your Review", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
+                              SizedBox(height: 5,),
+                              TextFormField(
+                                enableInteractiveSelection: true,
+                                controller: _controller,
+                                maxLines: 7,
+                                minLines: 4,
+                                maxLength: 400,
+                                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                style: TextStyle(fontSize: 13),
+                                decoration: InputDecoration(
+                                  hintText: "Would you wish to write a review about this property",
+                                  hintStyle: TextStyle(color: secondaryColor, fontSize: 13),
+                                  border: inputBorder,
+                                  focusedBorder: inputBorder,
+                                  enabledBorder: inputBorder,
+                                  filled: true,
+                                  fillColor: color1,
+                                  contentPadding: const EdgeInsets.all(10),
+                                ),
+                                validator: (value){
+                                  if( value == null || value.isEmpty){
+                                    return 'Please enter your review';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              InkWell(
-                onTap: (){
-                  if(star == 0.0){
-                    setState(() {
-                      isRated = true;
-                    });
-                  } else {
-                    setState(() {
-                      isRated = false;
-                    });
-                    _review();
-                  }
-                },
-                child: Container(
-                  width: 450,
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: CupertinoColors.activeBlue,
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: InkWell(
+                    onTap: (){
+                      final form = formKey.currentState!;
+                      if(form.validate()){
+                        if(star == 0.0){
+                          setState(() {
+                            isRated = true;
+                          });
+                        } else {
+                          setState(() {
+                            isRated = false;
+                          });
+                          _review();
+                        }
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(5),
+                    child: Container(
+                      width: 450,
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: CupertinoColors.activeBlue,
+                      ),
+                      child: Center(child: _loading
+                          ? SizedBox(
+                              width: 15,height: 15,
+                              child: CircularProgressIndicator(color: Colors.black,strokeWidth: 2,)
+                          )
+                          :Text("Submit Review", style: TextStyle(color: Colors.black),)),
+                    ),
                   ),
-                  child: Center(child: _loading
-                      ? SizedBox(
-                          width: 15,height: 15,
-                          child: CircularProgressIndicator(color: Colors.black,strokeWidth: 2,)
-                      )
-                      :Text("Submit Review", style: TextStyle(color: Colors.black),)),
                 ),
-              ),
-              SizedBox(height: 10,)
-            ],
+                SizedBox(height: 10,)
+              ],
+            ),
           ),
         ),
       ),
