@@ -13,8 +13,10 @@ import 'package:Zelli/models/units.dart';
 import 'package:Zelli/models/users.dart';
 import 'package:Zelli/resources/services.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../api/api_service.dart';
 import '../models/data.dart';
 import '../models/messages.dart';
 
@@ -277,5 +279,16 @@ class SocketManager extends GetxController  {
       notifications.add(notif);
     }
     Data().addOrUpdateNotif(notifications);
+  }
+  Future<void> initPlatform()async{
+    if(Platform.isAndroid || Platform.isIOS){
+      await OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+      OneSignal.Debug.setAlertLevel(OSLogLevel.none);
+      OneSignal.initialize("41db0b95-b70f-44a5-a5bf-ad849c74352e");
+      OneSignal.Notifications.requestPermission(true);
+      await OneSignal.User.getOnesignalId().then((value){
+        APIService().getUserData(value!);
+      });
+    }
   }
 }

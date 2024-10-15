@@ -15,13 +15,15 @@ import 'api/currency_service.dart';
 import 'auth/fetching_data.dart';
 import 'home/home_screen.dart';
 import 'home/web_home.dart';
+import 'models/device.dart';
 import 'models/users.dart';
 
 late List<CameraDescription> cameras;
 DateTime today = DateTime.now();
 DateTime justToday = DateTime(today.year, today.month, today.day);
 UserModel currentUser = UserModel(uid: "");
-String domain = "192.168.1.100";
+DeviceModel deviceModel = DeviceModel();
+String domain = "192.168.1.186";
 List<String> myEntity = [];
 List<String> notMyEntity = [];
 List<String> myUnits = [];
@@ -144,7 +146,7 @@ class _MyAppState extends State<MyApp> {
     // TODO: implement initState
     super.initState();
     getValidations();
-
+    SocketManager().initPlatform();
   }
   @override
   Widget build(BuildContext context) {

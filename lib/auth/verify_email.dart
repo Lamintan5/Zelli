@@ -14,6 +14,7 @@ import '../home/web_home.dart';
 import '../main.dart';
 import '../models/users.dart';
 import '../resources/services.dart';
+import '../resources/socket.dart';
 import '../utils/colors.dart';
 import '../widgets/time_counter.dart';
 
@@ -208,8 +209,8 @@ class _VerifyEmailState extends State<VerifyEmail> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(Platform.isAndroid || Platform.isIOS){
-      initPlatform();
+    if(deviceModel.id==null){
+      SocketManager().initPlatform();
     }
     _hashCode = widget.otpHash;
     targetTimestamp = int.parse(widget.otpHash.split(".").last);
@@ -353,13 +354,5 @@ class _VerifyEmailState extends State<VerifyEmail> {
         ),
       ),
     );
-  }
-
-  Future<void> initPlatform() async {
-    await OneSignal.shared.setAppId("41db0b95-b70f-44a5-a5bf-ad849c74352e");
-    await OneSignal.shared.getDeviceState().then((value) {
-      print(value!.userId);
-      token = value.userId!;
-    });
   }
 }

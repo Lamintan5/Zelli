@@ -46,7 +46,7 @@ class _LogInState extends State<LogIn> {
 
   _getUser()async{
     final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    initPlatform();
+
     setState(() {
       _isLoading = true;
     });
@@ -158,8 +158,8 @@ class _LogInState extends State<LogIn> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(Platform.isAndroid || Platform.isIOS){
-      initPlatform();
+    if(deviceModel.id==null){
+      SocketManager().initPlatform();
     }
   }
 
@@ -382,13 +382,6 @@ class _LogInState extends State<LogIn> {
     super.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-  }
-  Future<void> initPlatform()async{
-    await OneSignal.shared.setAppId("41db0b95-b70f-44a5-a5bf-ad849c74352e");
-    await OneSignal.shared.getDeviceState().then((value){
-      print(value!.userId);
-      token = value.userId!;
-    });
   }
   Future signIn()async{
     final user = await GoogleSignInApi.login();

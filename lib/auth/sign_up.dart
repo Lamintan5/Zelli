@@ -15,6 +15,7 @@ import '../api/api_service.dart';
 import '../api/google_signin_api.dart';
 import '../main.dart';
 import '../models/avatars.dart';
+import '../resources/socket.dart';
 import '../utils/colors.dart';
 import '../widgets/dialogs/dialog_ipaddress.dart';
 import '../widgets/dialogs/dialog_title.dart';
@@ -165,6 +166,15 @@ class _SignUpState extends State<SignUp> {
     setState(() {
       _image = image;
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(deviceModel.id==null){
+      SocketManager().initPlatform();
+    }
   }
 
 

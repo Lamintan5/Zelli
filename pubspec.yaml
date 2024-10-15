@@ -45,7 +45,7 @@ dependencies:
   uuid: ^4.4.2
   cached_network_image: ^3.4.1
   email_validator: ^3.0.0
-  onesignal_flutter: ^3.2.7
+  onesignal_flutter: ^5.2.6
   sms_autofill: ^2.4.0
   http: any
   intl: any
@@ -61,7 +61,6 @@ dependencies:
   grouped_list: ^6.0.0
   shimmer: ^3.0.0
   liquid_progress_indicator_v2: ^0.5.0
-  flutter_phone_direct_caller: ^2.1.1
   fl_chart: ^0.68.0
   timeago: ^3.7.0
   google_sign_in: ^6.2.1
