@@ -204,6 +204,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                   background: Column(
                     mainAxisAlignment:MainAxisAlignment.center,
                     children: [
+
                       Stack(
                         alignment: Alignment.center,
                         children: [

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -158,7 +160,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
         sharedPreferences.setString('image', user.image.toString());
         sharedPreferences.setString('phone', user.phone.toString());
         sharedPreferences.setString('token', token);
-        sharedPreferences.setString('password', user.password.toString());
+        sharedPreferences.setString('password', md5.convert(utf8.encode(user.password.toString())).toString());
         sharedPreferences.setString('country', user.country.toString());
         currentUser = UserModel(
           uid: user.uid.toString(),

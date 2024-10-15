@@ -283,9 +283,9 @@ class SocketManager extends GetxController  {
   Future<void> initPlatform()async{
     if(Platform.isAndroid || Platform.isIOS){
       await OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-      OneSignal.Debug.setAlertLevel(OSLogLevel.none);
+      await OneSignal.Debug.setAlertLevel(OSLogLevel.none);
       OneSignal.initialize("41db0b95-b70f-44a5-a5bf-ad849c74352e");
-      OneSignal.Notifications.requestPermission(true);
+      await OneSignal.Notifications.requestPermission(true);
       await OneSignal.User.getOnesignalId().then((value){
         APIService().getUserData(value!);
       });

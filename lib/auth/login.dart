@@ -62,7 +62,7 @@ class _LogInState extends State<LogIn> {
     sharedPreferences.setString('phone', userModel.phone.toString());
     sharedPreferences.setString('status', userModel.status.toString());
     sharedPreferences.setString('token', token);
-    sharedPreferences.setString('password', _passwordController.text.trim().toString());
+    sharedPreferences.setString('password', userModel.password.toString());
     sharedPreferences.setString('country', userModel.country.toString());
     currentUser = UserModel(
       uid: userModel.uid.toString(),
@@ -72,7 +72,7 @@ class _LogInState extends State<LogIn> {
       email: userModel.email.toString(),
       phone: userModel.phone.toString(),
       image: userModel.image.toString(),
-      password: _passwordController.text.trim().toString(),
+      password: userModel.password.toString(),
       status: userModel.status,
       token:  token,
       country: userModel.country
@@ -100,7 +100,6 @@ class _LogInState extends State<LogIn> {
     } else {
       response = await Services.loginUserWithEmail(email);
     }
-    print(response);
     if(response.contains('Success')){
       _getUser();
     }
@@ -159,7 +158,11 @@ class _LogInState extends State<LogIn> {
     // TODO: implement initState
     super.initState();
     if(deviceModel.id==null){
-      SocketManager().initPlatform();
+      SocketManager().initPlatform().then((value){
+        setState(() {
+
+        });
+      });
     }
   }
 

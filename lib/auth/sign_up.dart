@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:Zelli/auth/password.dart';
 import 'package:Zelli/auth/verify_email.dart';
 import 'package:Zelli/models/users.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -51,7 +53,7 @@ class _SignUpState extends State<SignUp> {
   DateTime now = DateTime.now();
   bool obsecureConfirm = true;
   var pickedImage;
-  Country _country = CountryParser.parseCountryCode('US');
+  Country _country = CountryParser.parseCountryCode(deviceModel.country == null? 'US' : deviceModel.country.toString());
 
 
   Future choiceImage() async {
@@ -136,7 +138,7 @@ class _SignUpState extends State<SignUp> {
       lastname: _secondName.text.trim().toString(),
       email: _emailController.text.trim().toString(),
       phone: "+"+ _country.phoneCode+_phoneController.text.trim().toString(),
-      password: _passwordController.text.trim().toString(),
+      password:  md5.convert(utf8.encode(_passwordController.text.trim().toString())).toString(),
       image: _image!=null?_image!.path:imageUrl,
       status: "",
       token: "",

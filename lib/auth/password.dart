@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:Zelli/api/google_signin_api.dart';
@@ -5,6 +6,7 @@ import 'package:Zelli/models/users.dart';
 import 'package:Zelli/widgets/dialogs/dialog_title.dart';
 import 'package:Zelli/widgets/profile_images/user_profile.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +35,7 @@ class PasswordScreen extends StatefulWidget {
 class _PasswordScreenState extends State<PasswordScreen> {
   TextEditingController _newpass = TextEditingController();
   TextEditingController _repass = TextEditingController();
-  Country _country = CountryParser.parseCountryCode('US');
+  Country _country = CountryParser.parseCountryCode(deviceModel.country == null? 'US' : deviceModel.country.toString());
   final formKey = GlobalKey<FormState>();
   bool _loading = false;
 
@@ -92,7 +94,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
         sharedPreferences.setString('image', user.image.toString());
         sharedPreferences.setString('phone', user.phone.toString());
         sharedPreferences.setString('token', user.token.toString());
-        sharedPreferences.setString('password', _repass.text.toString());
+        sharedPreferences.setString('password',  md5.convert(utf8.encode(_repass.text.trim().toString())).toString());
         sharedPreferences.setString('country', user.country.toString());
         currentUser = UserModel(
           uid: user.uid.toString(),
