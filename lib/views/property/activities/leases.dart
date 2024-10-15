@@ -8,7 +8,6 @@ import 'package:Zelli/utils/colors.dart';
 import 'package:Zelli/widgets/profile_images/user_profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
@@ -385,7 +384,12 @@ class _LeasesState extends State<Leases> {
                                                   )
                                               );
                                             } else {
-                                              _callNumber(user.phone.toString());
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                      content: Text("Feature not available."),
+                                                      showCloseIcon: true,
+                                                  )
+                                              );
                                             }
                                           },
                                           icon: Icon(
@@ -580,8 +584,5 @@ class _LeasesState extends State<Leases> {
     setState(() {
 
     });
-  }
-  _callNumber(String number) async{
-    await FlutterPhoneDirectCaller.callNumber(number);
   }
 }

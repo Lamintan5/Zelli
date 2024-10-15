@@ -7,8 +7,6 @@ import 'package:Zelli/widgets/logo/prop_logo.dart';
 import 'package:Zelli/widgets/profile_images/user_profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
@@ -409,7 +407,12 @@ class _ItemTntRqState extends State<ItemTntRq> {
                                         )
                                     );
                                   } else {
-                                    _callNumber(sender.phone.toString());
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Feature not available."),
+                                          showCloseIcon: true,
+                                        )
+                                    );
                                   }
                                 },
                               ),
@@ -539,7 +542,4 @@ class _ItemTntRqState extends State<ItemTntRq> {
 
   _updateCount(){}
   _changeMess(MessModel messModel){}
-  _callNumber(String number) async{
-    await FlutterPhoneDirectCaller.callNumber(number);
-  }
 }

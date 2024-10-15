@@ -12,7 +12,6 @@ import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
@@ -724,7 +723,12 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                         )
                                     );
                                   }
-                                  FlutterPhoneDirectCaller.callNumber(currentTenant.phone!);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Feature not available."),
+                                        showCloseIcon: true,
+                                      )
+                                  );
                                 }
                             )
                                 :  SizedBox(),
@@ -1151,7 +1155,12 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                                   )
                                                               );
                                                             } else {
-                                                              _callNumber(user.phone.toString());
+                                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text("Feature not available."),
+                                                                    showCloseIcon: true,
+                                                                  )
+                                                              );
                                                             }
                                                           },
                                                           icon: Icon(
@@ -2312,9 +2321,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   void _updateCount(){}
   void _changeMess(MessModel messModel){}
 
-  _callNumber(String number) async{
-    await FlutterPhoneDirectCaller.callNumber(number);
-  }
 }
 
 class buildButton extends StatelessWidget {

@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
@@ -562,7 +561,12 @@ class _ItemReqCoTntState extends State<ItemReqCoTnt> {
                                         )
                                     );
                                   } else {
-                                    _callNumber(user.phone.toString());
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Feature not available."),
+                                          showCloseIcon: true,
+                                        )
+                                    );
                                   }
                                 },
                               ),
@@ -703,7 +707,4 @@ class _ItemReqCoTntState extends State<ItemReqCoTnt> {
 
   void _updateCount(){}
   void _changeMess(MessModel mess){}
-  _callNumber(String number) async{
-    await FlutterPhoneDirectCaller.callNumber(number);
-  }
 }

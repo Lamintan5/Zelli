@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:Zelli/widgets/items/item_pay.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
@@ -392,7 +391,7 @@ class _TestUnitState extends State<TestUnit> with TickerProviderStateMixin {
                                   forecolor: normal,
                                   icon: Icon(CupertinoIcons.phone, color: normal,size: 20),
                                   onTap: (){
-                                    FlutterPhoneDirectCaller.callNumber(crrntTenant.phone!);
+
                                   }
                               )
                                   :  SizedBox(),

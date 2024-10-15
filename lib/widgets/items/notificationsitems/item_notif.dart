@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:get/get.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:uuid/uuid.dart';
@@ -502,7 +501,12 @@ class _ItemNotifState extends State<ItemNotif> {
                                             )
                                         );
                                       } else {
-                                        _callNumber(user.phone.toString());
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Feature not available."),
+                                              showCloseIcon: true,
+                                            )
+                                        );
                                       }
                                     },
                                   ),
@@ -613,8 +617,5 @@ class _ItemNotifState extends State<ItemNotif> {
         _loading = false;
       });
     });
-  }
-  _callNumber(String number) async{
-    await FlutterPhoneDirectCaller.callNumber(number);
   }
 }
