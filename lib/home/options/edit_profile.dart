@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:Zelli/main.dart';
 import 'package:Zelli/widgets/buttons/call_actions/double_call_action.dart';
 import 'package:Zelli/widgets/profile_images/current_profile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -356,7 +358,7 @@ class _EditProfileState extends State<EditProfile> {
                         labelText: "Password",
                         isPass: true,
                         validator: (value){
-                          if(value!=currentUser.password){
+                          if(md5.convert(utf8.encode(value!)).toString()!= currentUser.password){
                             return "Please enter the correct password";
                           }
                         },

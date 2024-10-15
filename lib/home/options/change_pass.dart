@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:Zelli/main.dart';
 import 'package:Zelli/resources/services.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -133,7 +135,7 @@ class _ChangePassState extends State<ChangePass> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter current password.';
                             }
-                            if (value != currentUser.password) {
+                            if (md5.convert(utf8.encode(value)).toString()!= currentUser.password) {
                               return 'Please enter the correct password.';
                             }
                           },

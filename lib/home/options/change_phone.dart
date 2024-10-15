@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:Zelli/main.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/colors.dart';
@@ -100,7 +103,7 @@ class _ChangePhoneState extends State<ChangePhone> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a password.';
                               }
-                              if (value != currentUser.password) {
+                              if (md5.convert(utf8.encode(value!)).toString()!= currentUser.password) {
                                 return 'Please Enter the correct password';
                               }
                               return null;
