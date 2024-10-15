@@ -131,7 +131,7 @@ class _TenantsState extends State<Tenants> {
                       itemCount: filteredList.length,
                       itemBuilder: (context,index){
                         UserModel user = filteredList[index];
-                        return ItemTenant(user: user, entity : EntityModel(eid: ""));
+                        return ItemTenant(user: user, entity : widget.entity);
                       }),
                 ),
               ),

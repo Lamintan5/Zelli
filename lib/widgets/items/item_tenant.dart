@@ -49,9 +49,11 @@ class _ItemTenantState extends State<ItemTenant> {
 
   _getData(){
     admin = widget.entity.admin.toString().split(",");
-    _units = widget.entity.eid == ""
-        ?  myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) => unt.tid.toString().contains(widget.user.uid)).toList()
-        : myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((unt) => unt.tid.toString().contains(widget.user.uid) && unt.eid == widget.entity.eid).toList();
+    _units = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((test){
+      bool matchesEid = widget.entity.eid.toString().isEmpty || test.eid.toString() == widget.entity.eid.toString();
+      bool matchesTid = test.tid.toString().contains(widget.user.uid);
+      return matchesEid && matchesTid;
+    }).toList();
     _pay = widget.entity.eid == ""
         ? myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((pay) => pay.type!.split(",").first != "EXP" && pay.tid.toString().contains(widget.user.uid.toString())).toList()
         : myPayment.map((jsonString) => PaymentsModel.fromJson(json.decode(jsonString))).where((pay) =>
@@ -178,108 +180,108 @@ class _ItemTenantState extends State<ItemTenant> {
           widget.user.uid==currentUser.uid
               ?  SizedBox()
               : AnimatedSize(
-            duration: Duration(milliseconds: 500),
-            alignment: Alignment.topCenter,
-            curve: Curves.easeInOut,
-            child: _expanded
-                ? Column(
-              children: [
-                SizedBox(height: 5,),
-                IntrinsicHeight(
-                  child: Row(
+                  duration: Duration(milliseconds: 500),
+                  alignment: Alignment.topCenter,
+                  curve: Curves.easeInOut,
+                  child: _expanded
+                      ? Column(
                     children: [
-                      BottomCallButtons(
-                          onTap: () {
-                            Get.to(()=>Payments(entity: widget.entity, unit: UnitModel(id: "" ), tid: widget.user.uid, lid: '', from: 'item',),transition: Transition.rightToLeft);
-                          },
-                          icon: LineIcon.wallet(color: secondaryColor,),
-                          actionColor: secondaryColor,
-                          backColor: Colors.transparent,
-                          title: "Payments"),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: VerticalDivider(
-                          thickness: 1,
-                          width: 15,
-                          color: secondaryColor,
+                      SizedBox(height: 5,),
+                      IntrinsicHeight(
+                        child: Row(
+                          children: [
+                            BottomCallButtons(
+                                onTap: () {
+                                  Get.to(()=>Payments(entity: widget.entity, unit: UnitModel(id: "" ), tid: widget.user.uid, lid: '', from: 'item',),transition: Transition.rightToLeft);
+                                },
+                                icon: LineIcon.wallet(color: secondaryColor,),
+                                actionColor: secondaryColor,
+                                backColor: Colors.transparent,
+                                title: "Payments"),
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: VerticalDivider(
+                                thickness: 1,
+                                width: 15,
+                                color: secondaryColor,
+                              ),
+                            ),
+                            BottomCallButtons(
+                                onTap: () {
+                                  _units.length == 1
+                                      ? Get.to(()=> ShowCaseWidget(
+                                        builder: (context) => UnitProfile(unit: _units.first,  reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: widget.entity,),
+                                      ), transition: Transition.rightToLeft)
+                                      : dialogChooseUnit(context, _units);
+                                },
+                                icon: Icon(units==1?Icons.crop_square:CupertinoIcons.square_grid_2x2, color: secondaryColor),
+                                actionColor: secondaryColor,
+                                backColor: Colors.transparent,
+                                title: units==1? "Unit" : "Units"
+                            ),
+                            Platform.isAndroid || Platform.isIOS? Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: VerticalDivider(
+                                thickness: 1,
+                                width: 15,
+                                color: secondaryColor,
+                              ),
+                            ) : SizedBox(),
+                            Platform.isAndroid || Platform.isIOS? BottomCallButtons(
+                                onTap: () {
+                                  if(widget.user.phone.toString()==""){
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(Data().noPhone),
+                                          width: 500,
+                                          showCloseIcon: true,
+                                        )
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("Feature not available."),
+                                          showCloseIcon: true,
+                                        )
+                                    );
+                                  }
+                                },
+                                icon: Icon(
+                                  CupertinoIcons.phone,
+                                  color: secondaryColor,
+                                ),
+                                actionColor: secondaryColor,
+                                backColor: Colors.transparent,
+                                title: "Call") : SizedBox(),
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 10),
+                              child: VerticalDivider(
+                                thickness: 1,
+                                width: 15,
+                                color: secondaryColor,
+                              ),
+                            ),
+                            BottomCallButtons(
+                                onTap: () {
+                                  Platform.isAndroid || Platform.isIOS
+                                      ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: widget.user), transition: Transition.rightToLeft)
+                                      : Get.to(() => WebChat(selected: widget.user), transition: Transition.rightToLeft);
+                                },
+                                icon: Icon(
+                                  CupertinoIcons.ellipses_bubble,
+                                  color: secondaryColor,
+                                ),
+                                actionColor: secondaryColor,
+                                backColor: Colors.transparent,
+                                title: "Message"
+                            ),
+                          ],
                         ),
-                      ),
-                      BottomCallButtons(
-                          onTap: () {
-                            _units.length == 1
-                                ? Get.to(()=> ShowCaseWidget(
-                                  builder: (context) => UnitProfile(unit: _units.first,  reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: widget.entity,),
-                                ), transition: Transition.rightToLeft)
-                                : dialogChooseUnit(context, _units);
-                          },
-                          icon: Icon(units==1?Icons.crop_square:CupertinoIcons.square_grid_2x2, color: secondaryColor),
-                          actionColor: secondaryColor,
-                          backColor: Colors.transparent,
-                          title: units==1? "Unit" : "Units"
-                      ),
-                      Platform.isAndroid || Platform.isIOS? Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: VerticalDivider(
-                          thickness: 1,
-                          width: 15,
-                          color: secondaryColor,
-                        ),
-                      ) : SizedBox(),
-                      Platform.isAndroid || Platform.isIOS? BottomCallButtons(
-                          onTap: () {
-                            if(widget.user.phone.toString()==""){
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(Data().noPhone),
-                                    width: 500,
-                                    showCloseIcon: true,
-                                  )
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Feature not available."),
-                                    showCloseIcon: true,
-                                  )
-                              );
-                            }
-                          },
-                          icon: Icon(
-                            CupertinoIcons.phone,
-                            color: secondaryColor,
-                          ),
-                          actionColor: secondaryColor,
-                          backColor: Colors.transparent,
-                          title: "Call") : SizedBox(),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        child: VerticalDivider(
-                          thickness: 1,
-                          width: 15,
-                          color: secondaryColor,
-                        ),
-                      ),
-                      BottomCallButtons(
-                          onTap: () {
-                            Platform.isAndroid || Platform.isIOS
-                                ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: widget.user), transition: Transition.rightToLeft)
-                                : Get.to(() => WebChat(selected: widget.user), transition: Transition.rightToLeft);
-                          },
-                          icon: Icon(
-                            CupertinoIcons.ellipses_bubble,
-                            color: secondaryColor,
-                          ),
-                          actionColor: secondaryColor,
-                          backColor: Colors.transparent,
-                          title: "Message"
                       ),
                     ],
-                  ),
-                ),
-              ],
-            )
-                : SizedBox(),
-          )
+                  )
+                      : SizedBox(),
+                )
         ],
       ),
     );
