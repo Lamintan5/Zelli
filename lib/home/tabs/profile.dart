@@ -164,7 +164,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(30),
                               padding: EdgeInsets.all(5)
                           ),
-                          badgeContent: Text(NumberFormat.compact().format(countNotif), style: TextStyle(fontSize: 10),),
+                          badgeContent: Text(NumberFormat.compact().format(countNotif), style: TextStyle(fontSize: 10, color: Colors.black),),
                           showBadge:countNotif ==0?false:true,
                           position: badges.BadgePosition.topEnd(end: -5, top: -4),
                           child: LineIcon.bell(),
@@ -185,7 +185,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                               borderRadius: BorderRadius.circular(30),
                               padding: EdgeInsets.all(5)
                           ),
-                          badgeContent: Text(NumberFormat.compact().format(countMess), style: TextStyle(fontSize: 10),),
+                          badgeContent: Text(NumberFormat.compact().format(countMess), style: TextStyle(fontSize: 10, color: Colors.black),),
                           showBadge:countMess==0?false:true,
                           position: badges.BadgePosition.topEnd(end: -5, top: -4),
                           child: Icon(CupertinoIcons.ellipses_bubble),

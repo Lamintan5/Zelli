@@ -251,7 +251,7 @@ class _WebHomeState extends State<WebHome> {
                                         borderRadius: BorderRadius.circular(30),
                                         padding: EdgeInsets.all(5)
                                     ),
-                                    badgeContent: Text(NumberFormat.compact().format(countMess), style: TextStyle(fontSize: 10),),
+                                    badgeContent: Text(NumberFormat.compact().format(countMess), style: TextStyle(fontSize: 10, color: Colors.black),),
                                     showBadge: countMess==0?false:true,
                                     position: badges.BadgePosition.topEnd(end: -5, top: -4),
                                   );
@@ -290,7 +290,7 @@ class _WebHomeState extends State<WebHome> {
                                         borderRadius: BorderRadius.circular(30),
                                         padding: EdgeInsets.all(5)
                                     ),
-                                    badgeContent: Text(NumberFormat.compact().format(countNotif), style: TextStyle(fontSize: 10),),
+                                    badgeContent: Text(NumberFormat.compact().format(countNotif), style: TextStyle(fontSize: 10, color: Colors.black),),
                                     showBadge: countNotif==0?false:true,
                                     position: badges.BadgePosition.topEnd(end: -5, top: -4),
                                     child: LineIcon.bell(),
