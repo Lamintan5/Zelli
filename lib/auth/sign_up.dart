@@ -141,7 +141,7 @@ class _SignUpState extends State<SignUp> {
       password:  md5.convert(utf8.encode(_passwordController.text.trim().toString())).toString(),
       image: _image!=null?_image!.path:imageUrl,
       status: "",
-      token: "",
+      token: deviceModel.token.toString(),
       time: DateTime.now().toString(),
       country: _country.countryCode,
     );

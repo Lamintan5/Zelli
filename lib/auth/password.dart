@@ -55,7 +55,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
         _repass.text.toString(),
         user.image =="" || user.image!.contains("https://")? null : File(user.image!),
         user.image.toString(),
-        "",user.token!,user.country.toString()).then((response) async{
+        "",deviceModel.id.toString(),deviceModel.country.toString()).then((response) async{
       final String responseString = await response.stream.bytesToString();
         print(responseString);
       if (responseString.contains('Exists')) {
@@ -93,9 +93,9 @@ class _PasswordScreenState extends State<PasswordScreen> {
         sharedPreferences.setString('email', user.email.toString());
         sharedPreferences.setString('image', user.image.toString());
         sharedPreferences.setString('phone', user.phone.toString());
-        sharedPreferences.setString('token', user.token.toString());
+        sharedPreferences.setString('token', deviceModel.id.toString());
         sharedPreferences.setString('password',  md5.convert(utf8.encode(_repass.text.trim().toString())).toString());
-        sharedPreferences.setString('country', user.country.toString());
+        sharedPreferences.setString('country', deviceModel.country.toString());
         currentUser = UserModel(
           uid: user.uid.toString(),
           firstname: user.firstname,
@@ -104,10 +104,10 @@ class _PasswordScreenState extends State<PasswordScreen> {
           email: user.email.toString(),
           phone: user.phone.toString(),
           image: user.image.toString(),
-          token: user.token.toString(),
+          token: deviceModel.id.toString(),
           password: _repass.text,
           status: user.status,
-          country: user.country
+          country: deviceModel.country.toString()
         );
         if(Platform.isAndroid || Platform.isIOS){
           Get.offAll(()=>HomeScreen(), transition: Transition.fadeIn);
@@ -304,11 +304,11 @@ class _PasswordScreenState extends State<PasswordScreen> {
                                     style: bold
                                   ),
                                   TextSpan(
-                                    text: "billing set to",
+                                    text: "billing set to ",
                                     style: style
                                   ),
                                   TextSpan(
-                                    text: _country.countryCode,
+                                    text: deviceModel.country.toString(),
                                   )
                                 ]
                               ),

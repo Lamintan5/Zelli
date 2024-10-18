@@ -31,7 +31,7 @@ class LogIn extends StatefulWidget {
 class _LogInState extends State<LogIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  List<UserModel> user = [];
+  List<UserModel> _user = [];
   late UserModel userModel;
   List<UserModel> fltUsrs = [];
   bool obsecure = true;
@@ -42,6 +42,7 @@ class _LogInState extends State<LogIn> {
   String email = '';
 
   String token = '';
+  List<String> tokens = [];
 
 
   _getUser()async{
@@ -50,8 +51,15 @@ class _LogInState extends State<LogIn> {
     setState(() {
       _isLoading = true;
     });
-    user = await Services().getUser(email==""?_emailController.text.trim().toString():email);
-    userModel = user.first;
+    _user = await Services().getUser(email==""?_emailController.text.trim().toString():email);
+    userModel = _user.first;
+    token = Platform.isAndroid || Platform.isIOS ? deviceModel.id! : "";
+    tokens = userModel.token.toString().split(",");
+    tokens.add(token);
+    tokens.remove("");
+    await Services.updateToken(userModel.uid, tokens.join(",")).then((value){
+      print("Token : $token, ${value}");
+    });
     await Services.updateToken(userModel.uid, token);
     sharedPreferences.setString('uid', userModel.uid.toString());
     sharedPreferences.setString('username', userModel.username.toString());
@@ -90,7 +98,7 @@ class _LogInState extends State<LogIn> {
         : WebHome(), transition: Transition.fadeIn);      _isLoading = false;
   }
   _loginUser()async{
-    print(email);
+
     setState(() {
       _isLoading = true;
     });
@@ -100,6 +108,7 @@ class _LogInState extends State<LogIn> {
     } else {
       response = await Services.loginUserWithEmail(email);
     }
+    print("Response $response");
     if(response.contains('Success')){
       _getUser();
     }

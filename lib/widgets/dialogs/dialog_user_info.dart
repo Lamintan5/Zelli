@@ -33,7 +33,7 @@ class _DialogUserInfoState extends State<DialogUserInfo> {
   final TextEditingController _secondName = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  Country _country = CountryParser.parseCountryCode('US');
+  Country _country = CountryParser.parseCountryCode(deviceModel.country == null? 'US' : deviceModel.country.toString());
   File? _image;
 
   UserModel userModel = UserModel(uid: "");
@@ -359,9 +359,7 @@ class _DialogUserInfoState extends State<DialogUserInfo> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                DialogTitle(title: "C H O O S E  A V A T A R"),
-                SizedBox(height: 5,),
-                Text('${avatars.length.toString()} avatars'),
+                DialogTitle(title: "A V A T A R"),
                 SizedBox(height: 5,),
                 Expanded(
                   child: GridView.builder(

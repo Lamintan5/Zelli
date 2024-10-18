@@ -37,7 +37,6 @@ class _VerifyEmailState extends State<VerifyEmail> {
   bool _loading = false;
   String _hashCode = "";
   late UserModel user;
-  String token = '';
   int targetTimestamp = 0;
 
   _resend() {
@@ -121,7 +120,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
         user.password!,
         user.image =="" || user.image.toString().contains("https://")? null :  File(user.image!),
         user.image.toString(),
-        "",token,user.country.toString()).then((response) async{
+        "",deviceModel.id.toString(),user.country.toString()).then((response) async{
           print(response);
       final String responseString = await response.stream.bytesToString();
 
@@ -159,7 +158,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
         sharedPreferences.setString('email', user.email.toString());
         sharedPreferences.setString('image', user.image.toString());
         sharedPreferences.setString('phone', user.phone.toString());
-        sharedPreferences.setString('token', token);
+        sharedPreferences.setString('token', deviceModel.id.toString());
         sharedPreferences.setString('password', md5.convert(utf8.encode(user.password.toString())).toString());
         sharedPreferences.setString('country', user.country.toString());
         currentUser = UserModel(
@@ -170,7 +169,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
           email: user.email.toString(),
           phone: user.phone.toString(),
           image: user.image.toString(),
-          token: token,
+          token: deviceModel.id.toString(),
           password: user.password,
           status: user.status,
           country: user.country,
@@ -205,7 +204,6 @@ class _VerifyEmailState extends State<VerifyEmail> {
       }
     });
   }
-
 
   @override
   void initState() {
