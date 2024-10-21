@@ -231,7 +231,8 @@ class _DialogTerminateState extends State<DialogTerminate> {
                 ]
             )
         ),
-        InkWell(
+        widget.tenant.uid == currentUser.uid
+            ? InkWell(
           onTap: _showDatePicker,
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
@@ -256,7 +257,8 @@ class _DialogTerminateState extends State<DialogTerminate> {
               ],
             ),
           ),
-        ),
+        )
+            : SizedBox(),
         Divider(
           thickness: 0.1,
           color: reverse,
