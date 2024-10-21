@@ -119,9 +119,7 @@ class _ReviewsState extends State<Reviews> {
                               fontSize: 60,
                             ),
                           ),
-                          SizedBox(
-                            height: 10,
-                          ),
+                          SizedBox(height: 10,),
                           RatingBar.builder(
                               initialRating: average,
                               minRating: 1,
@@ -163,9 +161,7 @@ class _ReviewsState extends State<Reviews> {
                                   ]
                               )
                           ),
-                          SizedBox(
-                            height: 20,
-                          ),
+                          SizedBox(height: 20,),
                           Container(
                             width: 450,
                             child: Column(
@@ -199,13 +195,13 @@ class _ReviewsState extends State<Reviews> {
           child: _loading
               ? SizedBox()
               : ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: _review.length,
-              itemBuilder: (context, index) {
-                ReviewModel review = _review[index];
-                return ItemReview(review: review);
-              }),
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _review.length,
+                itemBuilder: (context, index) {
+                  ReviewModel review = _review[index];
+                  return ItemReview(review: review);
+                }),
         )),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
@@ -214,7 +210,6 @@ class _ReviewsState extends State<Reviews> {
         autofocus: true,
         tooltip: "Write your Review",
         child: Icon(Icons.add),
-
       ),
     );
   }
