@@ -145,42 +145,40 @@ class _DropStarState extends State<DropStar> {
               ):SizedBox()
             ],
           ),
-          widget.entity.pid!.contains(currentUser.uid)
-              ?RichText(
-            textAlign: TextAlign.center,
+          RichText(
+              textAlign: TextAlign.center,
               text: TextSpan(
-              children: [
-                TextSpan(
-                 text: '${average.toStringAsFixed(1)} ',
-                  style: bold
-                ),
-                TextSpan(
-                    text: 'ratings out of ',
-                    style: style
-                ),
-                TextSpan(
-                    text: '${totalRate.toString()} ',
-                    style: bold
-                ),
-                TextSpan(
-                    text: 'Ratings',
-                    style: style
-                ),
-                WidgetSpan(
-                    child: InkWell(
-                      onTap: (){
-                        isOpened ? hideOverlay() : showOverlay();
-                      },
-                      borderRadius: BorderRadius.circular(5),
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                      ),
+                  children: [
+                    TextSpan(
+                        text: '${average.toStringAsFixed(1)} ',
+                        style: bold
+                    ),
+                    TextSpan(
+                        text: 'ratings out of ',
+                        style: style
+                    ),
+                    TextSpan(
+                        text: '${totalRate.toString()} ',
+                        style: bold
+                    ),
+                    TextSpan(
+                        text: 'Ratings',
+                        style: style
+                    ),
+                    WidgetSpan(
+                        child: InkWell(
+                          onTap: (){
+                            isOpened ? hideOverlay() : showOverlay();
+                          },
+                          borderRadius: BorderRadius.circular(5),
+                          child: Icon(
+                            Icons.keyboard_arrow_down,
+                          ),
+                        )
                     )
-                )
-              ]
-            )
+                  ]
+              )
           )
-              :SizedBox()
         ],
       ),
     );
@@ -351,7 +349,7 @@ class _DropStarState extends State<DropStar> {
             ),
           ),
           SizedBox(width: 40,
-              child: Text(percent.isNaN? '0.0' : '${percent.toStringAsFixed(0)}%')),
+              child: Text(percent.isNaN? '0.0' : '${(percent*100).toStringAsFixed(0)}%')),
         ],
       ),
     );

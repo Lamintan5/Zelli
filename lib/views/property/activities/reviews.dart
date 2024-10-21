@@ -7,6 +7,7 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 
 import '../../../create/create_review.dart';
 import '../../../models/reviews.dart';
+import '../../../models/stars.dart';
 import '../../../resources/services.dart';
 import '../../../utils/colors.dart';
 import '../../../widgets/items/item_review.dart';
@@ -21,6 +22,7 @@ class Reviews extends StatefulWidget {
 
 class _ReviewsState extends State<Reviews> {
   List<ReviewModel> _review = [];
+  List<StarModel> crrntStars = [];
   List<double> _stars = [];
   bool _loading = false;
 
@@ -43,7 +45,8 @@ class _ReviewsState extends State<Reviews> {
       _loading = true;
     });
     _review = await Services().getCrntReview(widget.entity.eid.toString());
-    _stars = _review.map((e) => double.parse(e.star.toString())).toList();
+    crrntStars = await Services().getCrrntStars(widget.entity.eid);
+    _stars = crrntStars.map((e) => double.parse(e.rate.toString())).toList();
     fivestars = _stars.where((element) => element > 4.1).toList();
     fourstars = _stars.where((element) => element > 3.0 && element <4.1).toList();
     threestars = _stars.where((element) => element > 2.0 && element <3.1).toList();
@@ -86,6 +89,8 @@ class _ReviewsState extends State<Reviews> {
     final normal = Theme.of(context).brightness == Brightness.dark
         ? Colors.black
         : Colors.white;
+    final style = TextStyle(color: secondaryColor);
+    final bold = TextStyle( fontWeight: FontWeight.w600);
     return Scaffold(
       body: NestedScrollView(
           floatHeaderSlivers: true,
@@ -134,11 +139,29 @@ class _ReviewsState extends State<Reviews> {
                               onRatingUpdate: (rating) {
                                 //rate(rating.toString()).then((value) => getStars());
                               }),
-                          Text(
-                            "based on ${_stars.length} reviews",
-                            style: TextStyle(
-                              fontSize: 18,
-                            ),
+                          RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                        text: '${average.toStringAsFixed(1)} ',
+                                        style: bold
+                                    ),
+                                    TextSpan(
+                                        text: 'ratings out of ',
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: '${_stars.length.toString()} ',
+                                        style: bold
+                                    ),
+                                    TextSpan(
+                                        text: 'Ratings',
+                                        style: style
+                                    ),
+
+                                  ]
+                              )
                           ),
                           SizedBox(
                             height: 20,
