@@ -7,8 +7,9 @@ class StarModel {
   String? rate;
   String? type;
   String? time;
+  String? checked;
 
-  StarModel({required this.sid, this.pid, this.rid, this.eid,this.uid, this.rate, this.type, this.time});
+  StarModel({required this.sid, this.pid, this.rid, this.eid,this.uid, this.rate, this.type, this.time, this.checked});
 
 
   factory StarModel.fromJson(Map<String, dynamic> json) {
@@ -21,10 +22,11 @@ class StarModel {
       rate: json['rate'] as String,
       type: json['type'] as String,
       time: json['time'] as String,
+      checked: json['checked'] as String,
     );
   }
 
-  Map<String, dynamic> toJsonAdd() {
+  Map<String, dynamic> toJson() {
     return {
       "sid" : sid,
       "pid" : pid,
@@ -33,6 +35,7 @@ class StarModel {
       "uid" : uid,
       "rate" : rate,
       "type" : type,
+      "checked":checked,
       "time":time,
     };
   }

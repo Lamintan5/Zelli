@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 import '../../create/create_property.dart';
 import '../../main.dart';
@@ -49,6 +50,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
   final socketManager = Get.find<SocketManager>();
 
   bool isFilled = false;
+  bool isExpnd = false;
 
   int countNotif = 0;
   int countMess = 0;
@@ -84,6 +86,11 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
     _search = TextEditingController();
     _tabController = TabController(length: 2, vsync: this);
     _getDetails();
+    Future.delayed(Duration(seconds: 1)).then((value){
+      setState(() {
+        isExpnd = true;
+      });
+    });
   }
 
   @override
@@ -133,7 +140,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                 expandedHeight: 320,
                 automaticallyImplyLeading: false,
                 foregroundColor: reverse,
-                toolbarHeight: 30,
+                toolbarHeight: 35,
                 actions: [
                   SizedBox(width: 5,),
                   Image.asset(
@@ -143,14 +150,13 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                   SizedBox(width: 5,),
                   Text('Z E L L I', style: TextStyle(fontWeight: FontWeight.w100, fontSize: 18),),
                   Expanded(child: SizedBox()),
-                  SizedBox(width: 10,),
                   IconButton(
-                      onPressed: (){
-                        Get.to(()=>Explore(from: "home",),transition: Transition.rightToLeft);
-                      },
-                      icon: Icon(CupertinoIcons.compass)
+                    onPressed: (){
+                      Get.to(()=>Explore(from: "home",),transition: Transition.rightToLeft);
+                    },
+                    icon: Icon(CupertinoIcons.compass),
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(width: 5,),
                   IconButton(
                       onPressed: (){
                         Get.to(()=>Notifications(reload: _getData, updateCount: _updateCount, eid: '',), transition: Transition.rightToLeft);
@@ -171,7 +177,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                         );
                       })
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(width: 5,),
                   IconButton(
                       onPressed: (){
                         Get.to(() => ChatScreen(updateCount: _updateCount,), transition: Transition.rightToLeft);
@@ -192,7 +198,7 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                         );
                       })
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(width: 5,),
                   IconButton(
                       onPressed: (){
                         Get.to(() => Options(reload: (){setState(() {});},), transition: Transition.rightToLeft);

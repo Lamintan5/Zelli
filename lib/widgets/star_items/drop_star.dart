@@ -88,7 +88,7 @@ class _DropStarState extends State<DropStar> {
     // TODO: implement initState
     super.initState();
     _getCurrentStar();
-    getStars();
+    getData();
     starList = [];
   }
 
@@ -203,42 +203,53 @@ class _DropStarState extends State<DropStar> {
         rate: rate.toString(),
         type: "ENTITY"
     );
-    // Services.addEntityStar(star).then((response){
-    //   print(response);
-    //   if(response=="Exists"){
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //             backgroundColor: dgcolor,
-    //             content: Text("Rating already exists", style: TextStyle(color: reverse),)
-    //         )
-    //     );
-    //   } else if(response=="Success"){
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //             backgroundColor: dgcolor,
-    //             content: Text("Successfully rated ${rate} stars.", style: TextStyle(color: reverse),)
-    //         )
-    //     );
-    //   }else if(response=="Failed"){
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           backgroundColor: dgcolor,
-    //           content: Text("Rating failed. Please try again", style: TextStyle(color: reverse),),
-    //
-    //         )
-    //     );
-    //   }else {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           backgroundColor: dgcolor,
-    //           content: Text("mhmm 🤔 seems like something went wrong. Please try again", style: TextStyle(color: reverse),),
-    //         )
-    //     );
-    //   }
-    //   setState(() {
-    //     rating = false;
-    //   });
-    // });
+    Services.addStar(star).then((response)async{
+      print(response);
+      if(response=="Exists"){
+        setState(() {
+          rating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                backgroundColor: dgcolor,
+                content: Text("Rating already exists", style: TextStyle(color: reverse),)
+            )
+        );
+      } else if(response=="Success"){
+        setState(() {
+          rating = false;
+        });
+        await Data().addStar(star);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                backgroundColor: dgcolor,
+                content: Text("Successfully rated ${rate} stars.", style: TextStyle(color: reverse),)
+            )
+        );
+      }else if(response=="Failed"){
+        setState(() {
+          rating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: dgcolor,
+              content: Text("Rating failed. Please try again", style: TextStyle(color: reverse),),
+
+            )
+        );
+      }else {
+        setState(() {
+          rating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: dgcolor,
+              content: Text("mhmm 🤔 seems like something went wrong. Please try again", style: TextStyle(color: reverse),),
+            )
+        );
+      }
+
+    });
 
   }
   Widget buildOverlay() {

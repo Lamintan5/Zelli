@@ -9,6 +9,7 @@ import 'package:Zelli/models/entities.dart';
 import 'package:Zelli/models/notifications.dart';
 import 'package:Zelli/models/payments.dart';
 import 'package:Zelli/models/lease.dart';
+import 'package:Zelli/models/stars.dart';
 import 'package:Zelli/models/units.dart';
 import 'package:Zelli/models/users.dart';
 import 'package:Zelli/resources/services.dart';
@@ -31,6 +32,7 @@ class SocketManager extends GetxController  {
   List<NotifModel> _notification = [];
   List<LeaseModel> _lease = [];
   List<DutiesModel> _duties = [];
+  List<StarModel> _stars = [];
 
   List<EntityModel> _entity = [];
   List<EntityModel> _newEnt = [];
@@ -61,7 +63,7 @@ class SocketManager extends GetxController  {
     _pay = await Services().getMyPay(currentUser.uid);
     _lease = await Services().getMyLeases(currentUser.uid);
     _notification = await Services().getMyNotif(currentUser.uid);
-
+    _stars = await Services().getMyStars(currentUser.uid);
 
     // Loop through entities and process
     for (var enty in _entity) {
@@ -89,7 +91,6 @@ class SocketManager extends GetxController  {
         });
       }
     }
-
     for (var lease in _lease){
       if(!_user.any((e) => e.uid == lease.tid)){
         var users = await Services().getCrntUsr(lease.tid.toString());
@@ -113,8 +114,6 @@ class SocketManager extends GetxController  {
       }
     }
 
-
-
     // Update the data storage
     await Data().addOrUpdateEntity(_entity);
     await Data().addOrUpdateUnit(_unit);
@@ -123,6 +122,7 @@ class SocketManager extends GetxController  {
     await Data().addOrUpdateNotif(_notification);
     await Data().addOrUpdateLease(_lease);
     await Data().addOrUpdateDutyList(_duties);
+    await Data().addOrUpdateStarList(_stars);
     return false;
   }
 

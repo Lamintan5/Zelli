@@ -87,102 +87,103 @@ class _ReviewsState extends State<Reviews> {
         ? Colors.black
         : Colors.white;
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            surfaceTintColor: Colors.transparent,
-            backgroundColor: normal,
-            pinned: true,
-            expandedHeight: 400,
-            foregroundColor: reverse,
-            toolbarHeight: 30,
-            title: Text("Review"),
-            centerTitle: true,
-            actions: [IconButton(onPressed: () {}, icon: Icon(Icons.help))],
-            flexibleSpace: FlexibleSpaceBar(
-              background: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      average.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    RatingBar.builder(
-                        initialRating: average,
-                        minRating: 1,
-                        direction: Axis.horizontal,
-                        allowHalfRating: true,
-                        ignoreGestures: true,
-                        itemCount: 5,
-                        itemSize: 30.0,
-                        unratedColor: color2,
-                        itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
-                        itemBuilder: (context, _) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                        onRatingUpdate: (rating) {
-                          //rate(rating.toString()).then((value) => getStars());
-                        }),
-                    Text(
-                      "based on ${_stars.length} reviews",
-                      style: TextStyle(
-                        fontSize: 18,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                      width: 450,
+      body: NestedScrollView(
+          floatHeaderSlivers: true,
+          headerSliverBuilder: (context, innerBoxIsScroller) => [
+              SliverAppBar(
+                  surfaceTintColor: Colors.transparent,
+                  backgroundColor: normal,
+                  pinned: true,
+                  expandedHeight: 400,
+                  foregroundColor: reverse,
+                  toolbarHeight: 40,
+                  title: Text("Reviews"),
+                  centerTitle: true,
+                  actions: [IconButton(onPressed: () {}, icon: Icon(Icons.help))],
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Padding(
+                      padding: const EdgeInsets.all(8.0),
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          bar("Excellent", five/totalStars, Colors.green),
-                          bar("Good", four/totalStars, Colors.lightGreen),
-                          bar("Average", three/totalStars, Colors.yellow),
-                          bar("Below Average", two/totalStars, Colors.orange),
-                          bar("Poor", one/totalStars, Colors.red),
+                          Text(
+                            average.toStringAsFixed(1),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 60,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          RatingBar.builder(
+                              initialRating: average,
+                              minRating: 1,
+                              direction: Axis.horizontal,
+                              allowHalfRating: true,
+                              ignoreGestures: true,
+                              itemCount: 5,
+                              itemSize: 30.0,
+                              unratedColor: color2,
+                              itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
+                              itemBuilder: (context, _) => Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                              ),
+                              onRatingUpdate: (rating) {
+                                //rate(rating.toString()).then((value) => getStars());
+                              }),
+                          Text(
+                            "based on ${_stars.length} reviews",
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Container(
+                            width: 450,
+                            child: Column(
+                              children: [
+                                bar("Excellent", five/totalStars, Colors.green),
+                                bar("Good", four/totalStars, Colors.lightGreen),
+                                bar("Average", three/totalStars, Colors.yellow),
+                                bar("Below Average", two/totalStars, Colors.orange),
+                                bar("Poor", one/totalStars, Colors.red),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 30),
+                            child: _loading
+                                ? LinearProgressIndicator(color: CupertinoColors.activeBlue, minHeight: 3,backgroundColor: color2,)
+                                : Divider(
+                              thickness: 2,
+                              height: 1,
+                              color: color2,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 30),
-                      child: _loading
-                          ? LinearProgressIndicator(color: CupertinoColors.activeBlue, minHeight: 3,backgroundColor: color2,)
-                          : Divider(
-                        thickness: 2,
-                        height: 1,
-                        color: color2,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: _loading? SizedBox() : ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: _review.length,
-                    itemBuilder: (context, index) {
-                      ReviewModel review = _review[index];
-                      return ItemReview(review: review);
-                    }),
-              )),
-        ],
-      ),
+          ],
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: _loading
+              ? SizedBox()
+              : ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: _review.length,
+              itemBuilder: (context, index) {
+                ReviewModel review = _review[index];
+                return ItemReview(review: review);
+              }),
+        )),
       floatingActionButton: FloatingActionButton(
         onPressed: (){
           Get.to(() => CreateReview(entity: widget.entity,addReview: _addReview), transition: Transition.rightToLeft);

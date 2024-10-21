@@ -326,6 +326,39 @@ class Data{
     sharedPreferences.setStringList('mymess', uniqueMessages);
     myMess = uniqueMessages;
   }
+  Future<void> addOrUpdateStarList(List<StarModel> newDataList) async {
+    List<StarModel> _stars = [];
+    List<String> uniqueStars = [];
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    _stars = myStars.map((jsonString) => StarModel.fromJson(json.decode(jsonString))).toList();
+    // entities.removeWhere((ent) => ent.checked == "true" && !newDataList.any((newEnt) => newEnt.eid == ent.eid));
+    for (var newStar in newDataList) {
+      // Check if a user with the same uid exists in _user
+      int existingStarIndex = _stars.indexWhere((star) => star.sid == newStar.sid);
+      if (existingStarIndex != -1) {
+        // User with the same uid exists, compare other attributes
+        StarModel existingStar = _stars[existingStarIndex];
+        if (existingStar.toJson().toString() != newStar.toJson().toString()) {
+          // If any attribute is different, update the existing user with the new data
+          _stars[existingStarIndex] = newStar;
+        }
+      } else {
+        // User with the same uid doesn't exist, add the new user
+        _stars.add(newStar);
+      }
+    }
+    // Mark Entity as DELETED if they are not in newDataList
+    for (var existingStar in _stars) {
+      bool existsInNewDataList = newDataList.any((newEntity) => newEntity.eid == existingStar.eid);
+      if (!existsInNewDataList && existingStar.checked.toString().contains("true")) {
+        existingStar.checked = "REMOVED";
+      }
+    }
+
+    uniqueStars = _stars.map((model) => jsonEncode(model.toJson())).toList();
+    sharedPreferences.setStringList('mystars', uniqueStars);
+    myStars = uniqueStars;
+  }
 
   Future<void> addUser(UserModel user) async {
     List<UserModel> _users = [];
@@ -462,6 +495,29 @@ class Data{
     reload();
     return false;
   }
+  Future<void> addStar(StarModel star) async {
+    List<StarModel> _stars = [];
+    List<String> uniqueStars = [];
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    _stars = myStars.map((jsonString) => StarModel.fromJson(json.decode(jsonString))).toList();
+
+    bool exists = false;
+    for (int i = 0; i < _stars.length; i++) {
+      if (_stars[i].sid == star.eid) {
+        _stars[i] = star;
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      _stars.add(star);
+    }
+
+    uniqueStars = _stars.map((model) => jsonEncode(model.toJson())).toList();
+    sharedPreferences.setStringList('mystars', uniqueStars);
+    myStars = uniqueStars;
+  }
 
   Future<void> addOrUpdateUserList(List<UserModel> newDataList)async{
     List<String> uniqueUsers= [];
@@ -535,30 +591,6 @@ class Data{
     uniqueChats = _chat.map((model) => jsonEncode(model.toJsonAdd())).toList();
     sharedPreferences.setStringList('mychats', uniqueChats);
     myChats = uniqueChats;
-  }
-  Future<void> addOrUpdateStarList(List<StarModel> newStarList)async{
-    List<String> uniqueStars= [];
-    List<StarModel> _star = [];
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    _star = myStars.map((jsonString) => StarModel.fromJson(json.decode(jsonString))).toList();
-    for (var newStar in newStarList) {
-      // Check if a user with the same uid exists in _user
-      int existingUserIndex = _star.indexWhere((str) => str.sid == newStar.sid);
-      if (existingUserIndex != -1) {
-        // User with the same uid exists, compare other attributes
-        StarModel existingStar = _star[existingUserIndex];
-        if (existingStar.toJsonAdd().toString() != newStar.toJsonAdd().toString()) {
-          // If any attribute is different, update the existing user with the new data
-          _star[existingUserIndex] = newStar;
-        }
-      } else {
-        // User with the same uid doesn't exist, add the new user
-        _star.add(newStar);
-      }
-    }
-    uniqueStars = _star.map((model) => jsonEncode(model.toJsonAdd())).toList();
-    sharedPreferences.setStringList('mystars', uniqueStars);
-    myStars = uniqueStars;
   }
 
   Future<bool> checkAndUploadEntity(List<EntityModel> entities, Function reload) async {

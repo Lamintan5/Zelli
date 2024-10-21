@@ -1,6 +1,8 @@
 import 'package:Zelli/models/messages.dart';
 import 'package:Zelli/models/reviews.dart';
 import 'package:Zelli/resources/services.dart';
+import 'package:Zelli/utils/colors.dart';
+import 'package:Zelli/utils/colors.dart';
 import 'package:Zelli/widgets/profile_images/user_profile.dart';
 import 'package:Zelli/widgets/shimmer_widget.dart';
 
@@ -58,28 +60,27 @@ class _ItemReviewState extends State<ItemReview> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _loading
                   ?ShimmerWidget.circular(width: 40, height: 40)
                   :UserProfile(image: user.image.toString()),
-              SizedBox(
-                width: 10,
-              ),
+              SizedBox(width: 15),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _loading
-                        ?ShimmerWidget.rectangular(width: 100, height: 10)
-                        :Text(
-                      user.username.toString(),
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500),
-                    ),
                     Row(
                       children: [
+                        _loading
+                            ?ShimmerWidget.rectangular(width: 100, height: 10)
+                            :Text(
+                          user.username.toString(),
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(width: 10,),
                         RatingBar.builder(
                             initialRating:star,
                             minRating: 1,
@@ -87,12 +88,11 @@ class _ItemReviewState extends State<ItemReview> {
                             allowHalfRating: true,
                             ignoreGestures: true,
                             itemCount: 5,
-                            itemSize: 20.0,
+                            itemSize: 15.0,
                             unratedColor: color2,
-                            itemPadding: EdgeInsets.symmetric(
-                                horizontal: 1.0),
+                            itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
                             itemBuilder: (context, _) => Icon(
-                              Icons.star,
+                              CupertinoIcons.star_fill,
                               color: Colors.amber,
                             ),
                             onRatingUpdate: (rating) {
@@ -107,46 +107,57 @@ class _ItemReviewState extends State<ItemReview> {
                             fontSize: 11))
                       ],
                     ),
+                    SizedBox(height: 2,),
+                    Text(widget.review.message.toString()),
+                    widget.review.image == ""
+                        ? SizedBox()
+                        : Container(
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            children: [
+                          InkWell(
+                            onTap: (){
+                              message = MessModel(
+                                mid: "",
+                                path: widget.review.image,
+                                message: widget.review.message,
+                                time: widget.review.time,
+                              );
+                              // Get.to(()=>MediaScreen(message: message));
+                            },
+                            child: Hero(
+                              tag: message,
+                              child: Container(
+                                constraints: BoxConstraints(
+                                    maxHeight: 100, minHeight: 50,
+                                    maxWidth: 100, minWidth: 50
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(width: 2, color: color2),
+                                  borderRadius: BorderRadius.circular(10),
+                                  image: DecorationImage(
+                                      image: NetworkImage('${Services.HOST}Uploads/${widget.review.image}')
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                                                ],
+                                              ),
+                        ),
+                    Row(
+                      children: [
+                        Text("Like",style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w700),),
+                        SizedBox(width: 20),
+                        Text("Reply",style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w700),),
+                      ],
+                    )
                   ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 5,),
-          widget.review.image == "" ?SizedBox() :
-          Row(
-            children: [
-              InkWell(
-                onTap: (){
-                  message = MessModel(
-                    mid: "",
-                    path: widget.review.image,
-                    message: widget.review.message,
-                    time: widget.review.time,
-                  );
-                  // Get.to(()=>MediaScreen(message: message));
-                },
-                child: Hero(
-                  tag: message,
-                  child: Container(
-                    constraints: BoxConstraints(
-                        maxHeight: 100, minHeight: 50,
-                        maxWidth: 100, minWidth: 50
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 2, color: color2),
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                          image: NetworkImage('${Services.HOST}Uploads/${widget.review.image}')
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 5,),
-          Text(widget.review.message.toString()),
+
         ],
       ),
     );

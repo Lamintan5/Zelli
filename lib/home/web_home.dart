@@ -248,6 +248,8 @@ class _WebHomeState extends State<WebHome> {
                                   return badges.Badge(
                                     badgeStyle: badges.BadgeStyle(
                                         shape: countMess > 99? badges.BadgeShape.square : badges.BadgeShape.circle,
+
+
                                         borderRadius: BorderRadius.circular(30),
                                         padding: EdgeInsets.all(5)
                                     ),
@@ -272,7 +274,6 @@ class _WebHomeState extends State<WebHome> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5),
                             decoration: BoxDecoration(
-
                                 borderRadius: BorderRadius.circular(5)
                             ),
                             child: Row(
