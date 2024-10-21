@@ -468,19 +468,6 @@ class Services{
       return <NotifModel>[];
     }
   }
-  // GET MY STARS
-  Future<List<StarModel>> getMyStars(String uid)async{
-    var map = new Map<String, dynamic>();
-    map["action"] = _GET_MY;
-    map["uid"] = uid;
-    final response = await http.post(Uri.parse(_STAR),body: map);
-    if(response.statusCode==200) {
-      List<StarModel> star = starFromJson(response.body);
-      return star;
-    } else {
-      return <StarModel>[];
-    }
-  }
   // GET CURRENT UNIT
   Future<List<UnitModel>> getCrrntUnit(String id)async{
     var map = new Map<String, dynamic>();
@@ -545,7 +532,6 @@ class Services{
       return <DutiesModel>[];
     }
   }
-
   // GET CURRENT REVIEW
   Future<List<ReviewModel>> getCrntReview(String eid)async{
     var map = new Map<String, dynamic>();
@@ -557,6 +543,32 @@ class Services{
       return review;
     } else {
       return <ReviewModel>[];
+    }
+  }
+  // GET MY STARS
+  Future<List<StarModel>> getMyStars(String uid)async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_MY;
+    map["uid"] = uid;
+    final response = await http.post(Uri.parse(_STAR),body: map);
+    if(response.statusCode==200) {
+      List<StarModel> star = starFromJson(response.body);
+      return star;
+    } else {
+      return <StarModel>[];
+    }
+  }
+  // GET CURRENT STARS
+  Future<List<StarModel>> getCrrntStars(String eid)async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_CURRENT;
+    map["eid"] = eid;
+    final response = await http.post(Uri.parse(_STAR),body: map);
+    if(response.statusCode==200) {
+      List<StarModel> star = starFromJson(response.body);
+      return star;
+    } else {
+      return <StarModel>[];
     }
   }
 

@@ -180,7 +180,7 @@ class _ExploreState extends State<Explore> {
                             crossAxisSpacing: 5,
                             mainAxisSpacing: 5,
                             mainAxisExtent: 250,
-                            maxCrossAxisExtent: 200,
+                            maxCrossAxisExtent: 250,
                           ),
                           itemBuilder: (context, index){
                             EntityModel entity = filteredList[index];

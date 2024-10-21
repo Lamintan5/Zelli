@@ -45,26 +45,27 @@ class _DropStarState extends State<DropStar> {
   bool rating = false;
   String sid = '';
 
-  void getStars()async{
-    // getData();
-    // newStars = await Services().getMyStars(currentUser.uid);
-    // await Data().addOrUpdateStarList(newStars);
-    // getData();
-  }
   _getCurrentStar()async{
-    // setState(() {
-    //   rating = true;
-    // });
-    // crrntStars= await Services().getCrrntStars(widget.entity.eid);
-    // setState(() {
-    //   rating = false;
-    // });
+    setState(() {
+      rating = true;
+    });
+    crrntStars = await Services().getCrrntStars(widget.entity.eid);
+    starList = crrntStars;
+    _getData();
+    setState(() {
+      rating = false;
+    });
   }
 
-  void getData(){
-    rating = false;
+  void _getStars()async{
     starList = myStars.map((jsonString) => StarModel.fromJson(json.decode(jsonString)))
         .where((star) => star.eid == widget.entity.eid).toList();
+    _getData();
+  }
+
+
+  void _getData(){
+    rating = false;
     fivestars = starList.where((element) => double.parse(element.rate.toString()) > 4.1).toList();
     fourstars = starList.where((element) => double.parse(element.rate.toString()) > 3.0 && double.parse(element.rate.toString()) <4.1).toList();
     threestars = starList.where((element) => double.parse(element.rate.toString()) > 2.0 && double.parse(element.rate.toString()) <3.1).toList();
@@ -78,6 +79,9 @@ class _DropStarState extends State<DropStar> {
     totalStars = starList.isEmpty? 0.0 : starList.fold(0, (sum, stars) => sum + double.parse(stars.rate.toString()));
     average = starList.isEmpty? 0.0 : totalStars / starList.length;
     totalRate = starList.length;
+    if(starList.isEmpty){
+      _getCurrentStar();
+    }
     setState(() {
     });
   }
@@ -88,7 +92,7 @@ class _DropStarState extends State<DropStar> {
     // TODO: implement initState
     super.initState();
     _getCurrentStar();
-    getData();
+    _getStars();
     starList = [];
   }
 
@@ -129,7 +133,7 @@ class _DropStarState extends State<DropStar> {
                     color: Colors.amber,
                   ),
                   onRatingUpdate: (rating) {
-                    rate(rating).then((value) => getStars());
+                    rate(rating).then((value) => _getStars());
                   }),
               SizedBox(width: 5,),
               rating?SizedBox(width: 10,):SizedBox(),
@@ -201,10 +205,11 @@ class _DropStarState extends State<DropStar> {
         pid: widget.entity.pid,
         uid: currentUser.uid,
         rate: rate.toString(),
-        type: "ENTITY"
+        type: "ENTITY",
+        time: DateTime.now().toString(),
+        checked: "true"
     );
     Services.addStar(star).then((response)async{
-      print(response);
       if(response=="Exists"){
         setState(() {
           rating = false;

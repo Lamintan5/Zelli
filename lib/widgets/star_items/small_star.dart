@@ -46,23 +46,17 @@ class _SmallStarState extends State<SmallStar> {
   bool rating = false;
   String sid = '';
 
-  _getStars()async{
-    // _getStar();
-    // newStars = await Services().getMyStars(currentUser.uid);
-    // await Data().addOrUpdateStarList(newStars);
-    // _getStar();
-  }
 
   _getCurrentStar()async{
-    // setState(() {
-    //   rating = true;
-    // });
-    // crrntStars= await Services().getCrrntStars(widget.entity.eid);
-    // starList = crrntStars;
-    // _getData();
-    // setState(() {
-    //   rating = false;
-    // });
+    setState(() {
+      rating = true;
+    });
+    crrntStars = await Services().getCrrntStars(widget.entity.eid);
+    starList = crrntStars;
+    _getData();
+    setState(() {
+      rating = false;
+    });
   }
 
   _getStar(){
@@ -84,6 +78,9 @@ class _SmallStarState extends State<SmallStar> {
     one = onestars.isEmpty? 0.0 : onestars.fold(0, (sum, stars) => sum + double.parse(stars.rate.toString()));
     totalStars = starList.isEmpty? 0.0 : starList.fold(0, (sum, stars) => sum + double.parse(stars.rate.toString()));
     average = starList.isEmpty? 0.0 : totalStars / starList.length;
+    if(starList.isEmpty){
+      _getCurrentStar();
+    }
     setState(() {
     });
   }
@@ -93,11 +90,7 @@ class _SmallStarState extends State<SmallStar> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    if(widget.from=="SEARCH"){
-      _getCurrentStar();
-    } else {
-      _getStars();
-    }
+    _getStar();
   }
 
   @override
@@ -168,56 +161,56 @@ class _SmallStarState extends State<SmallStar> {
         pid: widget.entity.pid,
         uid: currentUser.uid,
         rate: rate.toString(),
-        type: widget.type
+        type: widget.type,
+        time: DateTime.now().toString(),
+        checked: "true"
     );
-    // Services.addEntityStar(star).then((response){
-    //   print(response);
-    //   if(response=="Exists"){
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //             backgroundColor: dgcolor,
-    //             content: Text("Rating already exists", style: TextStyle(color: reverse),)
-    //         )
-    //     );
-    //   } else if(response=="Success"){
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //             backgroundColor: dgcolor,
-    //             content: Text("Successfully rated ${rate} stars.", style: TextStyle(color: reverse),)
-    //         )
-    //     );
-    //   }else if(response=="Failed"){
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           backgroundColor: dgcolor,
-    //           content: Text("Rating failed.", style: TextStyle(color: reverse),),
-    //           action: SnackBarAction(
-    //             label: "Try again",
-    //             onPressed: (){
-    //               _rate(rate);
-    //             },
-    //           ),
-    //         )
-    //     );
-    //   }else {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(
-    //           backgroundColor: dgcolor,
-    //           content: Text("mhmm 🤔 seems like something went wrong.", style: TextStyle(color: reverse),),
-    //           action: SnackBarAction(
-    //             label: "Try again",
-    //             onPressed: (){
-    //               _rate(rate);
-    //             },
-    //           ),
-    //         )
-    //     );
-    //   }
-    //   setState(() {
-    //     rating = false;
-    //   });
-    // });
+    Services.addStar(star).then((response)async{
+      if(response=="Exists"){
+        setState(() {
+          rating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                backgroundColor: dgcolor,
+                content: Text("Rating already exists", style: TextStyle(color: reverse),)
+            )
+        );
+      } else if(response=="Success"){
+        setState(() {
+          rating = false;
+        });
+        await Data().addStar(star);
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                backgroundColor: dgcolor,
+                content: Text("Successfully rated ${rate} stars.", style: TextStyle(color: reverse),)
+            )
+        );
+      }else if(response=="Failed"){
+        setState(() {
+          rating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: dgcolor,
+              content: Text("Rating failed. Please try again", style: TextStyle(color: reverse),),
 
+            )
+        );
+      }else {
+        setState(() {
+          rating = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: dgcolor,
+              content: Text("mhmm 🤔 seems like something went wrong. Please try again", style: TextStyle(color: reverse),),
+            )
+        );
+      }
+
+    });
   }
   Widget buildOverlay() {
     final color =  Theme.of(context).brightness == Brightness.dark
