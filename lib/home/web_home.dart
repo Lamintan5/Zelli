@@ -119,13 +119,10 @@ class _WebHomeState extends State<WebHome> {
     final normal = Theme.of(context).brightness == Brightness.dark
         ? Colors.black
         : Colors.white;
-    final revers = Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
     final color5 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white54
         : Colors.black54;
-    final style = TextStyle(color: revers, fontSize: 13);
+    final style = TextStyle(color: reverse, fontSize: 13);
     final secondary = TextStyle(color: secondaryColor, fontSize: 13);
     final image =  Theme.of(context).brightness == Brightness.dark
         ? "assets/logo/5logo_72.png"
