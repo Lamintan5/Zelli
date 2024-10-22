@@ -8,6 +8,7 @@ import 'package:Zelli/models/payments.dart';
 import 'package:Zelli/models/users.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/unit/activities/co_tenants.dart';
+import 'package:Zelli/views/unit/activities/create_request.dart';
 import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
@@ -817,7 +818,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                             onTap: (){
                                               isMember
                                                   ? dialogAddTenant(context)
-                                                  : dialogRequest(context);
+                                                  : dialogRequestLease(context);
                                             },
                                             child: Text(
                                               isMember
@@ -1127,7 +1128,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                       ),
                                                       BottomCallButtons(
                                                           onTap: () {
-                                                            Get.to(()=>Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid, from: 'unit',),transition: Transition.rightToLeft);
+                                                            Get.to(()=>Payments(entity: entity, unit: unit,
+                                                              tid: user.uid, lid: "", from: 'unit',),transition: Transition.rightToLeft);
                                                           },
                                                           icon: LineIcon.wallet(color: secondaryColor,),
                                                           actionColor: secondaryColor,
@@ -1562,7 +1564,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
-                          // dialogMaintain(context);
+                            Navigator.pop(context);
+                            dialogRequest(context);
                           },
                           icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: ""
                         )
@@ -1570,11 +1573,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
                   _admin.contains(currentUser.uid) && unit.lid == currentLease.lid
                       ? RowButton(
-                      onTap: (){
-                        Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
-                      },
-                      icon : Icon(CupertinoIcons.doc_text), title: "Leases",subtitle: ""
-                  )
+                          onTap: (){
+                            Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
+                          },
+                          icon : Icon(CupertinoIcons.doc_text), title: "Leases",subtitle: ""
+                      )
                       : SizedBox(),
 
                   _pids.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid)
@@ -2258,7 +2261,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
           );
         });
   }
-  void dialogRequest(BuildContext context){
+  void dialogRequestLease(BuildContext context){
     final reverse = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
@@ -2299,6 +2302,38 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         )
     );
   }
+  void dialogRequest(BuildContext context){
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text('R E Q U E S T'),
+        message: Text('Please select one of the following options:'),
+        actions: [
+          // Convert Iterable to a list using `toList()`
+          ...Data().requests.map((e) => CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              Get.to(() => CreateRequest(request: e),transition: Transition.rightToLeft);
+            },
+            child: Row(
+              children: [
+                Icon(e.icon, color: Colors.white),
+                SizedBox(width: 10),
+                Text('${e.text}', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+          )).toList(),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          child: Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+    );
+  }
 
   void _addPay(PaymentsModel paymentsModel, double paid, String account){
     print("Payment adding");
@@ -2320,7 +2355,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   }
   void _updateCount(){}
   void _changeMess(MessModel messModel){}
-
 }
 
 class buildButton extends StatelessWidget {
