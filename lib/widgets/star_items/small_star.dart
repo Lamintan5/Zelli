@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:Zelli/models/data.dart';
 import 'package:Zelli/models/entities.dart';
+import 'package:Zelli/models/units.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -27,15 +28,18 @@ class SmallStar extends StatefulWidget {
 class _SmallStarState extends State<SmallStar> {
   OverlayEntry? entry;
   final layerLink = LayerLink();
-  bool isOpened = false;
+
   List<StarModel> starList = [];
   List<StarModel> newStars = [];
   List<StarModel> crrntStars = [];
+  List<UnitModel> _units = [];
+
   List fivestars = [];
   List fourstars = [];
   List threestars = [];
   List twostars = [];
   List onestars = [];
+
   double five = 0.0;
   double four = 0.0;
   double three = 0.0;
@@ -43,7 +47,12 @@ class _SmallStarState extends State<SmallStar> {
   double one = 0.0;
   double totalStars = 0.0;
   double average = 0.0;
+
   bool rating = false;
+  bool isMember = false;
+  bool isTenant = false;
+  bool isOpened = false;
+
   String sid = '';
 
 
@@ -66,6 +75,8 @@ class _SmallStarState extends State<SmallStar> {
   }
 
   _getData(){
+    _units = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((test) =>
+     test.eid == widget.entity.eid).toList();
     fivestars = starList.where((element) => double.parse(element.rate.toString()) > 4.1).toList();
     fourstars = starList.where((element) => double.parse(element.rate.toString()) > 3.0 && double.parse(element.rate.toString()) <4.1).toList();
     threestars = starList.where((element) => double.parse(element.rate.toString()) > 2.0 && double.parse(element.rate.toString()) <3.1).toList();
@@ -78,7 +89,11 @@ class _SmallStarState extends State<SmallStar> {
     one = onestars.isEmpty? 0.0 : onestars.fold(0, (sum, stars) => sum + double.parse(stars.rate.toString()));
     totalStars = starList.isEmpty? 0.0 : starList.fold(0, (sum, stars) => sum + double.parse(stars.rate.toString()));
     average = starList.isEmpty? 0.0 : totalStars / starList.length;
-    if(starList.isEmpty){
+    isMember = widget.entity.pid.toString().split(",").contains(currentUser.uid);
+    isTenant = _units.any((test) => test.tid.toString().contains(currentUser.uid));
+    if(isTenant || isMember){
+
+    } else {
       _getCurrentStar();
     }
     setState(() {

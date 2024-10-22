@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../main.dart';
 import '../../models/stars.dart';
+import '../../models/units.dart';
 import '../../resources/services.dart';
 import '../../utils/colors.dart';
 import '../../views/property/activities/reviews.dart';
@@ -29,11 +30,14 @@ class _DropStarState extends State<DropStar> {
   List<StarModel> starList = [];
   List<StarModel> crrntStars = [];
   List<StarModel> newStars = [];
+  List<UnitModel> _units = [];
+
   List fivestars = [];
   List fourstars = [];
   List threestars = [];
   List twostars = [];
   List onestars = [];
+
   double five = 0.0;
   double four = 0.0;
   double three = 0.0;
@@ -41,8 +45,12 @@ class _DropStarState extends State<DropStar> {
   double one = 0.0;
   double totalStars = 0.0;
   double average = 0.0;
+
   int totalRate = 0;
+
   bool rating = false;
+  bool isMember = false;
+  bool isTenant = false;
   String sid = '';
 
   _getCurrentStar()async{
@@ -66,6 +74,8 @@ class _DropStarState extends State<DropStar> {
 
   void _getData(){
     rating = false;
+    _units = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((test) =>
+    test.eid == widget.entity.eid).toList();
     fivestars = starList.where((element) => double.parse(element.rate.toString()) > 4.1).toList();
     fourstars = starList.where((element) => double.parse(element.rate.toString()) > 3.0 && double.parse(element.rate.toString()) <4.1).toList();
     threestars = starList.where((element) => double.parse(element.rate.toString()) > 2.0 && double.parse(element.rate.toString()) <3.1).toList();
@@ -79,7 +89,11 @@ class _DropStarState extends State<DropStar> {
     totalStars = starList.isEmpty? 0.0 : starList.fold(0, (sum, stars) => sum + double.parse(stars.rate.toString()));
     average = starList.isEmpty? 0.0 : totalStars / starList.length;
     totalRate = starList.length;
-    if(starList.isEmpty){
+    isMember = widget.entity.pid.toString().split(",").contains(currentUser.uid);
+    isTenant = _units.any((test) => test.tid.toString().contains(currentUser.uid));
+    if(isTenant || isMember){
+
+    } else {
       _getCurrentStar();
     }
     setState(() {
