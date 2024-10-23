@@ -2313,13 +2313,13 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
           ...Data().requests.map((e) => CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
-              Get.to(() => CreateRequest(request: e),transition: Transition.rightToLeft);
+              Get.to(() => CreateRequest(request: e, entity: entity, unit: unit,),transition: Transition.rightToLeft);
             },
             child: Row(
               children: [
-                Icon(e.icon, color: Colors.white),
+                Icon(e.icon, color: secondaryColor),
                 SizedBox(width: 10),
-                Text('${e.text}', style: TextStyle(color: Colors.white)),
+                Text('${e.text}', style: TextStyle(color: secondaryColor)),
               ],
             ),
           )).toList(),
