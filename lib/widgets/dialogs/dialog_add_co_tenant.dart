@@ -70,7 +70,7 @@ class _DialogAddCoTenantState extends State<DialogAddCoTenant> {
       checked: "true",
       time: DateTime.now().toString(),
     );
-    Services.addNotification(notification).then((response) {
+    Services.addNotification(notification, null).then((response) {
       if(response=="Success"){
         _socketSend(user);
         setState(() {_isLoading = false;});
