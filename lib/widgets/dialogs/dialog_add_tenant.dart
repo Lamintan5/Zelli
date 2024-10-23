@@ -77,7 +77,7 @@ class _DialogAddTenantState extends State<DialogAddTenant> {
         time: "",
     );
 
-    Services.addNotification(notification).then((response) {
+    Services.addNotification(notification, null).then((response) {
       if(response=="Success"){
         _socketSend(user);
         Navigator.pop(context);
