@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:Zelli/main.dart';
 import 'package:Zelli/resources/services.dart';
+import 'package:Zelli/widgets/items/notificationsitems/item_req.dart';
 import 'package:Zelli/widgets/items/notificationsitems/item_req_co_tnt.dart';
 import 'package:Zelli/widgets/items/notificationsitems/item_terminate.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +128,9 @@ class _NotificationsState extends State<Notifications> {
                                       ? ItemReqCoTnt(notif: notification, getEntity: widget.reload, from: eid!=""?"Entity":'Notification', remove: _remove,)
                                       : notification.type == "TRMLEASE"
                                       ? ItemTerminate(notif: notification, getEntity: widget.reload, remove: _remove, from: eid!=""?"Entity":'Notification')
-                                      : SizedBox(),
+                                      : notification.type == 'REQUEST'
+                                      ? ItemReq(notif: notification, getEntity: widget.reload)
+                                      : SizedBox()
                                 ),
                               );
                             },

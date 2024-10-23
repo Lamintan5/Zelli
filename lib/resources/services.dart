@@ -235,20 +235,28 @@ class Services{
     }
   }
   // ADD NOTIFICATION
-  static Future<String> addNotification(NotifModel notif) async {
+  static Future addNotification(NotifModel notif, File? image) async {
     try {
-      var map = new Map<String, dynamic>();
-      map["action"] = _ADD;
-      map["nid"] = notif.nid;
-      map["sid"] = notif.sid;
-      map["rid"] = notif.rid;
-      map["pid"] = notif.pid;
-      map["eid"] = notif.eid;
-      map["text"] = notif.text;
-      map["actions"] = notif.actions;
-      map["type"] = notif.type;
-      map["message"] = notif.message;
-      final response = await http.post(Uri.parse(_NOTIFICATIONS), body: map);
+      var request = http.MultipartRequest('POST', Uri.parse(_NOTIFICATIONS));
+
+      request.fields["action"] = _ADD;
+      request.fields["nid"] = notif.nid;
+      request.fields["sid"] = notif.sid.toString();
+      request.fields["rid"] = notif.rid.toString();
+      request.fields["pid"] = notif.pid.toString();
+      request.fields["eid"] = notif.eid.toString();
+      request.fields["text"] = notif.text.toString();
+      request.fields["actions"] = notif.actions.toString();
+      request.fields["type"] = notif.type.toString();
+      request.fields["message"] = notif.message.toString();
+      if (image != null) {
+        var pic = await http.MultipartFile.fromPath("image", image.path);
+        request.files.add(pic);
+      } else {
+        request.fields['image'] = "";
+      }
+      var streamedResponse = await request.send();
+      var response = await http.Response.fromStream(streamedResponse);
       return response.body;
     } catch (e) {
       return 'error';

@@ -7,6 +7,7 @@ import 'package:Zelli/models/chats.dart';
 import 'package:Zelli/models/maintain.dart';
 import 'package:Zelli/models/notifications.dart';
 import 'package:Zelli/models/payments.dart';
+import 'package:Zelli/models/request.dart';
 import 'package:Zelli/models/stars.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/models/third.dart';
@@ -38,6 +39,89 @@ class Data{
     DutyModel(text: 'Units', message: 'Grant the manager permission to add, remove, or edit unit data. This will enable the manager to effectively manage property details, ensuring accurate and up-to-date information for each unit.', icon: LineIcon.box()),
     DutyModel(text: 'Utilities', message: 'Grant the manager permission to add, remove, or edit utilities data. This allows the manager to maintain accurate records of household utilities, ensuring efficient tracking and management of utility services.', icon: Icon(CupertinoIcons.lightbulb)),
   ];
+  List<RequestModel> requests = [
+    RequestModel(id: 'R001',
+        text: "Maintenance", message: "", icon: CupertinoIcons.gear,
+        types: [
+          'General Repairs: Issues like broken fixtures, plumbing problems, or electrical malfunctions.',
+          'Appliance Repair: Problems with appliances such as ovens, refrigerators, dishwashers, etc.',
+          'Heating/AC Issues: Report heating or air conditioning malfunctions.',
+          'Pest Control: Request assistance for pest-related issues (e.g., insects, rodents).',
+          'Leaky Roof/Windows: Report water leaks, broken seals, or faulty windows.',
+          'Plumbing Issues: Blocked drains, toilets, or leaking pipes.',
+          'Electrical Problems: Broken outlets, faulty lighting, or power outages.'
+        ]
+    ),
+    RequestModel(id: 'R002',
+        text: "Utility", message: "", icon: CupertinoIcons.lightbulb,
+        types: [
+          'Water Supply Issues: Low water pressure, no hot water, or water outages.',
+          'Gas Issues: Gas leaks or problems with gas appliances.',
+          'Internet/Phone Issues: Requests related to building-managed internet or phone services.',
+        ]
+    ),
+    RequestModel(id: 'R003',
+        text: "Property Improvement ", message: "", icon: CupertinoIcons.home,
+        types: [
+          'Renovation Requests: Requests for upgrades or modifications (e.g., painting, carpet replacement).',
+          'Landscaping/Garden Maintenance: Requests for lawn care or gardening services.',
+          'Security Enhancements: Requests for additional security measures (e.g., locks, cameras).',
+        ]
+    ),
+    RequestModel(id: 'R004',
+        text: "Cleaning or Sanitation", message: "", icon: CupertinoIcons.drop,
+        types: [
+          'Pest Cleanup: Request professional cleaning after pest treatment.',
+          'Common Area Cleaning: Report issues in shared spaces like hallways, laundry rooms, or parking areas.',
+          'Waste Disposal Issues: Complaints about garbage collection or recycling services.',
+        ]
+    ),
+    RequestModel(id: 'R005',
+        text: "Lease and Documentation ", message: "", icon: CupertinoIcons.doc,
+        types: [
+          'Lease Renewal Requests: Request information or initiate a lease renewal process.',
+          'Early Lease Termination: Submit a formal request to terminate the lease before its end date.',
+          'Rent Payment Issues: Report any problems related to payment methods or transactions.',
+          'Rent Adjustment Requests: Submit a request for a rent reduction or deferment (e.g., due to financial hardship).',
+          'Lease Copy Request: Request a digital or physical copy of the lease.',
+        ]
+    ),
+    RequestModel(id: 'R006',
+        text: "Parking and Access Requests", message: "", icon: CupertinoIcons.car_detailed,
+        types: [
+          'Parking Spot Requests: Request a new or additional parking spot.',
+          'Access Card/Key Replacement: Request for lost or damaged access cards, keys, or fobs.',
+          'Gate/Entry Issues: Report issues with entry gates, security codes, or intercom systems.',
+        ]
+    ),
+    RequestModel(id: 'R007',
+        text: "Amenities and Facility", message: "", icon: CupertinoIcons.bed_double,
+        types: [
+          'Gym/Fitness Room Access: Request access to the building\'s fitness facilities.',
+          'Pool/Spa Maintenance: Report issues with shared amenities like a pool or spa.',
+          'Laundry Facility Issues: Report broken washers, dryers, or issues with payment machines in common laundry areas.',
+        ]
+    ),
+    RequestModel(id: 'R008',
+        text: "Neighbor-Related Complaints", message: "", icon: CupertinoIcons.person_2_fill,
+        types: [
+          'Noise Complaints: Report excessive noise from neighbors or construction.',
+          'Parking Violations: Report unauthorized parking in designated spots.',
+          'Pet Complaints: Issues with neighbors\' pets (e.g., noise, cleanliness).',
+          'Disputes: Report any conflicts or disputes with other tenants.',
+        ]
+    ),
+    RequestModel(
+        id: 'R009',
+        text: "Special", message: "", icon: CupertinoIcons.gear,
+        types: [
+          'Guest/Visitor Parking: Request temporary parking for guests.',
+          'Temporary Absence: Notify management if the tenant will be away for an extended period.',
+          'Pet Addition Request: Submit a request to add a new pet to the lease agreement.'
+        ]
+    ),
+  ];
+  
   final socketManager = Get.find<SocketManager>();
   List<String> items = ['Cash', 'Electronic'];
   List<ChargeModel> charge = [
