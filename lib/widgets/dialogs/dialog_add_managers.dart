@@ -64,7 +64,7 @@ class _DialogAddManagersState extends State<DialogAddManagers> {
       checked: "true",
       time: "",
     );
-    Services.addNotification(notification).then((response) {
+    Services.addNotification(notification, null).then((response) {
       if(response=="Success"){
         _socketSend(user);
         Navigator.pop(context);
