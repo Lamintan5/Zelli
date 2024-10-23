@@ -10,11 +10,12 @@ class NotifModel {
   String? seen;
   String? type;
   String? time;
+  String? image;
   String? deleted;
   String? checked;
 
   NotifModel({required this.nid, this.sid, this.rid, this.eid, this.pid, this.text, this.message,
-    this.actions, this.type, this.seen, this.time, this.deleted, this.checked});
+    this.actions, this.type, this.seen, this.image, this.time, this.deleted, this.checked});
 
   factory NotifModel.fromJson(Map<String, dynamic> json) {
     return NotifModel(
@@ -26,6 +27,7 @@ class NotifModel {
       text: json['text'] as String,
       message: json['message'] as String,
       actions: json['actions'] as String,
+      image: json['image'] as String,
       type: json['type'] as String,
       seen: json['seen'] as String,
       deleted: json['deleted'] as String,
@@ -43,6 +45,7 @@ class NotifModel {
       'text': text,
       'message': message,
       'actions': actions,
+      'image': image,
       'type': type,
       'seen': seen,
       'deleted': deleted,
