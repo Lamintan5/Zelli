@@ -233,74 +233,71 @@ class _ItemReqState extends State<ItemReq> {
                         ],
                       ),
                     ),
-                    SizedBox(width: 15,),
+                    SizedBox(width: 5,),
+                    AnimatedContainer(
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      height: _isExpanded ? 0 : 50,
+                      width: _isExpanded ? 0 : 50,
+                      margin: EdgeInsets.only(left: 5),
+                      child: CachedNetworkImage(
+                        cacheManager: customCacheManager,
+                        imageUrl: '${Services.HOST}uploads/${notifModel.image}',
+                        key: UniqueKey(),
+                        fit: BoxFit.cover,
+                        imageBuilder: (context, imageProvider) => Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            shape: BoxShape.rectangle,
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        placeholder: (context, url) => Container(
+                          color: Colors.black,
+                          child: Center(
+                            child: Text(
+                              "5",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w100,
+                                fontSize: 15,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          child: Center(
+                            child: Icon(
+                              Icons.error_outline_rounded,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
               ],
             ),
           ),
-          AnimatedSize(
-            duration: Duration(milliseconds: 500),
-            alignment: Alignment.topCenter,
-            curve: Curves.easeInOut,
-            child: _isExpanded
-                ? Container(
-              margin: EdgeInsets.only(top: 10, left: 5, right: 5),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: (){},
-                      borderRadius: BorderRadius.circular(5),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                            color: color1,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: color1, width: 1)
-                        ),
-                        child: Center(child: Text("Reject")),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 5,),
-                  Expanded(
-                    child: InkWell(
-                      onTap: (){
-                        Get.to(()=>ViewRequest(notif: notifModel), transition: Transition.rightToLeft);
-                      },
-                      borderRadius: BorderRadius.circular(5),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        decoration: BoxDecoration(
-                            color: color1,
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: color1, width: 1)
-                        ),
-                        child: Center(child: Text("View Request")),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-                : SizedBox(),
-          ),
           _loading ? LinearProgressIndicator(backgroundColor: color1,minHeight: 1) : SizedBox(),
-          AnimatedContainer(
-            duration: Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            height: _isExpanded? 150 : 130,
-            width: double.infinity,
-            margin: EdgeInsets.only(top: 5),
-            child: CachedNetworkImage(
-              cacheManager: customCacheManager,
-              imageUrl: '${Services.HOST}uploads/${notifModel.image}',
-              key: UniqueKey(),
-              fit: BoxFit.cover,
-              imageBuilder: (context, imageProvider) => Stack(
-                children: [
-                  Container(
+          Stack(
+            children: [
+              AnimatedContainer(
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+                height: _isExpanded? 150 : 0,
+                width: double.infinity,
+                margin: EdgeInsets.only(top: 5),
+                child: CachedNetworkImage(
+                  cacheManager: customCacheManager,
+                  imageUrl: '${Services.HOST}uploads/${notifModel.image}',
+                  key: UniqueKey(),
+                  fit: BoxFit.cover,
+                  imageBuilder: (context, imageProvider) => Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                           bottomLeft: Radius.circular(10),
@@ -313,9 +310,84 @@ class _ItemReqState extends State<ItemReq> {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Row(
+                  placeholder: (context, url) => Container(
+                    color: Colors.black,
+                    child: Center(
+                      child: Text(
+                        "S T U D I O 5 I V E",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w100,
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    child: Center(
+                      child: Icon(
+                        Icons.error_outline_rounded,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                alignment: Alignment.bottomCenter,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    AnimatedSize(
+                      duration: Duration(milliseconds: 500),
+                      alignment: Alignment.topCenter,
+                      curve: Curves.easeInOut,
+                      child: _isExpanded
+                          ? Container(
+                        margin: EdgeInsets.only(top: 10, left: 5, right: 5),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                onTap: (){},
+                                borderRadius: BorderRadius.circular(5),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                      color: color1,
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(color: color1, width: 1)
+                                  ),
+                                  child: Center(child: Text("Reject")),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 5,),
+                            Expanded(
+                              child: InkWell(
+                                onTap: (){
+                                  Get.to(()=>ViewRequest(notif: notifModel), transition: Transition.rightToLeft);
+                                },
+                                borderRadius: BorderRadius.circular(5),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 8),
+                                  decoration: BoxDecoration(
+                                      color: color1,
+                                      borderRadius: BorderRadius.circular(5),
+                                      border: Border.all(color: color1, width: 1)
+                                  ),
+                                  child: Center(child: Text("View Request")),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                          : SizedBox(),
+                    ),
+                    Row(
                       children: [
                         SizedBox(width: 5,),
                         Expanded(
@@ -439,31 +511,10 @@ class _ItemReqState extends State<ItemReq> {
                             })
                       ],
                     ),
-                  )
-                ],
-              ),
-              placeholder: (context, url) => Container(
-                color: Colors.black,
-                child: Center(
-                  child: Text(
-                    "S T U D I O 5 I V E",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w100,
-                      fontSize: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              errorWidget: (context, url, error) => Container(
-                child: Center(
-                  child: Icon(
-                    Icons.error_outline_rounded,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+                  ],
+                )
+              )
+            ],
           ),
         ],
       ),
