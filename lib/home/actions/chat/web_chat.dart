@@ -121,12 +121,16 @@ class _WebChatState extends State<WebChat> {
                       )
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
                     decoration: BoxDecoration(
-                      color: CupertinoColors.activeBlue,
-                      borderRadius: BorderRadius.circular(5)
+                        color: CupertinoColors.activeBlue.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                            color: CupertinoColors.activeBlue,
+                            width: 0.5
+                        )
                     ),
-                    child: Text("Beta", style: TextStyle(color: Colors.black, fontSize: 12),),
+                    child: Text("Beta", style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.bold),),
                   )
                 ],
               ),
