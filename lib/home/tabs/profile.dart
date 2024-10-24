@@ -60,7 +60,6 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
   int unitCount = 0;
   int tenantCount = 0;
 
-  double amount = 0.0;
 
   _getDetails()async{
     _getData();
@@ -118,8 +117,8 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
         ? Colors.white54
         : Colors.black54;
     final size = MediaQuery.of(context).size;
-    final style = TextStyle(color: reverse, fontSize: 13);
-    final secondary = TextStyle(color: secondaryColor, fontSize: 13);
+    final style = TextStyle(color: reverse, fontSize: 12);
+    final secondary = TextStyle(color: secondaryColor, fontSize: 12);
     List filteredList = [];
     if (_search.text.isNotEmpty) {
       _entity.forEach((item) {
@@ -595,20 +594,24 @@ class _ProfileState extends State<Profile> with TickerProviderStateMixin {
                                                                 ]
                                                             )
                                                         ),
-                                                        entity.pid!.contains(currentUser.uid)? RichText(
-                                                            text: TextSpan(
-                                                                children: [
-                                                                  TextSpan(
-                                                                      text: '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)} ',
-                                                                      style: style
-                                                                  ),
-                                                                  TextSpan(
-                                                                      text: "last month revenue",
-                                                                      style: secondary
-                                                                  )
-                                                                ]
-                                                            )
-                                                        ) : Text("Leasing"),
+                                                        entity.location.toString()==""?SizedBox()
+                                                            : Container(
+                                                          margin: EdgeInsets.only(bottom: 2),
+                                                          child: RichText(
+                                                              textAlign: TextAlign.center,
+                                                              text: TextSpan(
+                                                                  children: [
+                                                                    WidgetSpan(
+                                                                      child: Icon(CupertinoIcons.location, size: 12,color: secondaryColor,),
+                                                                    ),
+                                                                    TextSpan(
+                                                                        text:  " ${entity.location}",
+                                                                        style: secondary
+                                                                    ),
+                                                                  ]
+                                                              )
+                                                          ),
+                                                        ),
                                                         SmallStar(entity: entity, type: "ENTITY", rid: "", size: 20,),
                                                       ],
                                                     ),
