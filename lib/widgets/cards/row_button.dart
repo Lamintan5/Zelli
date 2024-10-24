@@ -6,7 +6,8 @@ class RowButton extends StatelessWidget {
   final Widget icon;
   final String title;
   final String subtitle;
-  const RowButton({super.key, required this.onTap, required this.icon, required this.title, required this.subtitle});
+  final bool isBeta;
+  const RowButton({super.key, required this.onTap, required this.icon, required this.title, required this.subtitle, this.isBeta = false});
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +32,26 @@ class RowButton extends StatelessWidget {
                 SizedBox(
                   width: 20,
                 ),
-                Text(
-                  title,
+                Expanded(
+                  child: Text(
+                    title,
+                  ),
                 ),
+                isBeta
+                    ?Container(
+                      padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.activeBlue.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(
+                          color: CupertinoColors.activeBlue,
+                          width: 0.5
+                        )
+                      ),
+                      child: Text("Beta", style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.bold),),
+                    )
+                    :SizedBox()
+
               ],
             ),
           ),
