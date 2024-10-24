@@ -709,10 +709,11 @@ class Data{
           entity.admin.toString(),
           entity.title.toString(),
           entity.category.toString(),
-            entity.image.toString() != ""?File(entity.image.toString()):null,
+          entity.image.toString() != ""?File(entity.image.toString()):null,
           entity.due.toString(),
           entity.late.toString(),
           entity.utilities.toString().split(","),
+          entity.location.toString()
         );
         final String responseString = await response.stream.bytesToString();
         if (responseString.contains("Success")) {
@@ -736,6 +737,7 @@ class Data{
             entity.due.toString(),
             entity.late.toString(),
             entity.utilities.toString().split(","),
+            entity.location.toString()
           );
           final String responseString = await response.stream.bytesToString();
 
@@ -749,7 +751,8 @@ class Data{
             print("Error: $responseString");
           }
         } else {
-          final response = await Services.updateEntity(entity.eid, entity.title.toString(), entity.category.toString(), File(entity.image.toString()), entity.image.toString(), entity.due.toString(), entity.late.toString());
+          final response = await Services.updateEntity(entity.eid, entity.title.toString(), entity.category.toString(), File(entity.image.toString()),
+              entity.image.toString(), entity.due.toString(), entity.late.toString(), entity.location.toString(),);
           final String responseString = await response.stream.bytesToString();
           if(responseString.contains("success")){
             entity.checked = 'true';
@@ -991,6 +994,7 @@ class Data{
         : "${updatedEntity.checked},EDIT";
 
     _entity.firstWhere((element) => element.eid == updatedEntity.eid).title = updatedEntity.title;
+    _entity.firstWhere((element) => element.eid == updatedEntity.eid).location = updatedEntity.location;
     _entity.firstWhere((element) => element.eid == updatedEntity.eid).category = updatedEntity.category;
     _entity.firstWhere((element) => element.eid == updatedEntity.eid).image = updatedEntity.image;
     _entity.firstWhere((element) => element.eid == updatedEntity.eid).checked = newEntity.checked;
@@ -1008,6 +1012,7 @@ class Data{
         oldImage,
         updatedEntity.due.toString(),
         updatedEntity.late.toString(),
+      updatedEntity.location.toString(),
     );
     final String responseString = await response.stream.bytesToString();
     if(responseString.contains("success")){
