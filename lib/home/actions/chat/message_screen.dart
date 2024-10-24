@@ -216,13 +216,32 @@ class _MessageScreenState extends State<MessageScreen> {
                             CircleAvatar(
                               radius: 20,
                               backgroundColor: color1,
-                              child: IconButton(onPressed: (){}, icon: Icon(Icons.video_call), color: Colors.blue,),
+                              child: IconButton(
+                                onPressed: (){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Feature not available"),
+                                        showCloseIcon: true,
+                                      )
+                                  );
+                                },
+                                icon: Icon(Icons.video_call), color: Colors.blue,),
                             ),
                             SizedBox(width: 5,),
                             CircleAvatar(
                               radius: 20,
                               backgroundColor: color1,
-                              child: IconButton(onPressed: (){}, icon: Icon(Icons.call), color: Colors.blue,),
+                              child: IconButton(
+                                onPressed: (){
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text("Feature not available"),
+                                        showCloseIcon: true,
+                                    )
+                                  );
+                                },
+                                icon: Icon(Icons.call), color: Colors.blue,
+                              ),
                             ),
                             SizedBox(width: 5,),
                             CircleAvatar(
