@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:Zelli/models/entities.dart';
 import 'package:Zelli/widgets/buttons/call_actions/double_call_action.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,8 +27,9 @@ class EditProperty extends StatefulWidget {
 class _EditPropertyState extends State<EditProperty> {
   List<String> cats = ['Cat One', 'Cat Two', 'Cat Three', 'Cat Four' , 'Cat Five'];
 
-  TextEditingController _title = TextEditingController();
-  TextEditingController _pass = TextEditingController();
+  late TextEditingController _title;
+  late TextEditingController _pass;
+  late TextEditingController _location;
 
   File? _image; String? category;
   final picker = ImagePicker();
@@ -46,11 +49,24 @@ class _EditPropertyState extends State<EditProperty> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _title= TextEditingController();
+    _pass= TextEditingController();
+    _location= TextEditingController();
     oldImage = widget.entity.image.toString();
     _title.text = widget.entity.title.toString();
+    _location.text = widget.entity.location.toString();
     category = widget.entity.category.toString();
     due = int.parse(widget.entity.due.toString());
     late = int.parse(widget.entity.late.toString());
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _title.dispose();
+    _location.dispose();
+    _pass.dispose();
   }
 
 
@@ -71,15 +87,13 @@ class _EditPropertyState extends State<EditProperty> {
     double width = 450;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: normal,
-        foregroundColor: reverse,
         title: Text('  Edit Property', style: TextStyle(fontWeight: FontWeight.normal),),
       ),
       body:  Form(
         key: _formkey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -258,30 +272,42 @@ class _EditPropertyState extends State<EditProperty> {
                             }
                           },
                         ),
-                        SizedBox(height: 20,),
-                        Text(' Category :  ', style: TextStyle(color: secondaryColor),),
                         SizedBox(height: 10,),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12,),
-                          decoration: BoxDecoration(
-                              color: color1,
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                  width: 1,
-                                  color: color1
-                              )
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              value: category,
-                              icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                              isExpanded: true,
-                              items: cats.map(buildMenuItem).toList(),
-                              dropdownColor: bgColor,
-                              onChanged: (value) => setState(() => this.category = value),
-                            ),
-                          ),
+                        TextFieldInput(
+                          textEditingController: _location,
+                          labelText: 'Location',
+                          textInputType: TextInputType.text,
+                          srfIcon: IconButton(icon: Icon(Icons.location_on_outlined), onPressed: (){},),
+                          validator: (value){
+                            if(value == null || value == ""){
+                              return 'Please enter your property location';
+                            }
+                          },
                         ),
+                        SizedBox(height: 10,),
+                        // Text(' Category :  ', style: TextStyle(color: secondaryColor),),
+                        // SizedBox(height: 10,),
+                        // Container(
+                        //   padding: EdgeInsets.symmetric(horizontal: 12,),
+                        //   decoration: BoxDecoration(
+                        //       color: color1,
+                        //       borderRadius: BorderRadius.circular(5),
+                        //       border: Border.all(
+                        //           width: 1,
+                        //           color: color1
+                        //       )
+                        //   ),
+                        //   child: DropdownButtonHideUnderline(
+                        //     child: DropdownButton<String>(
+                        //       value: category,
+                        //       icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                        //       isExpanded: true,
+                        //       items: cats.map(buildMenuItem).toList(),
+                        //       dropdownColor: bgColor,
+                        //       onChanged: (value) => setState(() => this.category = value),
+                        //     ),
+                        //   ),
+                        // ),
                         SizedBox(height: 20,),
                         Text('Payment Terms', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                         SizedBox(height: 10,),
@@ -521,7 +547,7 @@ class _EditPropertyState extends State<EditProperty> {
                       labelText: "Password",
                       isPass: true,
                       validator: (value){
-                        if(value!=currentUser.password){
+                        if(md5.convert(utf8.encode(value!)).toString()!= currentUser.password){
                           return "Please enter the correct password";
                         }
                       },
@@ -550,6 +576,7 @@ class _EditPropertyState extends State<EditProperty> {
     EntityModel entity = widget.entity;
     entity.title = _title.text;
     entity.category = category;
+    entity.location = _location.text;
     entity.due = due.toString();
     entity.late = late.toString();
     entity.image = _image==null?oldImage:_image!.path;
