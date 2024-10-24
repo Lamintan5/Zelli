@@ -43,7 +43,7 @@ class TextFieldInput extends StatelessWidget {
     return TextFormField(
       enableInteractiveSelection: true,
       controller: textEditingController,
-      keyboardType: TextInputType.multiline,
+      keyboardType: textInputType,
       validator: validator,
       textAlign: textAlign,
       maxLength: maxLength==null?null:maxLength,
