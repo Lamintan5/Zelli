@@ -258,9 +258,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(CupertinoIcons.location, size: 15,color: secondaryColor,),
-                                SizedBox(width: 5),
-                                Text("San Fransisco, CA", style: TextStyle(color: secondaryColor)),
+                                entity.location.toString() == "" ? SizedBox() : Icon(CupertinoIcons.location, size: 15,color: secondaryColor,),
+                                entity.location.toString() == "" ? SizedBox() : SizedBox(width: 5),
+                                entity.location.toString() == "" ? SizedBox() : Text(entity.location.toString(), style: TextStyle(color: secondaryColor)),
                                 SizedBox(width: !isMember ?0:10,),
                                 !isMember ?SizedBox() : Icon(CupertinoIcons.calendar, size: 15,color: secondaryColor),
                                 SizedBox(width: !isMember ?0:5),
@@ -834,7 +834,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                       onTap:() {
 
                                       },
-                                      icon :Icon(CupertinoIcons.arrowshape_turn_up_right), title:"Request", subtitle:""
+                                      icon :Icon(CupertinoIcons.arrowshape_turn_up_right), title:"Request", subtitle:"",isBeta: true,
                                   )
                                 : SizedBox(),
 
