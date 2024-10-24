@@ -188,7 +188,7 @@ class Services{
     }
   }
   // ADD ENTITY
-  static Future addEntity(String eid, String pid, String admin,String title, String category, File? image, String due, String late, List utilities) async {
+  static Future addEntity(String eid, String pid, String admin,String title, String category, File? image, String due, String late, List utilities, String location) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse(_ENTITY));
       request.fields['action'] = _ADD;
@@ -199,6 +199,7 @@ class Services{
       request.fields['category'] = category;
       request.fields['due'] = due;
       request.fields['late'] = late;
+      request.fields['location'] = location;
       request.fields['utilities'] = utilities.join(',');
       if (image != null) {
         var pic = await http.MultipartFile.fromPath("image", image.path);
@@ -581,7 +582,6 @@ class Services{
   }
 
 
-
   // UPDATE USER TOKEN
   static Future<String> updateToken(String uid,String token) async {
     try {
@@ -631,7 +631,7 @@ class Services{
     }
   }
   // UPDATE ENTITY
-  static Future updateEntity(String eid, String title, String category, File? image, String oldImage, String due, String late) async {
+  static Future updateEntity(String eid, String title, String category, File? image, String oldImage, String due, String late, String location) async {
     try {
       var request = http.MultipartRequest('POST', Uri.parse(_ENTITY));
       request.fields['action'] = _UPDATE;
@@ -640,6 +640,7 @@ class Services{
       request.fields['category'] = category;
       request.fields['due'] = due;
       request.fields['late'] = late;
+      request.fields['location'] = location;
       if (image != null) {
         var pic = await http.MultipartFile.fromPath("image", image.path);
         request.files.add(pic);
@@ -853,9 +854,7 @@ class Services{
     }
   }
 
-
-
-  // DELETE ENTITY
+   // DELETE ENTITY
   static Future<String> deleteEntity(String eid) async {
     try {
       var map = new Map<String, dynamic>();
