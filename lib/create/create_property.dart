@@ -24,6 +24,7 @@ class CreateProperty extends StatefulWidget {
 
 class _CreatePropertyState extends State<CreateProperty> {
   TextEditingController _title = TextEditingController();
+  TextEditingController _location = TextEditingController();
   List<String> cats = ['Cat One', 'Cat Two', 'Cat Three', 'Cat Four' , 'Cat Five'];
   List<EntityModel> _entity = [];
   File? _image; String? category;
@@ -58,6 +59,7 @@ class _CreatePropertyState extends State<CreateProperty> {
       late: late.toString(),
       utilities: _utilities.join(','),
       checked: "false",
+      location: _location.text.toString(),
       time: DateTime.now().toString(),
     );
 
@@ -68,7 +70,8 @@ class _CreatePropertyState extends State<CreateProperty> {
     widget.getData();
     Navigator.pop(context);
 
-    final response = await Services.addEntity(eid,currentUser.uid,currentUser.uid,_title.text.trim().toString(),category.toString(),_image,due.toString(),late.toString(),_utilities );
+    final response = await Services.addEntity(eid,currentUser.uid,currentUser.uid,
+      _title.text.trim().toString(),category.toString(),_image,due.toString(),late.toString(),_utilities, _location.text.trim());
     final String responseString = await response.stream.bytesToString();
     if(responseString.contains("Success")){
       _entity.firstWhere((test) => test.eid == eid).checked = "true";
@@ -135,7 +138,7 @@ class _CreatePropertyState extends State<CreateProperty> {
           key: formKey,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -227,30 +230,42 @@ class _CreatePropertyState extends State<CreateProperty> {
                             },
                           ),
                           SizedBox(height: 20,),
-                          Text(' Category :  ', style: TextStyle(color: secondaryColor),),
-                          SizedBox(height: 10,),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12,),
-                            decoration: BoxDecoration(
-                                color: color1,
-                                borderRadius: BorderRadius.circular(5),
-                                border: Border.all(
-                                    width: 1,
-                                    color: color1
-                                )
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: category,
-                                icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                                dropdownColor: bgColor,
-                                isExpanded: true,
-                                items: cats.map(buildMenuItem).toList(),
-                                onChanged: (value) => setState(() => this.category = value),
-                              ),
-                            ),
+                          TextFieldInput(
+                            textEditingController: _location,
+                            labelText: 'Location',
+                            textInputType: TextInputType.text,
+                            srfIcon: IconButton(icon: Icon(Icons.location_on_outlined), onPressed: (){},),
+                            validator: (value){
+                              if(value == null || value == ""){
+                                return 'Please enter your property location';
+                              }
+                            },
                           ),
-                          SizedBox(height: 20,),
+                          SizedBox(height: 10,),
+                          // Text(' Category :  ', style: TextStyle(color: secondaryColor),),
+                          // SizedBox(height: 5,),
+                          // Container(
+                          //   padding: EdgeInsets.symmetric(horizontal: 12,),
+                          //   decoration: BoxDecoration(
+                          //       color: color1,
+                          //       borderRadius: BorderRadius.circular(5),
+                          //       border: Border.all(
+                          //           width: 1,
+                          //           color: color1
+                          //       )
+                          //   ),
+                          //   child: DropdownButtonHideUnderline(
+                          //     child: DropdownButton<String>(
+                          //       value: category,
+                          //       icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                          //       dropdownColor: bgColor,
+                          //       isExpanded: true,
+                          //       items: cats.map(buildMenuItem).toList(),
+                          //       onChanged: (value) => setState(() => this.category = value),
+                          //     ),
+                          //   ),
+                          // ),
+                          //SizedBox(height: 20,),
                           Text('Payment Terms', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
                           SizedBox(height: 10,),
                           Row(
