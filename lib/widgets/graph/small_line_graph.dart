@@ -63,18 +63,18 @@ class _SmallLineGraphState extends State<SmallLineGraph> {
     ).toList()
         :[];
     setState(() {
-      _jan = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.january && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _feb = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.february && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _march = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.march && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _april = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.april && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _may = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.may && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _jun = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.june && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _jully = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.july && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _agust = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.august && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _sep = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.september && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _oct = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.october && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _nov = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.november && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
-      _dec = _payments.where((element) => DateTime.parse(element.time.toString().split(",").first).month == DateTime.december && DateTime.parse(element.time.toString().split(",").first).year == DateTime.now().year).toList();
+      _jan = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.january && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _feb = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.february && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _march = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.march && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _april = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.april && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _may = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.may && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _jun = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.june && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _jully = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.july && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _agust = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.august && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _sep = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.september && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _oct = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.october && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _nov = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.november && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
+      _dec = _payments.where((element) => DateTime.parse(element.time.toString()).month == DateTime.december && DateTime.parse(element.time.toString()).year == DateTime.now().year).toList();
 
       jan = _jan.isEmpty ? 0.0 : _jan.fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount.toString()));
       feb = _feb.isEmpty ? 0.0 : _feb.fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount.toString()));

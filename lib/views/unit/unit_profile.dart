@@ -223,10 +223,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     DateTime currentMonth = DateTime.now();
     DateTime firstRentDate =  _rent.isEmpty
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
-        : DateTime.parse(_rent.first.time.toString().split(",").first);
+        : DateTime.parse(_rent.first.time.toString());
     DateTime lastRentDate =  _rent.isEmpty
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
-        : DateTime.parse(_rent.last.time.toString().split(",").last);
+        : DateTime.parse(_rent.last.time.toString());
     startDate = DateTime(firstRentDate.year, firstRentDate.month, int.parse(entity.due.toString()));
     endDate = lastRentDate.month < currentMonth.month
         ?  DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))

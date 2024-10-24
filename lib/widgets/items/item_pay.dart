@@ -68,8 +68,8 @@ class _ItemPayState extends State<ItemPay> {
         ? currentUser
         : _user.firstWhere((element) => element.uid == widget.payments.tid.toString().split(",").first,
         orElse: () => UserModel(uid: "", image: "", username: "N/A"));
-    start = DateTime.parse(widget.payments.time.toString().split(",").first);
-    end = DateTime.parse(widget.payments.time.toString().split(",").last);
+    start = DateTime.parse(widget.payments.time.toString());
+    end = DateTime.parse(widget.payments.time.toString());
     setState(() {
     });
   }
@@ -218,12 +218,10 @@ class _ItemPayState extends State<ItemPay> {
                                       style: bold
                                   ),
                                   TextSpan(
-                                    text:widget.payments.time.toString().split(",").length >1? ' for the months ' : ' for the month of ',
+                                    text:' for the month of ',
                                   ),
                                   TextSpan(
-                                      text: widget.payments.time.toString().split(",").length >1
-                                          ?'${DateFormat.yMMM().format(start)} - ${DateFormat.yMMM().format(end)}'
-                                          :DateFormat.yMMM().format(DateTime.parse(widget.payments.time.toString().split(",").first)),
+                                      text:DateFormat.yMMM().format(DateTime.parse(widget.payments.time.toString())),
                                       style: bold
                                   ),
                                 ]
@@ -302,9 +300,7 @@ class _ItemPayState extends State<ItemPay> {
                               children: [
                                 Icon(CupertinoIcons.calendar, size: 11,),
                                 SizedBox(width: 5,),
-                                Text(widget.payments.time.toString().split(",").length >1
-                                    ?"${getMonthsBetween(start, end)+1} Months"
-                                    :DateFormat.yMMM().format(DateTime.parse(widget.payments.time.toString().split(",").first)), style: TextStyle(fontSize: 11, ),)
+                                Text(DateFormat.yMMM().format(DateTime.parse(widget.payments.time.toString())), style: TextStyle(fontSize: 11, ),)
                               ],
                             ),
                           ),
