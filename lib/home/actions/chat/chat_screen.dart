@@ -69,12 +69,16 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Obx(() => Text("${mychats.length} C H A T S", style: TextStyle(fontWeight: FontWeight.w100),)),
         actions: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: EdgeInsets.symmetric(vertical: 1, horizontal: 8),
             decoration: BoxDecoration(
+                color: CupertinoColors.activeBlue.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(5),
-                color: CupertinoColors.activeBlue
+                border: Border.all(
+                    color: CupertinoColors.activeBlue,
+                    width: 0.5
+                )
             ),
-            child: Text("Beta", style: TextStyle(fontSize: 12),),
+            child: Text("Beta", style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.bold),),
           ),
           IconButton(
             onPressed: (){
