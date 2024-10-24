@@ -1564,10 +1564,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
-                            Navigator.pop(context);
-                            dialogRequest(context);
+                            // Navigator.pop(context);
+                            // dialogRequest(context);
                           },
-                          icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: ""
+                          icon : Icon(CupertinoIcons.arrowshape_turn_up_right), title: "Request",subtitle: "", isBeta: true,
                         )
                       : SizedBox(),
 
