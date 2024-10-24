@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:Zelli/models/data.dart';
+import 'package:Zelli/views/unit/unit_profile.dart';
 import 'package:Zelli/widgets/dialogs/dialog_title.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 import '../../main.dart';
 import '../../models/entities.dart';
@@ -141,13 +144,9 @@ class _FloorUnitsState extends State<FloorUnits> {
                               ));
                               return InkWell(
                                 onTap: (){
-                                  // widget.unit.tid == currentUser.uid
-                                  //      ? Get.to(()=> ShowCaseWidget(
-                                  //       builder: Builder(builder: (_) => UnitProfilePage(unit: widget.unit, entity: widget.entity,),),
-                                  //     ), transition: Transition.rightToLeft)
-                                  //     : Get.to(()=> ShowCaseWidget(
-                                  //   builder: Builder(builder: (_) => UnitProfile(unit: widget.unit, getUnit: widget.getUnit, removeTenant: widget.removeTenant, removeFromList: widget.removeFromList,),),
-                                  // ), transition: Transition.rightToLeft);
+                                  Get.to(()=> ShowCaseWidget(
+                                    builder: (_) => UnitProfile(unit: unit, reload: _getData, removeTenant: _removeTenant, removeFromList: _removeFromList, user: UserModel(uid: ""), leasid: '', entity: widget.entity,),
+                                  ), transition: Transition.rightToLeft);
                                 },
                                 borderRadius: BorderRadius.circular(5),
                                 splashColor: CupertinoColors.activeBlue,
@@ -231,6 +230,9 @@ class _FloorUnitsState extends State<FloorUnits> {
     setState(() {
     });
   }
+  _removeTenant(){
+  }
+
   void dialogAddUnit(BuildContext context){
     final dilogbg = Theme.of(context).brightness == Brightness.dark
         ? Colors.grey[900]
