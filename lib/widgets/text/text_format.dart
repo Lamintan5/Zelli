@@ -52,8 +52,30 @@ class TFormat{
   String? getCurrencyCode() {
     return countryToCurrencyCode[currentUser.country];
   }
-  
-  
+
+  String formatOrdinal(int number) {
+    if (number <= 0) return number.toString();
+
+    int lastDigit = number % 10;
+    int lastTwoDigits = number % 100;
+
+    String suffix;
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+      suffix = "th";
+    } else if (lastDigit == 1) {
+      suffix = "st";
+    } else if (lastDigit == 2) {
+      suffix = "nd";
+    } else if (lastDigit == 3) {
+      suffix = "rd";
+    } else {
+      suffix = "th";
+    }
+
+    return "$number$suffix";
+  }
+
+
   final Map<String, String> countryToCurrency = {
     "AD": "€", // Andorra
     "AE": "د.إ", // United Arab Emirates
