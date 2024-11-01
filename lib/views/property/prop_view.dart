@@ -762,9 +762,8 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                       Navigator.pop(context);
                                       Get.to(()=>EditProperty(entity: entity, reload: _updateEntityProfile,), transition: Transition.rightToLeftWithFade);
                                     },
-                                    icon :  Icon(CupertinoIcons.pen, ), title: "Edit Property",subtitle: ""
+                                    icon : Icon(CupertinoIcons.pen, ), title: "Edit Property",subtitle: ""
                                   ),
-
                             // Exit or Delete
                             admin.first != currentUser.uid
                                 ? entity.pid.toString().contains(currentUser.uid)

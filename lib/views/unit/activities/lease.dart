@@ -1,7 +1,9 @@
 import 'package:Zelli/main.dart';
+import 'package:Zelli/models/data.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/models/units.dart';
 import 'package:Zelli/models/users.dart';
+import 'package:Zelli/resources/services.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +17,8 @@ class Lease extends StatefulWidget {
   final UnitModel unit;
   final LeaseModel lease;
   final UserModel tenant;
-  const Lease({super.key, required this.unit, required this.lease, required this.tenant, required this.entity});
+  final Function reload;
+  const Lease({super.key, required this.unit, required this.lease, required this.tenant, required this.entity, required this.reload});
 
   @override
   State<Lease> createState() => _LeaseState();
@@ -41,6 +44,7 @@ class _LeaseState extends State<Lease> {
 
   bool _editLease = false;
   bool _editFinance = false;
+  bool  _loading = false;
 
   _getData(){
     unit = widget.unit;
@@ -117,7 +121,7 @@ class _LeaseState extends State<Lease> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text("Basic Information", style: heading,),
-                              horizontalItems("Lease ID", lease.lid.split("-").first),
+                              horizontalItems("Lease ID", lease.lid.split("-").first.toUpperCase()),
                               horizontalItems("Property", entity.title.toString().split("-").first),
                               horizontalItems("Unit Number", unit.title.toString()),
                             ],
@@ -345,7 +349,7 @@ class _LeaseState extends State<Lease> {
                                   : horizontalItems("Monthly Rent", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(unit.price.toString()))}'),
                               _editFinance
                                   ? Container(
-                                    margin: EdgeInsets.only(top: 5),
+                                    margin: EdgeInsets.only(top: 10),
                                     child: TextFormField(
                                         controller: _deposit,
                                         maxLines: 1,
@@ -415,10 +419,85 @@ class _LeaseState extends State<Lease> {
                 ),
               ),
             ),
+            _editLease || _editFinance
+                ? Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: InkWell(
+                    onTap: _update,
+                    borderRadius: BorderRadius.circular(5),
+                    child: Container(
+                      width: 450,
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.activeBlue,
+                        borderRadius: BorderRadius.circular(5)
+                      ),
+                      child: Center(child: _loading
+                          ? SizedBox(
+                              width: 15,height: 15,
+                              child: CircularProgressIndicator(color: Colors.black,strokeWidth: 2)
+                            )
+                          : Text("UPDATE", style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),)),
+                    ),
+                  ),
+                )
+                : SizedBox()
           ],
         ),
       ),
     );
+  }
+  void _update()async{
+    setState(() {
+      _loading = true;
+    });
+    await Services.updateLeaseDetails(
+        lease.lid,
+        _rent.text.toString(),
+        _deposit.text.toString(),
+        startTime.toString(),
+        lease.end.toString().isEmpty? "" : endTime.toString()).then((response){
+      if(response=="success"){
+        lease.rent = _rent.text.toString();
+        lease.deposit = _deposit.text.toString();
+        lease.start = startTime.toString();
+        lease.end = lease.end.toString().isEmpty? "" : endTime.toString();
+        Data().addLease(lease);
+        widget.reload();
+        setState(() {
+          _editFinance = false;
+          _editLease = false;
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lease was updated. Successfully'),
+              showCloseIcon: true,
+            )
+        );
+      } else if(response=="error") {
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lease was not updated. Please try again later'),
+              showCloseIcon: true,
+            )
+        );
+      } else {
+        setState(() {
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(Data().failed),
+            showCloseIcon: true,
+          )
+        );
+      }
+    });
+
   }
   Widget horizontalItems(String title, String value){
     return Container(

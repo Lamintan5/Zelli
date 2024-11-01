@@ -47,6 +47,7 @@ class Services{
   static const String _GET_BY_ENTITY  = 'GET_BY_ENTITY';
   static const String _UPDATE  = 'UPDATE';
   static const String _UPDATE_PASS  = 'UPDATE_PASS';
+  static const String _UPDATE_DETAILS  = 'UPDATE_DETAILS';
   static const String _UPDATE_TOKEN  = 'UPDATE_TOKEN';
   static const String _UPDATE_ACTION  = 'UPDATE_ACTION';
   static const String _UPDATE_DELETE  = 'UPDATE_DELETE';
@@ -78,55 +79,46 @@ class Services{
     final data = json.decode(jsonString);
     return List<InventModel>.from(data.map((item)=>InventModel.fromJson(item)));
   }
-
   // Method to create the table Unit.
   List<UnitModel> unitFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<UnitModel>.from(data.map((item)=>UnitModel.fromJson(item)));
   }
-
   // Method to create the table Notification.
   List<NotifModel> notifFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<NotifModel>.from(data.map((item)=>NotifModel.fromJson(item)));
   }
-
   // Method to create the table Manager.
   List<ManagerModel> managerFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<ManagerModel>.from(data.map((item)=>ManagerModel.fromJson(item)));
   }
-
   // Method to create the table lease.
   List<LeaseModel> leaseFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<LeaseModel>.from(data.map((item)=>LeaseModel.fromJson(item)));
   }
-
   // Method to create the table Message.
   List<MessModel> messFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<MessModel>.from(data.map((item)=>MessModel.fromJson(item)));
   }
-
   // Method to create the table Payment.
   List<PaymentsModel> payFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<PaymentsModel>.from(data.map((item)=>PaymentsModel.fromJson(item)));
   }
-
   // Method to create the table Star.
   List<StarModel> starFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<StarModel>.from(data.map((item)=>StarModel.fromJson(item)));
   }
-
   // Method to create the table Review.
   List<ReviewModel> reviewFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<ReviewModel>.from(data.map((item)=>ReviewModel.fromJson(item)));
   }
-
   // Method to create the table Duties.
   List<DutiesModel> dutyFromJson(String jsonString) {
     final data = json.decode(jsonString);
@@ -264,17 +256,19 @@ class Services{
     }
   }
   // ADD lease
-  static Future<String> addLeases(String lid, String tid, String eid, String uid, String pid, String start, String end) async {
+  static Future<String> addLeases(LeaseModel lease) async {
     try {
       var map = new Map<String, dynamic>();
       map["action"] = _ADD;
-      map["lid"] = lid;
-      map["tid"] = tid;
-      map["eid"] = eid;
-      map["uid"] = uid;
-      map["pid"] = pid;
-      map["start"] = start;
-      map["end"] = end;
+      map["lid"] = lease.lid;
+      map["tid"] = lease.tid;
+      map["eid"] = lease.eid;
+      map["uid"] = lease.uid;
+      map["pid"] = lease.pid;
+      map["rent"] = lease.rent;
+      map["deposit"] = lease.deposit;
+      map["start"] = lease.start;
+      map["end"] = lease.end;
       final response = await http.post(Uri.parse(_LEASE), body: map);
       return response.body;
     } catch (e) {
@@ -826,7 +820,6 @@ class Services{
       return 'error';
     }
   }
-
   // UPDATE DUTIES
   static Future<String> updateDuties(String did,List duties) async {
     try {
@@ -847,6 +840,22 @@ class Services{
       map["action"] = _UPDATE;
       map["lid"] = lid;
       map["end"] = DateTime.now().toString();
+      final response = await http.post(Uri.parse(_LEASE), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // UPDATE LEASE DETAILS
+  static Future<String> updateLeaseDetails(String lid, String rent, String deposit, String start, String end) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _UPDATE_DETAILS;
+      map["lid"] = lid;
+      map["rent"] = rent;
+      map["deposit"] = deposit;
+      map["start"] = start;
+      map["end"] = end;
       final response = await http.post(Uri.parse(_LEASE), body: map);
       return response.body;
     } catch (e) {

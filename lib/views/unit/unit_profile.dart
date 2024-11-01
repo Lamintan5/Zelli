@@ -145,9 +145,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
     lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0, orElse: ()=>MonthModel(year: DateTime.now().year, monthName: "Jan", month: DateTime.now().month, amount: 0, balance: 0));
-    monthsList.forEach((mnth){
-      print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
-    });
+    // monthsList.forEach((mnth){
+    //   print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
+    // });
+    print("DATA FETCHED");
     setState(() {
     });
   }
@@ -201,14 +202,17 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         _position4 = _tenants.length == 0 ? 20 : _tenants.length == 1 ? 30 : _tenants.length == 2 || _tenants.length == 3 || _tenants.length > 3 ? 40 : 20.0;
       });
     });
+
+    deposit = double.parse(unit.lid.toString().isNotEmpty
+        ? currentLease.deposit.toString()
+        : unit.deposit.toString());
+    rent = double.parse(unit.lid.toString().isNotEmpty? currentLease.rent.toString() : unit.price.toString());
   }
 
   _getUnit(){
     unit = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).firstWhere((test) => test.id==widget.unit.id, orElse: ()=>widget.unit);
     floor = int.parse(unit.floor.toString());
     room = int.parse(unit.room.toString());
-    deposit = double.parse(unit.deposit.toString());
-    rent = double.parse(unit.price.toString());
   }
 
   _getPayments(){
@@ -439,7 +443,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       ? SizedBox()
                       : IconButton(
                           onPressed: (){
-                            Get.to(() => Lease(entity: entity, unit: unit, lease: currentLease, tenant: currentTenant), transition: Transition.rightToLeft);
+                            Get.to(() => Lease(entity: entity, unit: unit, lease: currentLease,
+                              tenant: currentTenant, reload: _getData,), transition: Transition.rightToLeft);
                           },
                           icon: Icon(CupertinoIcons.doc_text)
                         ),
@@ -1221,18 +1226,18 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                               Icon(
                                                 amount == 0
                                                     ? CupertinoIcons.circle
-                                                    : amount < double.parse(widget.unit.price!)
+                                                    : amount < rent
                                                     ? CupertinoIcons.circle_lefthalf_fill
                                                     :CupertinoIcons.check_mark_circled,
                                                 size: 20,
-                                                color: amount == double.parse(widget.unit.price!)? Colors.green :secondaryColor,
+                                                color: amount == rent && amount != 0? Colors.green :secondaryColor,
                                               ),
                                               SizedBox(width: 10,),
                                               Text(
                                                 TFormat().toCamelCase(DateFormat.MMMM().format(DateTime(month.year, month.month))),
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.w600,fontSize: 15,
-                                                  color: amount < double.parse(widget.unit.price!) ? secondaryColor : reverse
+                                                  color: amount < rent ? secondaryColor : reverse
                                                 ),
                                               ),
                                               Expanded(child: SizedBox()),
@@ -1247,7 +1252,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                                         color: amount<=0?secondaryColor:CupertinoColors.activeBlue
                                                     ),
                                                   ),
-                                                  amount < double.parse(widget.unit.price!) && double.parse(widget.unit.price!) - amount != rent
+                                                  amount < rent && rent - amount != rent
                                                       ? Text("Balance : ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(widget.unit.price!) - amount)}",
                                                         style: TextStyle(color: secondaryColor),)
                                                       : SizedBox()
@@ -1886,7 +1891,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     }
     List<PaymentsModel> _periodPays = [];
     // _periodPays = _sortedPay.where((element) => DateTime.parse(element.time.toString()).month == monthIndex && DateTime.parse(element.time.toString()).year == year).toList();
-    // oldRent = double.parse(widget.unit.price!) -_periodPays.where((pay) => pay.type == "RENT").fold(0, (previousValue, element) => previousValue + double.parse(element.amount!) );
+    // oldRent = rent -_periodPays.where((pay) => pay.type == "RENT").fold(0, (previousValue, element) => previousValue + double.parse(element.amount!) );
     // oldDepo = double.parse(widget.unit.deposit!) -_periodPays.where((pay) => pay.type == "DEPOSIT").fold(0, (previousValue, element) => previousValue + double.parse(element.amount!));
     // blncRent =  oldRent;
     // blncDepo = oldDepo;

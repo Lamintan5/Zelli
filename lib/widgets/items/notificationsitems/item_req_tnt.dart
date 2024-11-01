@@ -626,11 +626,13 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                   eid: notifModel.eid,
                   pid: notifModel.pid.toString(),
                   uid: notifModel.text.toString(),
+                  rent: unitmodel.price,
+                  deposit: unitmodel.deposit,
                   start: DateTime.now().toString(),
                   end: "",
                   checked: "true"
               );
-              Services.addLeases(lid, currentUser.uid, notifModel.eid.toString(), notifModel.text.toString(), notifModel.pid.toString(), DateTime.now().toString(), "",).then((state){
+              Services.addLeases(lease).then((state){
                 print("State $state");
               });
               unitmodel.tid = currentUser.uid;

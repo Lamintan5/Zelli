@@ -5,11 +5,13 @@ class LeaseModel {
   String? eid;
   String? pid;
   String? uid;
+  String? rent;
+  String? deposit;
   String? start;
   String? end;
   String? checked;
 
-  LeaseModel({required this.lid, this.tid,this.ctid, this.eid,this.pid,this.uid,this.start, this.end, this.checked});
+  LeaseModel({required this.lid, this.tid,this.ctid, this.eid,this.pid,this.uid, this.rent, this.deposit, this.start, this.end, this.checked});
   factory LeaseModel.fromJson(Map<String, dynamic> json) {
     return LeaseModel(
       lid: json['lid'] as String,
@@ -18,6 +20,8 @@ class LeaseModel {
       eid: json['eid'] as String,
       pid: json['pid'] as String,
       uid: json['uid'] as String,
+      rent: json['rent'] as String,
+      deposit: json['deposit'] as String,
       start: json['start'] as String,
       end: json['end'] as String,
       checked: json['checked'] as String,
@@ -32,6 +36,8 @@ class LeaseModel {
       'eid': eid,
       'pid': pid,
       'uid': uid,
+      'rent': rent,
+      'deposit': deposit,
       'start': start,
       'end': end,
       'checked': checked,
