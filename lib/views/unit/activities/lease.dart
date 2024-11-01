@@ -1,3 +1,4 @@
+import 'package:Zelli/main.dart';
 import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/models/units.dart';
 import 'package:Zelli/models/users.dart';
@@ -29,6 +30,8 @@ class _LeaseState extends State<Lease> {
   late DateTime startTime;
   late DateTime endTime;
 
+  List<String> _admins = [];
+
   int totalMonths = 0;
 
   _getData(){
@@ -37,6 +40,8 @@ class _LeaseState extends State<Lease> {
     tenant = widget.tenant;
     entity = widget.entity;
 
+    _admins = entity.admin.toString().split('');
+
     startTime = DateTime.parse(lease.start.toString());
     endTime = lease.end.toString().isEmpty? DateTime.now() :  DateTime.parse(lease.end.toString());
 
@@ -44,6 +49,7 @@ class _LeaseState extends State<Lease> {
     int monthDiff = endTime.month - startTime.month;
 
     totalMonths = (yearDiff * 12) + monthDiff;
+
   }
 
   @override
@@ -138,7 +144,7 @@ class _LeaseState extends State<Lease> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Lease Details", style: heading,),
-                                lease.end.toString().isNotEmpty?  SizedBox() : InkWell(
+                                lease.end.toString().isNotEmpty && _admins.contains(currentUser.uid)?  SizedBox() : InkWell(
                                     onTap: (){},
                                     borderRadius: BorderRadius.circular(20),
                                     hoverColor: CupertinoColors.systemBlue.withOpacity(0.2),
@@ -184,7 +190,7 @@ class _LeaseState extends State<Lease> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Financial Details", style: heading,),
-                                lease.end.toString().isNotEmpty?  SizedBox() : InkWell(
+                                lease.end.toString().isNotEmpty && _admins.contains(currentUser.uid)?  SizedBox() : InkWell(
                                     onTap: (){},
                                     borderRadius: BorderRadius.circular(20),
                                     hoverColor: CupertinoColors.systemBlue.withOpacity(0.2),
