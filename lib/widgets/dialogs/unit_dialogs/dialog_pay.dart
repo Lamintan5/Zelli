@@ -224,10 +224,10 @@ class _DialogPayState extends State<DialogPay> {
         uid: widget.unit.id,
         payerid: currentUser.uid,
         amount: double.parse(_amount.text).toString(),
-        balance: widget.account == "DEPOSIT"? (widget.amount -  double.parse(_amount.text)).toString() : balance.toString() ,
+        balance: widget.account == "DEPOSIT"? (widget.amount -  double.parse(_amount.text)).toString() : balance.toString(),
         method: method,
         type: widget.account,
-        time: widget.account == "DEPOSIT"?DateTime.now().toString():"${start},${end}",
+        time: DateTime.now().toString(),
         current: DateTime.now().toString(),
         checked: "true",
     );
