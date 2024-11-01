@@ -138,7 +138,7 @@ class _LeaseState extends State<Lease> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Lease Details", style: heading,),
-                                InkWell(
+                                lease.end.toString().isNotEmpty?  SizedBox() : InkWell(
                                     onTap: (){},
                                     borderRadius: BorderRadius.circular(20),
                                     hoverColor: CupertinoColors.systemBlue.withOpacity(0.2),
@@ -184,7 +184,7 @@ class _LeaseState extends State<Lease> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text("Financial Details", style: heading,),
-                                InkWell(
+                                lease.end.toString().isNotEmpty?  SizedBox() : InkWell(
                                     onTap: (){},
                                     borderRadius: BorderRadius.circular(20),
                                     hoverColor: CupertinoColors.systemBlue.withOpacity(0.2),
