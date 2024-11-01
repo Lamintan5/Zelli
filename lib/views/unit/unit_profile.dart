@@ -629,7 +629,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                             curve: Curves.easeInOut,
                                             child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
                                           ),
-                                          !_admin.contains(currentUser.uid) ? SizedBox() : AnimatedPositioned(
+                                          !_admin.contains(currentUser.uid) || currentLease.lid != unit.lid? SizedBox() : AnimatedPositioned(
                                             left: _position4,
                                             duration: Duration(seconds: 1),
                                             curve: Curves.easeInOut,

@@ -95,6 +95,7 @@ class _CoTenantsState extends State<CoTenants> {
       appBar: AppBar(
         title: Text("Co-Tenants"),
         actions: [
+          widget.lease.lid != widget.unit.lid ? SizedBox() :
           _admin.contains(currentUser.uid) || mainTenant == currentUser.uid
               ?Tooltip(
             message: "Add new co-tenants",
