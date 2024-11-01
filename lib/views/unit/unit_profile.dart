@@ -13,6 +13,7 @@ import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:get/get.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:intl/intl.dart';
@@ -419,10 +420,20 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 surfaceTintColor: Colors.transparent,
                 backgroundColor: normal,
                 pinned: true,
-                expandedHeight: currentTenant.uid==""? 220 :290,
+                expandedHeight: currentTenant.uid==""? 220 :240,
                 toolbarHeight: 40,
                 title: Text(entity.title.toString()),
                 actions: [
+                  currentTenant.uid==currentUser.uid || currentTenant.uid==""
+                      ? SizedBox()
+                      : IconButton(
+                      onPressed: (){
+                        Platform.isAndroid || Platform.isIOS
+                            ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: currentTenant), transition: Transition.rightToLeft)
+                            : Get.to(() => WebChat(selected: currentTenant), transition: Transition.rightToLeft);
+                      },
+                      icon: Icon(CupertinoIcons.ellipses_bubble)
+                  ),
                   isMember || isTenant
                       ? Showcase(
                     key: _keyThree,
@@ -699,91 +710,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                        SizedBox(height: 10),
-                        currentTenant.uid==""
-                            ? SizedBox()
-                            : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Platform.isAndroid || Platform.isIOS
-                                ?  currentTenant.uid==currentUser.uid
-                                ? SizedBox()
-                                : CardButton(
-                                text: "PHONE",
-                                backcolor: reverse,
-                                forecolor: normal,
-                                icon: Icon(CupertinoIcons.phone, color: normal,size: 20),
-                                onTap: (){
-                                  if(currentTenant.phone.toString()==""){
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                            content: Text(Data().noPhone),
-                                            width: 500,
-                                        )
-                                    );
-                                  }
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text("Feature not available."),
-                                        showCloseIcon: true,
-                                      )
-                                  );
-                                }
-                            )
-                                :  SizedBox(),
-
-                            currentTenant.uid==currentUser.uid
-                                ?SizedBox()
-                                : CardButton(
-                                    text: "CHAT",
-                                    backcolor: reverse,
-                                    forecolor: normal,
-                                    icon: Icon(CupertinoIcons.bubble_left, color: normal,size: 20),
-                                    onTap: (){
-                                      Platform.isAndroid || Platform.isIOS
-                                          ? Get.to(() => MessageScreen(changeMess: _changeMess, updateCount: _updateCount, receiver: currentTenant), transition: Transition.rightToLeft)
-                                          : Get.to(() => WebChat(selected: currentTenant), transition: Transition.rightToLeft);
-                                    }
-                                ),
-
-                            paidDeposit == deposit && currentLease.lid == unit.lid
-                                ? CardButton(
-                                    text:
-                                    "RENT",
-                                    backcolor: reverse,
-                                    forecolor: normal,
-                                    icon: Icon(CupertinoIcons.house,color: normal,size: 20),
-                                    onTap: (){
-                                      dialogRecordPayments(context, "RENT",accrued);
-                                    }
-                                )
-                                : SizedBox(),
-                            paidDeposit < deposit && currentLease.lid == unit.lid
-                                ?  CardButton(
-                                text:
-                                "DEPOSIT",
-                                backcolor: reverse,
-                                forecolor: normal,
-                                icon: Icon(CupertinoIcons.lock, color: normal,size: 20,),
-                                onTap: (){
-                                  dialogRecordPayments(context, "DEPOSIT",depoBalance);
-                                }
-                            )
-                                :SizedBox(),
-
-                            paidDeposit == deposit
-                                ?CardButton(
-                                    text: "UTILITY",
-                                    backcolor: reverse,
-                                    forecolor: normal,
-                                    icon: Icon(CupertinoIcons.lightbulb, color: normal,size: 20),
-                                    onTap: (){
-                                      dialogUtil(context);
-                                    }
-                                )
-                                : SizedBox(),
                           ],
                         ),
                         SizedBox(height: 10),
@@ -1615,6 +1541,36 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
           ),
         ),
       ),
+      floatingActionButton: currentTenant.uid==""
+          ? SizedBox()
+          : SpeedDial(
+            backgroundColor: CupertinoColors.activeBlue,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+            icon: CupertinoIcons.money_dollar,
+            overlayOpacity: 0.5,
+            animationDuration: Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+            tooltip: "Payments",
+            children: [
+              if(paidDeposit < deposit && currentLease.lid == unit.lid)
+                SpeedDialChild(
+                    child: Icon(CupertinoIcons.lock, size: 20,),
+                    shape: CircleBorder(),
+                    label: "Deposit"
+                ),
+              if(paidDeposit == deposit && currentLease.lid == unit.lid)
+                SpeedDialChild(
+                    child: Icon(CupertinoIcons.home, size: 20,),
+                    shape: CircleBorder(),
+                    label: "Rent"
+                ),
+              SpeedDialChild(
+                child: Icon(CupertinoIcons.lightbulb, size: 20,),
+                  shape: CircleBorder(),
+                label: "Utilities"
+              ),
+            ],
+          ),
     );
   }
   void dialogAddTenant(BuildContext context){
@@ -2372,8 +2328,8 @@ class buildButton extends StatelessWidget {
         hoverColor: color1,
         borderRadius: BorderRadius.circular(5),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(Icons.menu),
+          padding: const EdgeInsets.all(4.0),
+          child: Icon(Icons.menu, size: 28,),
         ));
   }
 }
