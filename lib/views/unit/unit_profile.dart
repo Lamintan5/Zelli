@@ -9,6 +9,7 @@ import 'package:Zelli/models/users.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/unit/activities/co_tenants.dart';
 import 'package:Zelli/views/unit/activities/create_request.dart';
+import 'package:Zelli/views/unit/activities/lease.dart';
 import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
@@ -434,6 +435,14 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       },
                       icon: Icon(CupertinoIcons.ellipses_bubble)
                   ),
+                  currentTenant.uid==""
+                      ? SizedBox()
+                      : IconButton(
+                          onPressed: (){
+                            Get.to(() => Lease(entity: entity, unit: unit, lease: currentLease, tenant: currentTenant), transition: Transition.rightToLeft);
+                          },
+                          icon: Icon(CupertinoIcons.doc_text)
+                        ),
                   isMember || isTenant
                       ? Showcase(
                     key: _keyThree,
@@ -1541,7 +1550,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
           ),
         ),
       ),
-      floatingActionButton: currentTenant.uid==""
+      floatingActionButton: currentTenant.uid=="" || currentLease.lid != unit.lid
           ? SizedBox()
           : SpeedDial(
             backgroundColor: CupertinoColors.activeBlue,
@@ -1552,18 +1561,17 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             curve: Curves.easeInOut,
             tooltip: "Payments",
             children: [
-              if(paidDeposit < deposit && currentLease.lid == unit.lid)
+              if(paidDeposit < deposit)
                 SpeedDialChild(
                     child: Icon(CupertinoIcons.lock, size: 20,),
                     shape: CircleBorder(),
                     label: "Deposit"
                 ),
-              if(paidDeposit == deposit && currentLease.lid == unit.lid)
-                SpeedDialChild(
-                    child: Icon(CupertinoIcons.home, size: 20,),
-                    shape: CircleBorder(),
-                    label: "Rent"
-                ),
+              SpeedDialChild(
+                  child: Icon(CupertinoIcons.home, size: 20,),
+                  shape: CircleBorder(),
+                  label: "Rent"
+              ),
               SpeedDialChild(
                 child: Icon(CupertinoIcons.lightbulb, size: 20,),
                   shape: CircleBorder(),
