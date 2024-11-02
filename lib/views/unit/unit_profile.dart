@@ -343,7 +343,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         } else {
           totalAmountPaid += paymentAmount;
           monthlyBalance -= paymentAmount;
-          print("Monthly Balance $monthlyBalance");
+          // print("Monthly Balance $monthlyBalance");
         }
       }
 
@@ -1503,12 +1503,18 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 SpeedDialChild(
                     child: Icon(CupertinoIcons.lock, size: 20,),
                     shape: CircleBorder(),
-                    label: "Deposit"
+                    label: "Deposit",
+                    onTap: (){
+                      dialogRecordPayments(context, "Deposit", depoBalance);
+                    }
                 ),
               SpeedDialChild(
                   child: Icon(CupertinoIcons.home, size: 20,),
                   shape: CircleBorder(),
-                  label: "Rent"
+                  label: "Rent",
+                  onTap: (){
+                      dialogRecordPayments(context, "Rent", accrued);
+                  }
               ),
               SpeedDialChild(
                 child: Icon(CupertinoIcons.lightbulb, size: 20,),
