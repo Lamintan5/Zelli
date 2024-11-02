@@ -227,9 +227,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
   _listMonth(){
     DateTime currentMonth = DateTime.now();
-    DateTime firstRentDate =  _rent.isEmpty
-        ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
-        : DateTime.parse(_rent.first.time.toString());
+    DateTime firstRentDate = unit.lid.toString().isEmpty? DateTime.now() : DateTime.parse(currentLease.start.toString());
     DateTime lastRentDate =  _rent.isEmpty
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
         : DateTime.parse(_rent.last.time.toString());
@@ -425,7 +423,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 surfaceTintColor: Colors.transparent,
                 backgroundColor: normal,
                 pinned: true,
-                expandedHeight: currentTenant.uid==""? 220 :240,
+                expandedHeight: 220,
                 toolbarHeight: 40,
                 title: Text(entity.title.toString()),
                 actions: [
@@ -499,7 +497,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     child: Container(
                                         padding: EdgeInsets.all(1.3),
                                       decoration: BoxDecoration(
-                                        color: normal,
+                                        color: dgColor,
                                         borderRadius: BorderRadius.circular(50)
                                       ),
                                       child: Row(
@@ -656,71 +654,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   ),
                                   SizedBox(height: 5,),
                                   Text('Co-Tenants', overflow: TextOverflow.ellipsis, style: TextStyle(color: secondaryColor, fontSize: 10),)
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        currentTenant.uid==""
-                            ? SizedBox()
-                            : Wrap(
-                          spacing: 5,
-                          runSpacing: 5,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: color1
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(CupertinoIcons.doc_text , color: color5,size: 12,),
-                                  SizedBox(width: 2,),
-                                  Text(
-                                    currentLease.lid.split("-").first.toUpperCase(),
-                                    style: TextStyle(color: color5,fontSize: 12),
-                                  )
-                                ],
-                              ),
-                            ),
-                            start.isEmpty? SizedBox() : Container(
-                              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: color1
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(CupertinoIcons.play_arrow , color: color5,size: 12,),
-                                  SizedBox(width: 2,),
-                                  Text(
-                                    "Begin : ${DateFormat.yMMMEd().format(DateTime.parse(start))}",
-                                    style: TextStyle(color: color5,fontSize: 12),
-                                  )
-                                ],
-                              ),
-                            ),
-                            end.isEmpty? SizedBox() :  Container(
-                              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(5),
-                                  color: color1
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(CupertinoIcons.stop , color: color5,size: 12,),
-                                  SizedBox(width: 2,),
-                                  Text(
-                                    "End : ${DateFormat.yMMMEd().format(DateTime.parse(end))}",
-                                    style: TextStyle(color: color5,fontSize: 12),
-                                  )
                                 ],
                               ),
                             ),
@@ -1561,7 +1494,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             backgroundColor: CupertinoColors.activeBlue,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             icon: CupertinoIcons.money_dollar,
-            overlayOpacity: 0.5,
+            overlayOpacity: 0.7,
             animationDuration: Duration(milliseconds: 500),
             curve: Curves.easeInOut,
             tooltip: "Payments",
