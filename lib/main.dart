@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:Zelli/auth/login.dart';
-import 'package:Zelli/auth/sign_up.dart';
 import 'package:Zelli/resources/socket.dart';
 import 'package:Zelli/utils/colors.dart';
 import 'package:camera/camera.dart';
@@ -11,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'api/currency_service.dart';
 import 'auth/fetching_data.dart';
 import 'home/home_screen.dart';
 import 'home/web_home.dart';

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class RowLogo extends StatelessWidget {
   final String text;
-  const RowLogo({super.key, required this.text});
+  final double height;
+  const RowLogo({super.key, required this.text, this.height = 35});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +15,7 @@ class RowLogo extends StatelessWidget {
         children: [
           Image.asset(
             'assets/logo/logo-48px.png',
-            height: 35,
+            height: height,
           ),
           SizedBox(width: 5,),
           Column(

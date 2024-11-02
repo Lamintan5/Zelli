@@ -22,9 +22,11 @@ class VerifyOTP extends StatefulWidget {
 class _VerifyOTPState extends State<VerifyOTP> {
   String _otpCode = "";
   bool isMatch = true;
-  final int _otpCodeLength = 6;
+  int targetTimestamp = 0;
+  int _otpCodeLength = 6;
   bool _loading = false;
   String _hashCode = "";
+
 
   _resend(){
     final revers = Theme.of(context).brightness == Brightness.dark
@@ -45,6 +47,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
         setState(() {
           _hashCode = response.data!;
         });
+        targetTimestamp = int.parse(response.data!.split(".").last.toString());
         Get.snackbar(
             "Resend OTP",
             "New OTP has been sent to ${widget.email} please verify your email address with the new OTP",
@@ -142,6 +145,11 @@ class _VerifyOTPState extends State<VerifyOTP> {
     // TODO: implement initState
     super.initState();
     _hashCode = widget.otpHash;
+    targetTimestamp = int.parse(widget.otpHash.split(".").last);
+    _hashCode = widget.otpHash;
+    setState(() {
+
+    });
   }
 
   @override
@@ -178,7 +186,7 @@ class _VerifyOTPState extends State<VerifyOTP> {
               children: [
                 IconButton(onPressed: (){Navigator.pop(context);}, icon: Icon(Icons.arrow_back_ios), iconSize: 20,),
                 Expanded(child: SizedBox()),
-                TimeCounter()
+                TimeCounter(time: targetTimestamp,)
               ],
             ),
             SizedBox(height: 20,),

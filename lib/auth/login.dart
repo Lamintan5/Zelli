@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:Zelli/auth/reset.dart';
 import 'package:Zelli/auth/sign_up.dart';
 import 'package:Zelli/resources/socket.dart';
 import 'package:flutter/cupertino.dart';
@@ -242,7 +243,20 @@ class _LogInState extends State<LogIn> {
                                 ),
                                 prxIcon:Icon(Icons.lock_outline),
                               ),
-                              SizedBox(height: 20,),
+                              SizedBox(height: 10,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  InkWell(
+                                      onTap: (){
+                                        Get.to(() => Reset(), transition: Transition.rightToLeft);
+                                      },
+                                      borderRadius: BorderRadius.circular(5),
+                                      child: Text("Forgot your password?", style: TextStyle(fontWeight: FontWeight.w500, color: CupertinoColors.systemBlue),)
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10,),
                               MaterialButton(
                                 onPressed: checkid,
                                 splashColor: CupertinoColors.systemBlue,
