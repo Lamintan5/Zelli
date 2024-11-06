@@ -693,6 +693,24 @@ class _WebHomeState extends State<WebHome> {
                                                     ]
                                                 )
                                             ) : Text("Leasing"),
+                                            entity.location.toString()==""?SizedBox()
+                                                : Container(
+                                              margin: EdgeInsets.only(bottom: 2),
+                                              child: RichText(
+                                                  textAlign: TextAlign.center,
+                                                  text: TextSpan(
+                                                      children: [
+                                                        WidgetSpan(
+                                                          child: Icon(CupertinoIcons.location, size: 12,color: secondaryColor,),
+                                                        ),
+                                                        TextSpan(
+                                                            text:  " ${entity.location}",
+                                                            style: secondary
+                                                        ),
+                                                      ]
+                                                  )
+                                              ),
+                                            ),
                                             SmallStar(entity: entity, type: "ENTITY", rid: "", size: 20,),
                                           ],
                                         ),
