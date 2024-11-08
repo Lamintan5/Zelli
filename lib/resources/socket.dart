@@ -64,6 +64,14 @@ class SocketManager extends GetxController  {
     _lease = await Services().getMyLeases(currentUser.uid);
     _notification = await Services().getMyNotif(currentUser.uid);
     _stars = await Services().getMyStars(currentUser.uid);
+    
+    
+    for (var lease in _lease.where((l) => l.end.toString().isEmpty)){
+      var list = await Services().getCrrntUnit(lease.uid.toString());
+      if(!_unit.any((unt) => unt.id.toString().contains(list.first.id.toString()))){
+        _unit.add(list.first);
+      }
+    }
 
     // Loop through entities and process
     for (var enty in _entity) {
