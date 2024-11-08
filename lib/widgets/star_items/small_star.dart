@@ -63,9 +63,11 @@ class _SmallStarState extends State<SmallStar> {
     crrntStars = await Services().getCrrntStars(widget.entity.eid);
     starList = crrntStars;
     _getData();
-    setState(() {
-      rating = false;
-    });
+    if (mounted) {
+      setState(() {
+        rating = false;
+      });
+    }
   }
 
   _getStar(){
