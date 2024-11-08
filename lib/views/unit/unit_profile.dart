@@ -1498,6 +1498,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             animationDuration: Duration(milliseconds: 500),
             curve: Curves.easeInOut,
             tooltip: "Payments",
+            spaceBetweenChildren: 10,
             children: [
               if(paidDeposit < deposit)
                 SpeedDialChild(
