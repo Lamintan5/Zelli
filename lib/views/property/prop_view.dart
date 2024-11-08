@@ -55,6 +55,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   List<UnitModel> _units = [];
   List<UserModel> _users = [];
   List<EntityModel> _entity = [];
+  List<LeaseModel> _lease = [];
 
   List<UserModel> _managers = [];
 
@@ -116,8 +117,10 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   void _getData() {
     _unitList = myUnits.map((jsonString) => UnitModel.fromJson(json.decode(jsonString))).where((element) => element.eid == widget.entity.eid).toList();
     _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
+    _lease = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString)))
+        .where((test) => test.eid == widget.entity.eid).toList();
     isMember = widget.entity.pid.toString().split(",").contains(currentUser.uid);
-    isTenant = _unitList.any((test) => test.tid.toString().contains(currentUser.uid));
+    isTenant = _lease.any((test) => test.tid.toString().contains(currentUser.uid) || test.ctid.toString().contains(currentUser.uid));
 
     entity = isMember || isTenant ?  myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((element) => element.eid == widget.entity.eid,
         orElse: () => EntityModel(eid: "", image: "", title: "N/A", time: ""))
