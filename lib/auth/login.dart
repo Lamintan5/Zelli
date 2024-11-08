@@ -261,7 +261,7 @@ class _LogInState extends State<LogIn> {
                                 onPressed: checkid,
                                 splashColor: CupertinoColors.systemBlue,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                                padding: EdgeInsets.symmetric(vertical: 18),
+                                padding: EdgeInsets.symmetric(vertical: 15),
                                 color: CupertinoColors.activeBlue,
                                 minWidth: 400,
                                 child: _isLoading
