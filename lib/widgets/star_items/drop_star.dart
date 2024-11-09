@@ -54,15 +54,15 @@ class _DropStarState extends State<DropStar> {
   String sid = '';
 
   _getCurrentStar()async{
-    setState(() {
-      rating = true;
-    });
+    if (mounted) {
+      setState(() {
+          rating = true;
+      });
+    }
     crrntStars = await Services().getCrrntStars(widget.entity.eid);
     starList = crrntStars;
     _getData();
-    setState(() {
-      rating = false;
-    });
+    rating = false;
   }
 
   void _getStars()async{
@@ -96,7 +96,12 @@ class _DropStarState extends State<DropStar> {
     } else {
       _getCurrentStar();
     }
-    setState(() {
+    Future.delayed(Duration.zero).then((value){
+      if (mounted) {
+        setState(() {
+
+        });
+      }
     });
   }
 
