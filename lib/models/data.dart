@@ -14,6 +14,7 @@ import 'package:Zelli/models/third.dart';
 import 'package:Zelli/models/units.dart';
 import 'package:Zelli/models/users.dart';
 import 'package:Zelli/models/util.dart';
+import 'package:Zelli/models/cards.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -160,6 +161,11 @@ class Data{
     MaintainModel(text: "Garbage Disposal", maintain: ['Malfunctioning garbage disposal unit', 'Clogged sink drains'], icon: Icon(Icons.delete)),
     MaintainModel(text: "Smoke Detector and Alarm Issues", maintain: ['Battery replacements', 'Malfunctioning alarms'], icon: Icon(Icons.smoke_free)),
     MaintainModel(text: "General Maintenance", maintain: ['Routine inspections and maintenance checks', 'Cleaning or servicing of common areas'], icon: Icon(Icons.construction)),
+  ];
+  List<CardModel> cards = [
+    CardModel(image: Icon(CupertinoIcons.person), message: "Explore a variety of properties and available units suited to your needs. Ready to find your next home? Tap the button below to start exploring!", title: 'Looking for a Place to Call Home?'),
+    CardModel(image: Icon(CupertinoIcons.person), message: "List your property on Zelli to efficiently manage tenants and payments all in one place. Join us and experience hassle-free property management.", title: 'Ready to Publish Your Property on Zelli?'),
+    CardModel(image: Icon(CupertinoIcons.person), message: "Manage properties, tenants, and payments with ease. Send or receive management requests to start overseeing properties on Zelli.", title: 'Interested in Managing a Property?'),
   ];
 
   Future<void> addOrUpdateEntity(List<EntityModel> newDataList, {String from = ""}) async {

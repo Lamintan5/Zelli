@@ -34,6 +34,7 @@ class _TenantsState extends State<Tenants> {
     }).toList();
     _tntList = _units.map((unt) => unt.tid!.split(",").first).toList();
     _user = _user.where((usr) => _tntList.any((tnt) => usr.uid == tnt)).toList();
+    _user.removeWhere((test) => test.uid == currentUser.uid);
     setState(() {
 
     });

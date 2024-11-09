@@ -64,19 +64,29 @@ class SocketManager extends GetxController  {
     _lease = await Services().getMyLeases(currentUser.uid);
     _notification = await Services().getMyNotif(currentUser.uid);
     _stars = await Services().getMyStars(currentUser.uid);
-    
-    
-    for (var lease in _lease.where((l) => l.end.toString().isEmpty)){
-      var list = await Services().getCrrntUnit(lease.uid.toString());
-      if(!_unit.any((unt) => unt.id.toString().contains(list.first.id.toString()))){
-        _unit.add(list.first);
+
+
+    if (_lease.isNotEmpty) {
+      for (var lease in _lease.where((l) => l.end.toString().isEmpty && l.tid==currentUser.uid||l.ctid.toString().contains(currentUser.uid))) {
+        var list = await Services().getCrrntUnit(lease.uid!.split(",").first);
+
+        // Check if the list is not empty
+        if (list.isNotEmpty) {
+          if (!_unit.any((unt) => unt.id.toString().contains(list.first.id.toString()))) {
+            _unit.add(list.first);
+          }
+        } else {
+          // Handle the case where the list is empty if needed
+          print('No units found for lease with UID: ${lease.uid}');
+        }
       }
     }
+
+
 
     // Loop through entities and process
     for (var enty in _entity) {
       var list = enty.pid.toString().split(",");
-
       for (var pid in list) {
         if (!_pidList.contains(pid) && pid != currentUser.uid) {
           _pidList.add(pid);
