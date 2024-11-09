@@ -173,7 +173,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         ? widget.user
         :  _users.firstWhere((test) => test.uid == unit.tid.toString().split(",").first, orElse: () => UserModel(uid: ""));
 
-    currentLease = _leases.firstWhere((test) => test.lid == lid, orElse: ()=>LeaseModel(lid: "", tid: "", start: "", end: "") );
+    currentLease = _leases.firstWhere((test) => test.lid == lid, orElse: ()=>LeaseModel(
+        lid: "", tid: "", start: "", end: "", deposit: "0.0", rent: "0.0"
+    ) );
     start = currentLease.start.toString();
     end = currentLease.end.toString();
     // _leases.forEach((e){
@@ -203,10 +205,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
       });
     });
 
-    deposit = double.parse(unit.lid.toString().isNotEmpty
+    deposit = double.parse(currentTenant.uid.toString().isNotEmpty
         ? currentLease.deposit.toString()
         : unit.deposit.toString());
-    rent = double.parse(unit.lid.toString().isNotEmpty? currentLease.rent.toString() : unit.price.toString());
+    rent = double.parse(currentTenant.uid.toString().isNotEmpty? currentLease.rent.toString() : unit.price.toString());
   }
 
   _getUnit(){
@@ -503,19 +505,20 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          SizedBox(width: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
-                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false")?2:0,),
+                                          SizedBox(
+                                            width: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
+                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false") && isMember?2:0,),
 
                                           unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
                                               ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
                                               : unit.checked.toString().contains("EDIT")
                                               ? Icon(Icons.edit, color: Colors.red,size: 20,)
-                                              : unit.checked == "false"
+                                              : unit.checked == "false" && isMember
                                               ? Icon(Icons.cloud_upload, color: Colors.red,size: 20,)
                                               : SizedBox(),
 
                                           SizedBox(width: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
-                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false")?3:0,),
+                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false") && isMember?3:0,),
                                           currentTenant.uid==""
                                               ? SizedBox()
                                               : UserProfile(image: currentTenant.image.toString(), radius: 10,)
@@ -532,7 +535,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 children: [
                                   unit.tid==""
                                       ? Text(
-                                          entity.title!.toUpperCase(),
+                                          entity.title.toString().toUpperCase(),
                                             style: TextStyle(fontWeight: FontWeight.w700)
                                         )
                                       : Text(currentTenant.username.toString().toUpperCase(),
@@ -1705,7 +1708,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       child: InkWell(
                         onTap: (){
                           Navigator.push(context, (MaterialPageRoute(builder: (context) => ShowCaseWidget(
-                            builder:  (_) => UnitProfile(unit: unit, reload: (){}, removeTenant: (){}, removeFromList: (){}, user: user, leasid: lease.lid, entity: widget.entity,),
+                            builder:  (_) => UnitProfile(
+                              unit: unit, reload: (){}, removeTenant: (){},
+                              removeFromList: (){}, user: user, leasid: lease.lid, entity: widget.entity,),
                           ))));
                         },
                         splashColor: CupertinoColors.activeBlue,

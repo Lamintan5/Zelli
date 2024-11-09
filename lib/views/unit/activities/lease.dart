@@ -62,8 +62,8 @@ class _LeaseState extends State<Lease> {
 
     totalMonths = (yearDiff * 12) + monthDiff;
 
-    _rent.text = unit.price.toString();
-    _deposit.text = unit.deposit.toString();
+    _rent.text = lease.rent.toString();
+    _deposit.text = lease.deposit.toString();
   }
 
   @override
@@ -346,7 +346,7 @@ class _LeaseState extends State<Lease> {
 
                                       },
                                     )
-                                  : horizontalItems("Monthly Rent", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(unit.price.toString()))}'),
+                                  : horizontalItems("Monthly Rent", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(lease.rent.toString()))}'),
                               _editFinance
                                   ? Container(
                                     margin: EdgeInsets.only(top: 10),
@@ -383,7 +383,7 @@ class _LeaseState extends State<Lease> {
                                         },
                                       ),
                                   )
-                                  : horizontalItems("Security Deposit", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(unit.deposit.toString()))}'),
+                                  : horizontalItems("Security Deposit", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(lease.deposit.toString()))}'),
                               // horizontalItems("Late Fee Rate", '10%'),
                               horizontalItems("Rent Due Date", '${TFormat().formatOrdinal(int.parse(entity.due.toString()))}' ),
                               horizontalItems("Rent Late Date", '${TFormat().formatOrdinal(int.parse(entity.late.toString()))}'),
