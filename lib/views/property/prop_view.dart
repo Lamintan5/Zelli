@@ -88,7 +88,6 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
   String image2 = '';
   String image3 = '';
 
-  bool _rating = false;
 
 
   Future<void> _getDetails() async {
@@ -120,12 +119,15 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
     _lease = myLease.map((jsonString) => LeaseModel.fromJson(json.decode(jsonString)))
         .where((test) => test.eid == widget.entity.eid).toList();
     isMember = widget.entity.pid.toString().split(",").contains(currentUser.uid);
-    isTenant = _lease.any((test) => test.tid.toString().contains(currentUser.uid) || test.ctid.toString().contains(currentUser.uid));
+    isTenant = _lease.where((lease) => lease.end.toString().isEmpty).toList()
+        .any((test) => test.tid.toString().contains(currentUser.uid)
+        || test.ctid.toString().contains(currentUser.uid) );
 
     entity = isMember || isTenant ?  myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((element) => element.eid == widget.entity.eid,
         orElse: () => EntityModel(eid: "", image: "", title: "N/A", time: ""))
         : ! isMember && !isTenant
-        ? _entity.firstWhere((element) => element.eid == widget.entity.eid,orElse: () => EntityModel(eid: "", image: "", title: "N/A", time: ""))
+        ? _entity.firstWhere((element) => element.eid == widget.entity.eid,
+        orElse: () => widget.entity)
         : EntityModel(eid: "", image: "", title: "N/A", time: "");
     duty = myDuties.map((jsonString) => DutiesModel.fromJson(json.decode(jsonString))).firstWhere((test) =>
       test.pid.toString() == currentUser.uid, orElse: ()=>DutiesModel(did: "", duties: ""));
@@ -217,7 +219,9 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
               foregroundColor: reverse,
               toolbarHeight: 40,
               actions: [
-                _loading ? SizedBox(width: 20,height: 20, child: CircularProgressIndicator(color: reverse,strokeWidth: 2,)) : SizedBox(),
+                _loading
+                    ? SizedBox(width: 20,height: 20, child: CircularProgressIndicator(color: reverse,strokeWidth: 2,))
+                    : SizedBox(),
                 SizedBox(width: 10,),
                 admin.contains(currentUser.uid) || isMember || isTenant
                     ? Tooltip(
