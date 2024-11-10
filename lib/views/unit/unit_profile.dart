@@ -448,7 +448,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           },
                           icon: Icon(CupertinoIcons.doc_text)
                         ),
-                  isMember || isTenant
+                  isMember || isTenant || currentLease.lid.isNotEmpty
                       ? Showcase(
                     key: _keyThree,
                     description: 'Get more options',
@@ -1424,7 +1424,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
                   lid == ''
                       ? SizedBox()
-                      : currentLease.ctid.toString().contains(currentUser.uid) || _admin.contains(currentUser.uid) || _pids.contains(currentUser.uid)
+                      : currentLease.ctid.toString().contains(currentUser.uid) || currentLease.tid.toString().contains(currentUser.uid)
+                      || _admin.contains(currentUser.uid)
+                      || _pids.contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                           Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);},
@@ -1441,7 +1443,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   // )
                   //     : SizedBox(),
 
-                  _admin.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid) || _pids.contains(currentUser.uid)
+                  _admin.contains(currentUser.uid)
+                      || unit.tid.toString().contains(currentUser.uid)
+                      || _pids.contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                             // Navigator.pop(context);
@@ -1451,7 +1455,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         )
                       : SizedBox(),
 
-                  _admin.contains(currentUser.uid) && unit.lid == currentLease.lid
+                  isMember
                       ? RowButton(
                           onTap: (){
                             Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
@@ -1460,7 +1464,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       )
                       : SizedBox(),
 
-                  _pids.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid)
+                  _pids.contains(currentUser.uid) || currentLease.tid.toString().contains(currentUser.uid)
+                      || currentLease.ctid.toString().contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                             Get.to(()=>Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid, from: 'unit',), transition: Transition.rightToLeft);
@@ -1470,6 +1475,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       : SizedBox(),
 
                   _pids.contains(currentUser.uid) || unit.tid.toString().contains(currentUser.uid)
+                      || currentLease.tid.toString().contains(currentUser.uid)
+                      || currentLease.ctid.toString().contains(currentUser.uid)
                       ? RowButton(
                           onTap: (){
                             Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(), lid: lid,), transition: Transition.rightToLeft);
