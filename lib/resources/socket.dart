@@ -67,7 +67,13 @@ class SocketManager extends GetxController  {
 
 
     if (_lease.isNotEmpty) {
-      for (var lease in _lease.where((l) => l.end.toString().isEmpty && l.tid==currentUser.uid||l.ctid.toString().contains(currentUser.uid))) {
+      List<LeaseModel> _filtLease = _lease
+          .where((lease) => lease.end.toString().isEmpty &&
+          (lease.tid == currentUser.uid ||
+              lease.ctid.toString().contains(currentUser.uid)))
+          .toList();
+
+      for (var lease in _filtLease) {
         var list = await Services().getCrrntUnit(lease.uid!.split(",").first);
 
         // Check if the list is not empty
