@@ -130,7 +130,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
         orElse: () => widget.entity)
         : EntityModel(eid: "", image: "", title: "N/A", time: "");
     duty = myDuties.map((jsonString) => DutiesModel.fromJson(json.decode(jsonString))).firstWhere((test) =>
-      test.pid.toString() == currentUser.uid, orElse: ()=>DutiesModel(did: "", duties: ""));
+      test.pid.toString() == currentUser.uid && test.eid.toString() == widget.entity.eid, orElse: ()=>DutiesModel(did: "", duties: ""));
     _users.add(currentUser);
 
     available = _unitList.where((test) => test.tid.toString() == "").toList().length;
@@ -817,12 +817,10 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                   }, icon : Icon(CupertinoIcons.add), title:"Add Floor", subtitle:""
                                 ),
 
-
                             // NOTIFICATIONS
                             entity.checked.contains("REMOVE") || !entity.pid.toString().contains(currentUser.uid) ? SizedBox() : RowButton(onTap:() {
                               Get.to(()=> Notifications(reload: _getDetails, updateCount: _updateCount, eid: entity.eid,), transition: Transition.rightToLeft);
                             },icon :  LineIcon.bell(), title:"Notifications",subtitle: ""),
-
                             // UTILITIES
                             duty.duties.toString().contains("UTILITIES") || admin.contains(currentUser.uid)
                                 ?  RowButton(
