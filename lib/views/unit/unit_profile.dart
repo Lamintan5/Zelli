@@ -1481,7 +1481,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           onTap: (){
                             Get.to(()=>Report(entity: entity, unitid: widget.unit.id.toString(), tid: currentTenant.uid.toString(), lid: lid,), transition: Transition.rightToLeft);
                           },
-                          icon : Icon(CupertinoIcons.graph_square), title: "Reports & Analytics",subtitle: "Beta"
+                          icon : Icon(CupertinoIcons.chart_bar_alt_fill), title: "Reports & Analytics",subtitle: "Beta"
                         )
                       : SizedBox(),
                   Expanded(child: SizedBox()),
