@@ -1503,7 +1503,14 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         ),
       ),
       floatingActionButton: currentTenant.uid=="" || currentLease.lid != unit.lid
-          ? SizedBox()
+          ? FloatingActionButton(
+              onPressed: (){
+                isMember
+                    ? dialogAddTenant(context)
+                    : dialogRequestLease(context);
+              },
+              child: Icon(CupertinoIcons.add),
+            )
           : SpeedDial(
             backgroundColor: CupertinoColors.activeBlue,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
