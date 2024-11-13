@@ -37,7 +37,6 @@ import '../../resources/services.dart';
 import '../../utils/colors.dart';
 import '../../widgets/buttons/bottom_call_buttons.dart';
 import '../../widgets/buttons/call_actions/double_call_action.dart';
-import '../../widgets/cards/card_button.dart';
 import '../../widgets/cards/row_button.dart';
 import '../../widgets/dialogs/dialog_add_tenant.dart';
 import '../../widgets/dialogs/dialog_edit_unit.dart';
@@ -45,7 +44,6 @@ import '../../widgets/dialogs/dialog_title.dart';
 import '../../widgets/dialogs/unit_dialogs/dialog_terminate.dart';
 import '../../widgets/dialogs/unit_dialogs/dialog_tnt_rq.dart';
 import '../../widgets/items/item_pay.dart';
-import '../../widgets/items/item_utils_period.dart';
 import '../../widgets/profile_images/user_profile.dart';
 
 class UnitProfile extends StatefulWidget {
@@ -97,6 +95,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   double rent = 0;
   double paidDeposit = 0;
   double depoBalance = 0;
+  double balance = 0;
   double accrued = 0;
 
   late DateTime startDate;
@@ -121,6 +120,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   String image2 = '';
   String image3 = '';
 
+
   _getDetails()async{
     _getData();
     if(currentLease.ctid.toString().split(",").length > 1){
@@ -142,12 +142,22 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _getUser();
     _getPayments();
     _listMonth();
+
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
-    lastPaid = monthsList.lastWhere((test) => double.parse(test.amount.toString()) != 0, orElse: ()=>MonthModel(year: DateTime.now().year, monthName: "Jan", month: DateTime.now().month, amount: 0, balance: 0));
-    // monthsList.forEach((mnth){
-    //   print("${mnth.monthName}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
-    // });
+    lastPaid = monthsList.firstWhere((test) => double.parse(test.amount.toString()) != rent,
+        orElse: ()=>monthsList.last);
+
+    if(monthsList.last.year == DateTime.now().year && monthsList.last.month == DateTime.now().month && monthsList.last.amount == rent){
+      balance = rent;
+
+    } else if (monthsList.last.year >= DateTime.now().year && monthsList.last.month > DateTime.now().month ){
+      balance = monthsList.last.balance == 0? rent : monthsList.last.balance;
+    }
+
+    monthsList.forEach((mnth){
+      print("${mnth.month}:${mnth.monthName}${mnth.year}, Amount : ${mnth.amount}, Bal : ${mnth.balance}");
+    });
     print("DATA FETCHED");
     setState(() {
     });
@@ -175,7 +185,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
     currentLease = _leases.firstWhere((test) => test.lid == lid, orElse: ()=>LeaseModel(
         lid: "", tid: "", start: "", end: "", deposit: "0.0", rent: "0.0"
-    ) );
+    ));
     start = currentLease.start.toString();
     end = currentLease.end.toString();
     // _leases.forEach((e){
@@ -227,16 +237,26 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     depoBalance = deposit - paidDeposit;
   }
 
-  _listMonth(){
+  void _listMonth() {
     DateTime currentMonth = DateTime.now();
-    DateTime firstRentDate = unit.lid.toString().isEmpty? DateTime.now() : DateTime.parse(currentLease.start.toString());
-    DateTime lastRentDate =  _rent.isEmpty
+
+    // Set first rent date based on whether lease ID is empty
+    DateTime firstRentDate = unit.lid.toString().isEmpty
+        ? DateTime.now()
+        : DateTime.parse(currentLease.start.toString());
+
+    // Set last rent date based on existing rent records or due date
+    DateTime lastRentDate = _rent.isEmpty
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
         : DateTime.parse(_rent.last.time.toString());
+
+    // Define start and end dates for generating the months list
     startDate = DateTime(firstRentDate.year, firstRentDate.month, int.parse(entity.due.toString()));
-    endDate = lastRentDate.month < currentMonth.month
-        ?  DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
+    endDate = lastRentDate.isBefore(currentMonth)
+        ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
         : DateTime(lastRentDate.year, lastRentDate.month, int.parse(entity.due.toString()));
+
+    // Generate list of months within the date range
     monthsList = generateMonthsList(startDate, endDate);
   }
 
@@ -309,11 +329,15 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     List<MonthModel> monthList = [];
     double remainingBalance = 0.0;
 
-    for (DateTime date = startDate; date.isBefore(endDate) || date.isAtSameMomentAs(endDate); date = DateTime(date.year, date.month + 1, 1)) {
+    // Loop through each month in the range
+    for (DateTime date = startDate;
+    date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
+    date = DateTime(date.year, date.month + 1, 1) ) {
+
       double totalAmountPaid = 0.0;
       double monthlyBalance = rent;
 
-      // Find payments for the current month
+      // Filter payments relevant to the current month
       var currentMonthPayments = _rent.where((payment) {
         List<String> times = payment.time!.split(',');
         DateTime paymentStart = DateTime.parse(times.first);
@@ -328,34 +352,31 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
       for (var payment in currentMonthPayments) {
         double paymentAmount = double.parse(payment.amount!);
 
+        // Add previous balance to the first payment in the month
         if (date.month == DateTime.parse(payment.time!.split(',').first).month &&
             date.year == DateTime.parse(payment.time!.split(',').first).year) {
-          // Add previous balance to the first payment in the period
           paymentAmount += remainingBalance;
-          remainingBalance = 0;  // Reset the remaining balance after it's used
-          // print("Remain Balance $remainingBalance");
+          remainingBalance = 0;
         }
 
-        // Distribute the payment amount across months, if necessary
+        // Apply payment amount to the monthly balance
         if (paymentAmount > monthlyBalance) {
           remainingBalance = paymentAmount - monthlyBalance;
           totalAmountPaid += monthlyBalance;
-          // print("Remain Balance $remainingBalance");
-          break;  // Stop accumulating payments once the rent is covered
+          break; // Stop adding once rent is fully paid
         } else {
           totalAmountPaid += paymentAmount;
           monthlyBalance -= paymentAmount;
-          // print("Monthly Balance $monthlyBalance");
         }
       }
 
-      // Create MonthModel for the current month
+      // Add month record to the list
       monthList.add(MonthModel(
         year: date.year,
         month: date.month,
         monthName: DateFormat('MMM').format(date),
         amount: totalAmountPaid,
-        balance:monthlyBalance,
+        balance: monthlyBalance,
       ));
     }
 
@@ -1527,7 +1548,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     shape: CircleBorder(),
                     label: "Deposit",
                     onTap: (){
-                      dialogRecordPayments(context, "Deposit", depoBalance);
+                      dialogRecordPayments(context, "DEPOSIT", depoBalance);
                     }
                 ),
               SpeedDialChild(
@@ -1535,7 +1556,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   shape: CircleBorder(),
                   label: "Rent",
                   onTap: (){
-                      dialogRecordPayments(context, "Rent", accrued);
+                      dialogRecordPayments(context, "RENT", accrued);
                   }
               ),
               SpeedDialChild(
@@ -1825,8 +1846,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         ]
                     )
                 ),
-                SizedBox(height: 5,),
-                DialogPay(unit: unit, amount: amount, entity: entity, account: account, reload: _getData, lastPaid: lastPaid,)
+                SizedBox(height: 5),
+                DialogPay(
+                  unit: unit,
+                  lease: currentLease,
+                  amount: amount,
+                  entity: entity,
+                  account: account,
+                  reload: _getData,
+                  lastPaid: lastPaid,
+                )
               ],
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:Zelli/main.dart';
 import 'package:Zelli/models/entities.dart';
+import 'package:Zelli/models/lease.dart';
 import 'package:Zelli/models/month_model.dart';
 import 'package:Zelli/models/payments.dart';
 import 'package:Zelli/resources/services.dart';
@@ -17,11 +18,12 @@ import '../../../utils/colors.dart';
 class DialogPay extends StatefulWidget {
   final EntityModel entity;
   final UnitModel unit;
+  final LeaseModel lease;
   final double amount;
   final String account;
   final Function reload;
   final MonthModel lastPaid;
-  const DialogPay({super.key, required this.unit, required this.amount, required this.entity, required this.account, required this.reload, required this.lastPaid});
+  const DialogPay({super.key, required this.unit, required this.amount, required this.entity, required this.account, required this.reload, required this.lastPaid, required this.lease});
 
   @override
   State<DialogPay> createState() => _DialogPayState();
@@ -33,14 +35,32 @@ class _DialogPayState extends State<DialogPay> {
   String? method;
   bool _loading = false;
   double balance = 0;
+  late MonthModel month;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    month = widget.lastPaid;
     _amount = TextEditingController();
-    _amount.text = widget.amount.toString();
     method = "Electronic";
+    if(widget.account=="RENT"){
+      if(widget.amount == 0){
+        _amount.text = widget.lease.rent.toString();
+        if (month.month == 12) {
+          month.year += 1;
+          month.month = 1;
+        } else {
+          month.month += 1;
+        }
+
+      } else {
+        _amount.text = widget.amount.toString();
+      }
+    } else {
+      _amount.text = widget.amount.toString();
+    }
+
   }
 
   @override
@@ -66,6 +86,7 @@ class _DialogPayState extends State<DialogPay> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         children: [
+          Text(month.month.toString()),
           TextFieldInput(
             textEditingController: _amount,
             textInputType: TextInputType.number,
@@ -187,9 +208,9 @@ class _DialogPayState extends State<DialogPay> {
       payid = uuid.v1();
     });
     int months = 0;
-    double firstMonthPaid = widget.lastPaid.balance;
+    double firstMonthPaid = month.balance;
     double paid = double.parse(_amount.text);
-    double rent = double.parse(widget.unit.price!);
+    double rent = double.parse(widget.lease.rent.toString());
     double remainingAmount = paid - firstMonthPaid;
     DateTime start = DateTime.now();
     DateTime end = DateTime.now();
@@ -207,8 +228,8 @@ class _DialogPayState extends State<DialogPay> {
       // print('Month ${months + 1}: Paid \$${remainingAmount.toStringAsFixed(2)}, Remaining balance for Month ${months + 1}: \$${(rent - remainingAmount).toStringAsFixed(2)}');
     }
     balance = remainingAmount == 0? 0 :  rent - remainingAmount;
-    start = DateTime(widget.lastPaid.year,widget.lastPaid.balance==0?widget.lastPaid.month+1:widget.lastPaid.month);
-    end = DateTime(widget.lastPaid.year,widget.lastPaid.month+months);
+    start = DateTime(month.year,month.balance==0?month.month+1:month.month);
+    end = DateTime(month.year,month.month+months);
     // print("Balance ${balance}");
     // print('Total months covered: $months');
     // print('Final remaining balance: \$${remainingAmount.toStringAsFixed(2)}');
@@ -227,7 +248,7 @@ class _DialogPayState extends State<DialogPay> {
         balance: widget.account == "DEPOSIT"? (widget.amount -  double.parse(_amount.text)).toString() : balance.toString(),
         method: method,
         type: widget.account,
-        time: DateTime.now().toString(),
+        time: DateTime(month.year, month.month).toString(),
         current: DateTime.now().toString(),
         checked: "true",
     );
