@@ -78,6 +78,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   List<PaymentsModel> _rent = [];
   List<PaymentsModel> _deposit = [];
   List<MonthModel> _accrue = [];
+  List<MonthModel> _prepayment = [];
   List<MonthModel> monthsList = [];
   List<LeaseModel> _leases = [];
   List<String> _admin = [];
@@ -97,9 +98,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   double depoBalance = 0;
   double balance = 0;
   double accrued = 0;
+  double prepaid = 0;
 
   late DateTime startDate;
   late DateTime endDate;
+  DateTime currentMonth = DateTime.now();
 
   String start = "";
   String end = "";
@@ -144,7 +147,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _listMonth();
 
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
+    _prepayment = monthsList.where((test) => DateTime(test.year, test.month).isAfter(DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString())))).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
+    prepaid = _prepayment.fold(0.0, (previous, element) => previous + element.amount);
     lastPaid = monthsList.firstWhere((test) => double.parse(test.amount.toString()) != rent,
         orElse: ()=>monthsList.last);
 
@@ -238,8 +243,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   }
 
   void _listMonth() {
-    DateTime currentMonth = DateTime.now();
-
     // Set first rent date based on whether lease ID is empty
     DateTime firstRentDate = unit.lid.toString().isEmpty
         ? DateTime.now()
@@ -508,8 +511,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                           ?CupertinoColors.activeBlue
                                           : paidDeposit!=deposit
                                           ? color1
-                                          : accrued > 0
+                                          : accrued > 0 && prepaid == 0
                                           ? Colors.red
+                                          : prepaid > 0 && accrued == 0
+                                          ? Colors.green
                                           : color1,
                                   ),
                                   child: Center(child: Text(unit.title.toString(), style: TextStyle(fontWeight: FontWeight.w600),)),
