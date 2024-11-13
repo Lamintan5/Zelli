@@ -429,6 +429,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     final bold = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: reverse);
     final activeBlue = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: CupertinoColors.activeBlue);
     final activeRed = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.red);
+    final active = TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: reverse);
     List filteredTenants = [];
     if (_search.text.toString() != null && _search.text.isNotEmpty) {
       _users.where((test) => _leases.any((element) => element.tid == test.uid)).toList().forEach((item) {
@@ -765,7 +766,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     ),
                                   ]
                               )
-                                  : TextSpan(
+                                  : accrued > 0 && prepaid == 0
+                                  ?TextSpan(
                                   children: [
                                     TextSpan(
                                         text: "The rent has accrued by ",
@@ -791,6 +793,53 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     TextSpan(
                                         text: _accrue.length < 2? "" : "months",
                                         style: style
+                                    ),
+                                  ]
+                              )
+                                  : prepaid > 0 && accrued == 0
+                                  ? TextSpan(
+                                  children: [
+                                    TextSpan(
+                                        text: "The rent has been prepaid by ",
+                                        style: style
+                                    ),
+                                    WidgetSpan(
+                                        child: InkWell(
+                                          onTap: (){},
+                                          child: Text(
+                                            "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(prepaid)} ",
+                                            style: active,
+                                          ),
+                                        )
+                                    ),
+                                    TextSpan(
+                                        text: _prepayment.length < 2? "" : " for the next ",
+                                        style: style
+                                    ),
+                                    TextSpan(
+                                        text: _prepayment.length < 2? "" :"${_prepayment.length} ",
+                                        style: bold
+                                    ),
+                                    TextSpan(
+                                        text: _prepayment.length < 2? "" : "months",
+                                        style: style
+                                    ),
+                                  ]
+                              )
+                                  : TextSpan(
+                                  children: [
+                                    TextSpan(
+                                        text: "The expected rent for this month is ",
+                                        style: style
+                                    ),
+                                    WidgetSpan(
+                                        child: InkWell(
+                                          onTap: (){},
+                                          child: Text(
+                                            "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(rent)} ",
+                                            style: active,
+                                          ),
+                                        )
                                     ),
                                   ]
                               )
