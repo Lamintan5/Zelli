@@ -36,16 +36,17 @@ class _DialogPayState extends State<DialogPay> {
   bool _loading = false;
   double balance = 0;
   late MonthModel month;
+  DateTime currentMonth = DateTime.now();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    month = widget.lastPaid;
     _amount = TextEditingController();
     method = "Electronic";
+    month = MonthModel.copy(widget.lastPaid);
     if(widget.account=="RENT"){
-      if(widget.amount == 0){
+      if(DateTime(widget.lastPaid.year, widget.lastPaid.month).isAfter(DateTime(currentMonth.year, currentMonth.month))){
         _amount.text = widget.lease.rent.toString();
         if (month.month == 12) {
           month.year += 1;
@@ -53,7 +54,6 @@ class _DialogPayState extends State<DialogPay> {
         } else {
           month.month += 1;
         }
-
       } else {
         _amount.text = widget.amount.toString();
       }
