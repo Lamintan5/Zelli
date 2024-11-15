@@ -179,6 +179,7 @@ class _DialogTerminateState extends State<DialogTerminate> {
       UserModel user = _newUsers.first;
       if(!_users.any((test) => test.uid==pid)){
         _users.add(user);
+        await Data().addUser(user);
         _tokens.addAll(user.token.toString().split(","));
         _tokens.remove("");
         setState(() {
