@@ -432,7 +432,12 @@ class _LeaseState extends State<Lease> {
                 ? Padding(
                   padding: const EdgeInsets.all(10),
                   child: InkWell(
-                    onTap: _update,
+                    onTap: (){
+                      final form = formKey.currentState!;
+                      if(form.validate()){
+                        _update();
+                      }
+                    },
                     borderRadius: BorderRadius.circular(5),
                     child: Container(
                       width: 450,
