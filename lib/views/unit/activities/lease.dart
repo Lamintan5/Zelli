@@ -92,9 +92,7 @@ class _LeaseState extends State<Lease> {
     final heading = TextStyle(fontSize: 18, fontWeight: FontWeight.w700);
     final padding = EdgeInsets.symmetric(vertical: 8, horizontal: 10);
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Lease"),
-      ),
+      appBar: AppBar(),
       body: Form(
         autovalidateMode: AutovalidateMode.onUserInteraction,
         key: formKey,
@@ -108,6 +106,17 @@ class _LeaseState extends State<Lease> {
                   physics: BouncingScrollPhysics(),
                   child: Column(
                     children: [
+                      Container(
+                        padding: EdgeInsets.all(15),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: CupertinoColors.activeBlue.withOpacity(0.2)
+                        ),
+                        child: Icon(CupertinoIcons.doc_text, size: 40,color: CupertinoColors.activeBlue,),
+                      ),
+                      Text(
+                        "Lease Document", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
+                      SizedBox(height: 10,),
                       // Basic Info
                       Card(
                         elevation: 8,
