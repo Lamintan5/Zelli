@@ -10,6 +10,7 @@ import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/unit/activities/co_tenants.dart';
 import 'package:Zelli/views/unit/activities/create_request.dart';
 import 'package:Zelli/views/unit/activities/lease.dart';
+import 'package:Zelli/views/unit/activities/terminate.dart';
 import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,6 +22,7 @@ import 'package:intl/intl.dart';
 import 'package:line_icons/line_icon.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
 
 import '../../home/actions/chat/message_screen.dart';
 import '../../home/actions/chat/web_chat.dart';
@@ -99,6 +101,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   double balance = 0;
   double accrued = 0;
   double prepaid = 0;
+  double percentage = 0;
 
   late DateTime startDate;
   late DateTime endDate;
@@ -150,6 +153,20 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _prepayment = monthsList.where((test) => DateTime(test.year, test.month).isAfter(DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString())))).toList();
     accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
     prepaid = _prepayment.fold(0.0, (previous, element) => previous + element.amount);
+    if(prepaid>0){
+      if(prepaid<rent){
+        percentage = (prepaid/rent);
+      } else {
+        percentage = 1;
+      }
+    } else if(accrued>0){
+      if(accrued<rent){
+        percentage = 1 - ((accrued/rent));
+      } else {
+        percentage = 1;
+      }
+    }
+
     lastPaid = monthsList.firstWhere((test) => double.parse(test.amount.toString()) != rent,
         orElse: ()=>monthsList.last);
 
@@ -452,7 +469,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 pinned: true,
                 expandedHeight: 220,
                 toolbarHeight: 40,
-                title: Text(entity.title.toString()),
+                title: Text(
+                    entity.title.toString(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                ),
                 actions: [
                   currentTenant.uid==currentUser.uid || currentTenant.uid==""
                       ? SizedBox()
@@ -467,12 +488,12 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   currentTenant.uid==""
                       ? SizedBox()
                       : IconButton(
-                          onPressed: (){
-                            Get.to(() => Lease(entity: entity, unit: unit, lease: currentLease,
-                              tenant: currentTenant, reload: _getData,), transition: Transition.rightToLeft);
-                          },
-                          icon: Icon(CupertinoIcons.doc_text)
-                        ),
+                      onPressed: (){
+                        Get.to(() => Lease(entity: entity, unit: unit, lease: currentLease,
+                          tenant: currentTenant, reload: _getData,), transition: Transition.rightToLeft);
+                      },
+                      icon: Icon(CupertinoIcons.doc_text)
+                  ),
                   isMember || isTenant || currentLease.lid.isNotEmpty
                       ? Showcase(
                     key: _keyThree,
@@ -498,43 +519,68 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           children: [
                             Stack(
                               children: [
-                                Container(
+                                unit.tid==""&& currentTenant.uid==""
+                                    ? Container(
                                   width: 100,
                                   height: 100,
                                   margin: EdgeInsets.symmetric(vertical: 5),
                                   decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                          color: unit.tid==""&&currentTenant.uid==""?CupertinoColors.activeBlue:color1,
-                                          width: 1
-                                      ),
-                                      color: unit.tid==""&&currentTenant.uid==""
-                                          ?CupertinoColors.activeBlue
-                                          : paidDeposit!=deposit
-                                          ? color1
-                                          : accrued > 0 && prepaid == 0
-                                          ? Colors.red
-                                          : prepaid > 0 && accrued == 0
-                                          ? Colors.green
-                                          : color1,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                        color: CupertinoColors.activeBlue,
+                                        width: 1
+                                    ),
+                                    color: CupertinoColors.activeBlue,
                                   ),
                                   child: Center(child: Text(unit.title.toString(), style: TextStyle(fontWeight: FontWeight.w600),)),
-                                ),
+                                )
+                                    : Container(
+                                      width: 100,
+                                      height: 100,
+                                      margin: EdgeInsets.symmetric(vertical: 5),
+                                      child: LiquidLinearProgressIndicator(
+                                        value: percentage,
+                                        valueColor: AlwaysStoppedAnimation(
+                                          paidDeposit!=deposit
+                                              ? color1
+                                              : accrued > 0 && prepaid == 0
+                                              ? Colors.red
+                                              : prepaid > 0
+                                              ? Colors.green
+                                              : color1,
+                                        ),
+                                        backgroundColor: Colors.black12,
+                                        borderColor: color5,
+                                        borderWidth: 0,
+                                        borderRadius: 10.0,
+                                        direction: Axis.vertical,
+                                        center: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(unit.title.toString(), style: TextStyle(fontWeight: FontWeight.w600),),
+                                            percentage >= 1 || percentage == 0
+                                                ? SizedBox()
+                                                : Text('${(percentage*100).toStringAsFixed(0)}%',
+                                              style: TextStyle(color: color5),),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                 Positioned(
                                     right: 5,
                                     bottom: 8,
                                     child: Container(
-                                        padding: EdgeInsets.all(1.3),
+                                      padding: EdgeInsets.all(1.3),
                                       decoration: BoxDecoration(
-                                        color: dgColor,
-                                        borderRadius: BorderRadius.circular(50)
+                                          color: dgColor,
+                                          borderRadius: BorderRadius.circular(50)
                                       ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           SizedBox(
                                             width: unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
-                                              ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false") && isMember?2:0,),
+                                                ||unit.checked.toString().contains("EDIT") || unit.checked.toString().contains("false") && isMember?2:0,),
 
                                           unit.checked.toString().contains("DELETE") || unit.checked.toString().contains("REMOVED")
                                               ? Icon(CupertinoIcons.delete, color: Colors.red,size: 20,)
@@ -562,16 +608,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 children: [
                                   unit.tid==""
                                       ? Text(
-                                          entity.title.toString().toUpperCase(),
-                                            style: TextStyle(fontWeight: FontWeight.w700)
-                                        )
+                                      entity.title.toString().toUpperCase(),
+                                      style: TextStyle(fontWeight: FontWeight.w700)
+                                  )
                                       : Text(currentTenant.username.toString().toUpperCase(),
-                                          style: TextStyle(fontWeight: FontWeight.w700),
-                                        ),
+                                    style: TextStyle(fontWeight: FontWeight.w700),
+                                  ),
                                   Text(
                                       floor == 0
-                                        ? "GROUND FLOOR"
-                                        : "${TFormat().getOrdinal(floor)} FLOOR"
+                                          ? "GROUND FLOOR"
+                                          : "${TFormat().getOrdinal(floor)} FLOOR"
                                   ),
                                   Text(
                                       room == 0
@@ -739,111 +785,102 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               )
                           )
                               : RichText(
-                              textAlign: TextAlign.center,
-                              text: paidDeposit < deposit
-                                  ? TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: depoBalance < deposit? "Record " : "The anticipated ",
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: "security deposit ",
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: depoBalance < deposit? "balance of " : "amount is ",
-                                        style: style
-                                    ),
-                                    WidgetSpan(
-                                        child: InkWell(
-                                          onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance);},
-                                          child: Text(
-                                              "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
-                                              style: activeBlue
-                                          ),
-                                        )
-                                    ),
-                                  ]
-                              )
-                                  : accrued > 0 && prepaid == 0
-                                  ?TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: "The rent has accrued by ",
-                                        style: style
-                                    ),
-                                    WidgetSpan(
-                                        child: InkWell(
-                                          onTap: (){},
-                                          child: Text(
-                                            "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
-                                            style: activeRed,
-                                          ),
-                                        )
-                                    ),
-                                    TextSpan(
-                                        text: _accrue.length < 2? "" : " over the past ",
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: _accrue.length < 2? "" :"${_accrue.length} ",
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: _accrue.length < 2? "" : "months",
-                                        style: style
-                                    ),
-                                  ]
-                              )
-                                  : prepaid > 0 && accrued == 0
-                                  ? TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: "The rent has been prepaid by ",
-                                        style: style
-                                    ),
-                                    WidgetSpan(
-                                        child: InkWell(
-                                          onTap: (){},
-                                          child: Text(
-                                            "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(prepaid)} ",
-                                            style: active,
-                                          ),
-                                        )
-                                    ),
-                                    TextSpan(
-                                        text: _prepayment.length < 2? "" : " for the next ",
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: _prepayment.length < 2? "" :"${_prepayment.length} ",
-                                        style: bold
-                                    ),
-                                    TextSpan(
-                                        text: _prepayment.length < 2? "" : "months",
-                                        style: style
-                                    ),
-                                  ]
-                              )
-                                  : TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: "The expected rent for this month is ",
-                                        style: style
-                                    ),
-                                    WidgetSpan(
-                                        child: InkWell(
-                                          onTap: (){},
-                                          child: Text(
-                                            "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(rent)} ",
-                                            style: active,
-                                          ),
-                                        )
-                                    ),
-                                  ]
-                              )
-                          ),
+                                  textAlign: TextAlign.center,
+                                  text: paidDeposit < deposit
+                                      ? TextSpan(
+                                      children: [
+                                        TextSpan(
+                                            text: depoBalance < deposit? "Record " : "The anticipated ",
+                                            style: style
+                                        ),
+                                        TextSpan(
+                                            text: "security deposit ",
+                                            style: bold
+                                        ),
+                                        TextSpan(
+                                            text: depoBalance < deposit? "balance of " : "amount is ",
+                                            style: style
+                                        ),
+                                        WidgetSpan(
+                                            child: InkWell(
+                                              onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance);},
+                                              child: Text(
+                                                  "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
+                                                  style: activeBlue
+                                              ),
+                                            )
+                                        ),
+                                      ]
+                                  )
+                                      : accrued > 0 && prepaid == 0
+                                      ?TextSpan(
+                                      children: [
+                                        TextSpan(
+                                            text: "The rent has accrued by ",
+                                            style: style
+                                        ),
+                                        WidgetSpan(
+                                            child: InkWell(
+                                              onTap: (){},
+                                              child: Text(
+                                                "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
+                                                style: activeRed,
+                                              ),
+                                            )
+                                        ),
+                                        TextSpan(
+                                            text: _accrue.length < 2? "" : " over the past ",
+                                            style: style
+                                        ),
+                                        TextSpan(
+                                            text: _accrue.length < 2? "" :"${_accrue.length} ",
+                                            style: bold
+                                        ),
+                                        TextSpan(
+                                            text: _accrue.length < 2? "" : "months",
+                                            style: style
+                                        ),
+                                      ]
+                                  )
+                                      : prepaid > 0
+                                      ? TextSpan(
+                                      children: [
+                                        TextSpan(
+                                            text: "Rent prepaid by ",
+                                            style: style
+                                        ),
+                                        WidgetSpan(
+                                            child: InkWell(
+                                              onTap: (){},
+                                              child: Text(
+                                                "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(prepaid)} ",
+                                                style: active,
+                                              ),
+                                            )
+                                        ),
+                                        TextSpan(
+                                            text: _prepayment.length < 2? "." : "for the next ",
+                                            style: style
+                                        ),
+                                        TextSpan(
+                                            text: _prepayment.length < 2? "" :"${_prepayment.length} ",
+                                            style: bold
+                                        ),
+                                        TextSpan(
+                                            text: _prepayment.length < 2? "" : "months",
+                                            style: style
+                                        ),
+                                      ]
+                                  )
+                                      : TextSpan(
+                                      children: [
+                                        TextSpan(
+                                            text: "All rent payments are currently up to date.",
+                                            style: style
+                                        ),
+                                      ]
+                                  )
+                              ),
                         ),
                       ],
                     ),
@@ -853,16 +890,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   preferredSize: Size.fromHeight(40),
                   child: currentTenant.uid==""
                       ? Row(
-                        children: [
-                          SizedBox(width: 10,),
-                          Icon(CupertinoIcons.doc_text, size: 20,),
-                          Text(
-                            '  Leases' ,
-                            style: TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.w400),
-                          ),
-                        ],
-                      )
+                    children: [
+                      SizedBox(width: 10,),
+                      Icon(CupertinoIcons.doc_text, size: 20,),
+                      Text(
+                        '  Leases' ,
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  )
                       : Container(
                     width: 500,
                     height: 30,
@@ -1489,7 +1526,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       : _admin.contains(currentUser.uid) || unit.tid.toString().split(",").first == currentUser.uid
                       ? RowButton(
                           onTap: (){
-                            // dialogRemoveTenant(context, widget.unit, "${crrntTenant.firstname} ${crrntTenant.lastname}", crrntTenant.uid);
                             Navigator.pop(context);
                             dialogTerminateLease(context);
                           },
@@ -1874,33 +1910,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
               mainAxisSize: MainAxisSize.min,
               children: [
                 DialogTitle(title: account.split("").join(" ").toUpperCase()),
-                RichText(
-                    text: TextSpan(
-                        children: [
-                          TextSpan(
-                              text: "Record ",
-                              style: TextStyle(color: secondaryColor)
-                          ),
-                          TextSpan(
-                              text: "tenant ",
-                              style: TextStyle(color: secondaryColor)
-                          ),
-                          TextSpan(
-                              text: "${account.toLowerCase()} ",
-                              style: TextStyle(color: reverse)
-                          ),
-                          TextSpan(
-                              text: "amount of ",
-                              style: TextStyle(color: secondaryColor,)
-                          ),
-                          TextSpan(
-                              text: "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}.",
-                              style: TextStyle(color: reverse, )
-                          ),
-                        ]
-                    )
-                ),
-                SizedBox(height: 5),
                 DialogPay(
                   unit: unit,
                   lease: currentLease,

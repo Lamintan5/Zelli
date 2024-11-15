@@ -35,19 +35,19 @@ class _DialogPayState extends State<DialogPay> {
   String? method;
   bool _loading = false;
   double balance = 0;
+  double amount = 0;
   late MonthModel month;
-  DateTime currentMonth = DateTime.now();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    month = MonthModel.copy(widget.lastPaid);
     _amount = TextEditingController();
     method = "Electronic";
-    month = MonthModel.copy(widget.lastPaid);
     if(widget.account=="RENT"){
-      if(DateTime(widget.lastPaid.year, widget.lastPaid.month).isAfter(DateTime(currentMonth.year, currentMonth.month))){
-        _amount.text = widget.lease.rent.toString();
+      if(widget.amount == 0){
+        amount = double.parse(widget.lease.rent.toString());
         if (month.month == 12) {
           month.year += 1;
           month.month = 1;
@@ -55,11 +55,12 @@ class _DialogPayState extends State<DialogPay> {
           month.month += 1;
         }
       } else {
-        _amount.text = widget.amount.toString();
+        amount = widget.amount;
       }
     } else {
-      _amount.text = widget.amount.toString();
+      amount = widget.amount;
     }
+    _amount.text = amount.toString();
 
   }
 
@@ -86,7 +87,33 @@ class _DialogPayState extends State<DialogPay> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         children: [
-          Text(month.month.toString()),
+          RichText(
+              text: TextSpan(
+                  children: [
+                    TextSpan(
+                        text: "Record ",
+                        style: TextStyle(color: secondaryColor)
+                    ),
+                    TextSpan(
+                        text: "tenant ",
+                        style: TextStyle(color: secondaryColor)
+                    ),
+                    TextSpan(
+                        text: "${widget.account.toLowerCase()} ",
+                        style: TextStyle(color: reverse)
+                    ),
+                    TextSpan(
+                        text: "amount of ",
+                        style: TextStyle(color: secondaryColor,)
+                    ),
+                    TextSpan(
+                        text: "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}.",
+                        style: TextStyle(color: reverse, )
+                    ),
+                  ]
+              )
+          ),
+          SizedBox(height: 5),
           TextFieldInput(
             textEditingController: _amount,
             textInputType: TextInputType.number,
