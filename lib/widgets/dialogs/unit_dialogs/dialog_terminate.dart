@@ -186,7 +186,6 @@ class _DialogTerminateState extends State<DialogTerminate> {
         });
       }
     });
-
   }
 
   @override
