@@ -834,12 +834,15 @@ class Services{
     }
   }
   // UPDATE LEASE END
-  static Future<String> terminateLease(String lid) async {
+  static Future<String> terminateLease(String lid, String deduct, String refund, String balance) async {
     try {
       var map = new Map<String, dynamic>();
       map["action"] = _UPDATE;
       map["lid"] = lid;
       map["end"] = DateTime.now().toString();
+      map["deduct"] = deduct;
+      map["refund"] = refund;
+      map["balance"] = balance;
       final response = await http.post(Uri.parse(_LEASE), body: map);
       return response.body;
     } catch (e) {
