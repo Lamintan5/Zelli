@@ -519,7 +519,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           children: [
                             Stack(
                               children: [
-                                unit.tid==""&& currentTenant.uid==""
+                                unit.tid=="" && currentTenant.uid==""
                                     ? Container(
                                   width: 100,
                                   height: 100,
@@ -673,7 +673,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ],
                               ),
                             ),
-                            lid == ""
+                            unit.tid=="" && currentTenant.uid==""
                                 ? SizedBox()
                                 : InkWell(
                               onTap: (){
@@ -1526,9 +1526,11 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       : _admin.contains(currentUser.uid) || unit.tid.toString().split(",").first == currentUser.uid
                       ? RowButton(
                           onTap: (){
+
                             Navigator.pop(context);
-                            dialogTerminateLease(context);
-                          },
+                            Get.to(() => Terminate(entity: entity, tenant: currentTenant, unit: unit, lease: currentLease,
+                            accrued: accrued,prepaid: prepaid,depositPaid: paidDeposit, reload: _getData,), transition: Transition.rightToLeft);
+                            },
                           icon : Icon(CupertinoIcons.clear_circled), title: "Terminate Lease",subtitle: ""
                       )
                       : SizedBox(),
@@ -1566,8 +1568,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         )
                       : SizedBox(),
 
-                  isMember
-                      ? RowButton(
+                  isMember && unit.lid == currentLease.lid
+                      ?  RowButton(
                           onTap: (){
                             Get.to(()=>Leases(entity: entity, unit: unit, lease: currentLease,), transition: Transition.rightToLeft);
                           },
@@ -1613,8 +1615,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
           ),
         ),
       ),
-      floatingActionButton: currentTenant.uid=="" || currentLease.lid != unit.lid
-          ? FloatingActionButton(
+      floatingActionButton: currentLease.lid != unit.lid
+          ? SizedBox()
+          :  unit.lid.toString().isEmpty
+          ?  FloatingActionButton(
               onPressed: (){
                 isMember
                     ? dialogAddTenant(context)

@@ -61,7 +61,7 @@ class _DialogTerminateState extends State<DialogTerminate> {
     await Services.updateUnitTid(widget.unit.id.toString(), "", "").then((response)async{
       print("Response $response");
       if(response=="success"){
-        await Services.terminateLease(widget.lease.lid).then((value){
+        await Services.terminateLease(widget.lease.lid,"","","").then((value){
           print("Value $value");
           if(value=="success"){
 
@@ -149,7 +149,6 @@ class _DialogTerminateState extends State<DialogTerminate> {
     });
     setState(() {_loading = false;});
   }
-
   void _socketSend() async{
     List<String> _pidList = widget.entity.pid!.split(",");
     SocketManager().socket.emit("notif", {
