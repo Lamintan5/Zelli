@@ -18,7 +18,10 @@ class Lease extends StatefulWidget {
   final LeaseModel lease;
   final UserModel tenant;
   final Function reload;
-  const Lease({super.key, required this.unit, required this.lease, required this.tenant, required this.entity, required this.reload});
+  final double accrued;
+  final double prepaid;
+  final double depositPaid;
+  const Lease({super.key, required this.unit, required this.lease, required this.tenant, required this.entity, required this.reload, required this.accrued, required this.prepaid, required this.depositPaid});
 
   @override
   State<Lease> createState() => _LeaseState();
@@ -46,6 +49,15 @@ class _LeaseState extends State<Lease> {
   bool _editFinance = false;
   bool  _loading = false;
 
+  double paidAmount = 0;
+  double accrued = 0;
+  double prepaid = 0;
+  double depositPaid = 0;
+  double remainDeposit = 0;
+  double balance = 0;
+  double deduct = 0;
+  double refund = 0;
+
   _getData(){
     unit = widget.unit;
     lease = widget.lease;
@@ -64,7 +76,17 @@ class _LeaseState extends State<Lease> {
 
     _rent.text = lease.rent.toString();
     _deposit.text = lease.deposit.toString();
+    _getBalance();
   }
+
+  _getBalance(){
+    prepaid = widget.prepaid;
+    accrued = prepaid == 0 ? widget.accrued : 0;
+    depositPaid = widget.depositPaid;
+    remainDeposit = depositPaid - deduct;
+    balance = remainDeposit + prepaid - accrued - refund;
+  }
+
 
   @override
   void initState() {
@@ -393,6 +415,7 @@ class _LeaseState extends State<Lease> {
                                       ),
                                   )
                                   : horizontalItems("Security Deposit", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(lease.deposit.toString()))}'),
+                              horizontalItems("Deposit paid", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depositPaid)}'),
                               // horizontalItems("Late Fee Rate", '10%'),
                               horizontalItems("Rent Due Date", '${TFormat().formatOrdinal(int.parse(entity.due.toString()))}' ),
                               horizontalItems("Rent Late Date", '${TFormat().formatOrdinal(int.parse(entity.late.toString()))}'),
@@ -414,11 +437,27 @@ class _LeaseState extends State<Lease> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text("Status and Payment Tracking", style: heading,),
-                              horizontalItems("Current Balance", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(12000)}'),
-                              horizontalItems("Active", lease.end.toString().isEmpty? 'true' : 'false'),
-                              horizontalItems("Terminated", lease.end.toString().isEmpty? 'false':'true'),
-                              horizontalItems("Last Payment Date", '${DateFormat('HH:mm').format(DateTime.parse(lease.start!))}, ${DateFormat.yMMMEd().format(DateTime.parse(lease.start!))}' ),
-                              horizontalItems("Overdue Amount", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(12000)}'),
+                              horizontalItems("status", lease.end.toString().isEmpty? 'Active' : 'Terminated'),
+                              lease.end.toString().isEmpty? SizedBox() : horizontalItems("Total deduction from deposit", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(lease.deduct.toString()))}'),
+                              lease.end.toString().isEmpty? SizedBox() : horizontalItems("Refunded amount", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas( double.parse(lease.refund.toString()))}'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Outstanding Balance', style: TextStyle(fontSize: 15, color: secondaryColor),),
+                                  Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(lease.end.toString().isEmpty? balance :double.parse(lease.balance.toString()))}',
+                                    style: TextStyle(
+                                        color: widget.tenant.uid == currentUser.uid
+                                            ? balance<0
+                                            ? CupertinoColors.systemRed
+                                            : CupertinoColors.systemGreen
+                                            : balance<0
+                                            ? CupertinoColors.systemGreen
+                                            : CupertinoColors.systemBlue,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),

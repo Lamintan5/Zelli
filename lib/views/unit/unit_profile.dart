@@ -490,7 +490,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       : IconButton(
                       onPressed: (){
                         Get.to(() => Lease(entity: entity, unit: unit, lease: currentLease,
-                          tenant: currentTenant, reload: _getData,), transition: Transition.rightToLeft);
+                          tenant: currentTenant, reload: _getData, accrued: accrued, prepaid: prepaid, depositPaid: paidDeposit,), transition: Transition.rightToLeft);
                       },
                       icon: Icon(CupertinoIcons.doc_text)
                   ),
