@@ -48,6 +48,8 @@ class _CoTenantsState extends State<CoTenants> {
   String mainTenant = "";
   String loading = "";
 
+  bool isFilled = false;
+
   _getData(){
     _users = myUsers.map((jsonString) => UserModel.fromJson(json.decode(jsonString))).toList();
     _admin = widget.entity.admin.toString().split(",");
@@ -118,24 +120,47 @@ class _CoTenantsState extends State<CoTenants> {
           children: [
             Row(),
             SizedBox(width: 500,
-              child: TextFormField(
+              child:TextFormField(
                 controller: _search,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
-                  hintText: "🔎  Search for Tenants...",
-                  hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                  hintText: "Search",
                   fillColor: color1,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                        Radius.circular(5)
-                    ),
+                    borderRadius: BorderRadius.circular(5),
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
                   isDense: true,
-                  contentPadding: EdgeInsets.all(10),
+                  hintStyle: TextStyle(color: secondaryColor, fontWeight: FontWeight.normal),
+                  prefixIcon: Icon(CupertinoIcons.search, size: 20,color: secondaryColor),
+                  prefixIconConstraints: BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 30
+                  ),
+                  suffixIcon: isFilled?InkWell(
+                      onTap: (){
+                        _search.clear();
+                        setState(() {
+                          isFilled = false;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(100),
+                      child: Icon(Icons.cancel, size: 20,color: secondaryColor)
+                  ) :SizedBox(),
+                  suffixIconConstraints: BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 30
+                  ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 1, horizontal: 20),
                 ),
-                onChanged:  (value) => setState((){}),
+                onChanged: (value) => setState(() {
+                  if(value.isNotEmpty){
+                    isFilled = true;
+                  } else {
+                    isFilled = false;
+                  }
+                }),
               ),
             ),
             SizedBox(height: 10,),
