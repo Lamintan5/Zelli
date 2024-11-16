@@ -916,7 +916,7 @@ class Data{
 
     await Services.deleteUnit(unit.id.toString()).then((response)async{
       if(response=="success"||response=="Does not exist"){
-        await Services.terminateLease(unit.lid.toString());
+        await Services.terminateLease(unit.lid.toString(), "", "","");
         _unit.removeWhere((test) => test.id==unit.id);
         uniqueUnit = _unit.map((model) => jsonEncode(model.toJson())).toList();
         sharedPreferences.setStringList('myunit', uniqueUnit);
