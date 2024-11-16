@@ -193,8 +193,12 @@ class _ItemTerminateState extends State<ItemTerminate> {
                                         style: style
                                     ),
                                     TextSpan(
-                                        text: "${notifModel.text.toString()}",
+                                        text: "${DateFormat.yMMMEd().format(DateTime.parse(notifModel.text.toString().split(",")[1]))}",
                                         style: bold
+                                    ),
+                                    TextSpan(
+                                        text: "Please navigate to this unit to proceed with lease termination.",
+                                        style: style
                                     ),
                                   ]
                               )
@@ -310,59 +314,59 @@ class _ItemTerminateState extends State<ItemTerminate> {
                     SizedBox(width: 15,),
                   ],
                 ),
-                notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions == ""
-                    ? AnimatedSize(
-                  duration: Duration(milliseconds: 500),
-                  alignment: Alignment.topCenter,
-                  curve: Curves.easeInOut,
-                  child: _isExpanded
-                      ? Container(
-                    margin: EdgeInsets.only(top: 10),
-                    child: Row(
-                      children: [
-                       unitmodel.tid == null
-                            ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5,))
-                            :  Expanded(
-                          child: InkWell(
-                            onTap: (){
-                              _action("ACCEPTED");
-                            },
-                            borderRadius: BorderRadius.circular(5),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                              decoration: BoxDecoration(
-                                  color: color1,
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: color1, width: 1)
-                              ),
-                              child: Center(child: Text("Accept")),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 5,),
-                        unitmodel.tid == null
-                            ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5))
-                            :  Expanded(
-                          child: InkWell(
-                            onTap: (){_action("REJECTED");},
-                            borderRadius: BorderRadius.circular(5),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                              decoration: BoxDecoration(
-                                  color: color1,
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: color1, width: 1)
-                              ),
-                              child: Center(child: Text("Reject")),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                      : SizedBox(),
-                )
-                    : SizedBox(),
+                // notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions == ""
+                //     ? AnimatedSize(
+                //   duration: Duration(milliseconds: 500),
+                //   alignment: Alignment.topCenter,
+                //   curve: Curves.easeInOut,
+                //   child: _isExpanded
+                //       ? Container(
+                //     margin: EdgeInsets.only(top: 10),
+                //     child: Row(
+                //       children: [
+                //        unitmodel.tid == null
+                //             ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5,))
+                //             :  Expanded(
+                //           child: InkWell(
+                //             onTap: (){
+                //               _action("ACCEPTED");
+                //             },
+                //             borderRadius: BorderRadius.circular(5),
+                //             child: Container(
+                //               padding: EdgeInsets.symmetric(vertical: 8),
+                //               decoration: BoxDecoration(
+                //                   color: color1,
+                //                   borderRadius: BorderRadius.circular(5),
+                //                   border: Border.all(color: color1, width: 1)
+                //               ),
+                //               child: Center(child: Text("Accept")),
+                //             ),
+                //           ),
+                //         ),
+                //         SizedBox(width: 5,),
+                //         unitmodel.tid == null
+                //             ?  Expanded(child: ShimmerWidget.rectangular(width: 10, height: 30, borderRadius: 5))
+                //             :  Expanded(
+                //           child: InkWell(
+                //             onTap: (){_action("REJECTED");},
+                //             borderRadius: BorderRadius.circular(5),
+                //             child: Container(
+                //               padding: EdgeInsets.symmetric(vertical: 8),
+                //               decoration: BoxDecoration(
+                //                   color: color1,
+                //                   borderRadius: BorderRadius.circular(5),
+                //                   border: Border.all(color: color1, width: 1)
+                //               ),
+                //               child: Center(child: Text("Reject")),
+                //             ),
+                //           ),
+                //         ),
+                //       ],
+                //     ),
+                //   )
+                //       : SizedBox(),
+                // )
+                //     : SizedBox(),
                 Row(
                   children: [
                     Expanded(
@@ -397,17 +401,17 @@ class _ItemTerminateState extends State<ItemTerminate> {
                                 ],
                               )
                           ),
-                          notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions==""
-                              ? Container(
-                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-                              decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(color: color1, width: 0.5)
-                              ),
-                              child: Text("Action Required", style: TextStyle(fontSize: 11, color: Colors.green))
-                          )
-                              :SizedBox(),
+                          // notifModel.pid.toString().contains(currentUser.uid)  && notifModel.actions==""
+                          //     ? Container(
+                          //     padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
+                          //     decoration: BoxDecoration(
+                          //         color: Colors.green.withOpacity(0.2),
+                          //         borderRadius: BorderRadius.circular(5),
+                          //         border: Border.all(color: color1, width: 0.5)
+                          //     ),
+                          //     child: Text("Action Required", style: TextStyle(fontSize: 11, color: Colors.green))
+                          // )
+                          //     :SizedBox(),
                         ],
                       ),
                     ),
