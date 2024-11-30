@@ -78,7 +78,7 @@ class _ItemUtilState extends State<ItemUtil> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          util.icon,
+          Icon(util.icon),
           const SizedBox(width: 20,),
           Expanded(
             child: Column(

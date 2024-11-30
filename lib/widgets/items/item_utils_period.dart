@@ -70,7 +70,7 @@ class _ItemUtilPeriodState extends State<ItemUtilPeriod> {
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(width: 1, color: color)),
             child: Center(
-                child: widget.util.icon),
+                child: Icon(widget.util.icon)),
           ),
           SizedBox(width: 10,),
           Expanded(

@@ -2088,7 +2088,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 child: Row(
                                   children: [
                                     SizedBox(width: 5,),
-                                    util.icon,
+                                    Icon(util.icon),
                                     SizedBox(width: 20,),
                                     Expanded(child: Text(utils.text)),
                                     balance==0 || balance <0
@@ -2206,7 +2206,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           child: Row(
                             children: [
                               SizedBox(width: 5,),
-                              util.icon,
+                              Icon(util.icon),
                               SizedBox(width: 20,),
                               Expanded(child: Text(utils.text)),
                               Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}", style: TextStyle(color: secondaryColor),),
