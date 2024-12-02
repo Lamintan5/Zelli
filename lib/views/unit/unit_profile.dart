@@ -1994,7 +1994,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: InkWell(
                         onTap: (){
-                          Navigator.pop(context);
                           Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                             month: month.month.toString(),year: month.year.toString(),type: "DEPOSIT", from: 'unit',),transition: Transition.rightToLeft);
                         },
@@ -2008,20 +2007,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               Icon(CupertinoIcons.padlock),
                               SizedBox(width: 20,),
                               Expanded(child: Text("Security Deposit")),
-                              depoBalance == 0
+                              unit.lid != currentLease.lid
+                                  ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paidDeposit)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
+                                  : depoBalance == 0
                                   ? Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(deposit)}", style: TextStyle(fontWeight: FontWeight.w600),)
                                   : TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")),
                               SizedBox(width: 10,),
-                              InkWell(
-                                onTap: (){Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
-                                  month: month.month.toString(),year: month.year.toString(),type: "DEPOSIT", from: 'unit',),transition: Transition.rightToLeft);},
-                                borderRadius: BorderRadius.circular(5),
-                                hoverColor: color1,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
-                                ),
-                              )
+                              Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                              ),
                             ],
                           ),
                         ),
@@ -2032,7 +2027,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: InkWell(
                         onTap: (){
-                          Navigator.pop(context);
                           Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
                             month: month.month.toString(),year: month.year.toString(),type: "RENT", from: 'unit',),transition: Transition.rightToLeft);
                         },
@@ -2046,20 +2040,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                               Icon(CupertinoIcons.home),
                               SizedBox(width: 20,),
                               Expanded(child: Text("Rent")),
-                              month.balance==0
+                              unit.lid != currentLease.lid
+                                  ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.amount)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
+                                  : month.balance==0
                                   ?Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.amount)}", style: TextStyle(fontWeight: FontWeight.w600))
                                   :TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.balance)}")),
                               SizedBox(width: 10),
-                              InkWell(
-                                onTap: (){Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
-                                  month: month.month.toString(),year: month.year.toString(),type: "RENT", from: 'unit',),transition: Transition.rightToLeft);},
-                                borderRadius: BorderRadius.circular(5),
-                                hoverColor: color1,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
-                                ),
-                              )
+                              Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                              ),
                             ],
                           ),
                         ),
@@ -2072,28 +2062,36 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         itemBuilder: (context, index){
                           UtilsModel utils = _utils[index];
                           UtilModel util = Data().utilList.firstWhere((element) => element.text == utils.text);
-                          double balance = 0;
-                          balance = double.parse(utils.amount) - _periodPays.where((element) => element.type?.toUpperCase() == utils.text.toUpperCase()).fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount!));
+                          double amnt = utils.amount.isEmpty? 0.0 : double.parse(utils.amount);
+                          double paid = _periodPays.where((element) => element.type?.toUpperCase() == utils.text.toUpperCase()).fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount!));
+                          double balance = utils.cost == 'Variable'? 0.0 : double.parse(utils.amount) - paid;
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
                             child: InkWell(
                               onTap: (){
-                                Navigator.pop(context);
                                 Get.to(()=> Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid,
-                                month: month.month.toString(),year: month.year.toString(),type: utils.text, from: 'unit',),transition: Transition.rightToLeft);},
+                                month: month.month.toString(),year: month.year.toString(), type: utils.text, from: 'unit',),transition: Transition.rightToLeft);},
                               borderRadius: BorderRadius.circular(5),
                               hoverColor: color1,
                               child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+                                padding: EdgeInsets.symmetric(horizontal: 4),
                                 child: Row(
                                   children: [
                                     SizedBox(width: 5,),
                                     Icon(util.icon),
                                     SizedBox(width: 20,),
                                     Expanded(child: Text(utils.text)),
-                                    balance==0 || balance <0
-                                        ?Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}', style: TextStyle(color: secondaryColor),)
-                                        :balance==double.parse(utils.amount)
+                                     unit.lid != currentLease.lid
+                                         ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
+                                         : balance <=0
+                                        ?utils.cost == 'Variable'
+                                        ? TextButton(
+                                            onPressed: (){},
+                                            child: Text('Variable Cost ● ${utils.period}',)
+                                        )
+                                        : Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}',
+                                       style: TextStyle(color: secondaryColor),)
+                                        :balance==amnt
                                         ? TextButton(
                                         onPressed: (){
 
@@ -2104,17 +2102,29 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
                                         },
                                         child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
+                                    // TextButton(
+                                    //     onPressed: (){},
+                                    //     child: Text(
+                                    //       balance <= 0
+                                    //           ? utils.cost == 'Variable'? 'Variable Cost ● ${utils.period}' : '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}'
+                                    //           : balance==amnt
+                                    //           ? "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"
+                                    //           : 'Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}',
+                                    //       style: TextStyle(
+                                    //           color: unit.lid != currentLease.lid
+                                    //               ? secondaryColor
+                                    //               : balance==amnt
+                                    //               ? Colors.white
+                                    //               : CupertinoColors.activeBlue
+                                    //
+                                    //       ),
+                                    //     )
+                                    // ),
                                     SizedBox(width: 10,),
-                                    InkWell(
-                                      onTap: (){},
-                                      borderRadius: BorderRadius.circular(5),
-                                      hoverColor: color1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
-                                      ),
-                                    )
-
+                                    Padding(
+                                      padding: const EdgeInsets.all(5.0),
+                                      child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                                    ),
                                   ],
                                 ),
                               ),

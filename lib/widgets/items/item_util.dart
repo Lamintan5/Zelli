@@ -1,5 +1,7 @@
+import 'package:Zelli/views/property/activities/util_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/util.dart';
@@ -41,6 +43,7 @@ class _ItemUtilState extends State<ItemUtil> {
       period: newPeriod,
       amount: newAmount.toString(),
       checked: 'false',
+      cost: '',
     );
     amount = newAmount;
     period = newPeriod;
@@ -93,9 +96,10 @@ class _ItemUtilState extends State<ItemUtil> {
                 ),
                 _isChecked
                     ? amount == 0
-                    ? TextButton(onPressed: (){
-                  dialogAddData(context);
-                },
+                    ? TextButton(
+                    onPressed: (){
+                      dialogAddData(context);
+                    },
                     child: Text("Click here to enter amount",)
                 ) : TextButton(onPressed: (){dialogAddData(context);}, child: Text("Ksh.${formatNumberWithCommas(amount)} ● ${period}"))
                     : const SizedBox()
