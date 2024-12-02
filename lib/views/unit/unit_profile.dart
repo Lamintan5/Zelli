@@ -626,51 +626,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                           : "${room} BEDROOM"
                                   ),
                                   Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(rent)}"),
-                                  // currentTenant.uid==""
-                                  //     ? SizedBox()
-                                  //     : Wrap(
-                                  //   runSpacing: 5,
-                                  //   spacing: 5,
-                                  //   children: [
-                                  //     Container(
-                                  //       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                                  //       decoration: BoxDecoration(
-                                  //           borderRadius: BorderRadius.circular(5),
-                                  //           color: color1
-                                  //       ),
-                                  //       child: Row(
-                                  //         mainAxisSize: MainAxisSize.min,
-                                  //         crossAxisAlignment: CrossAxisAlignment.end,
-                                  //         children: [
-                                  //           Icon(CupertinoIcons.mail, color: color5,size: 13,),
-                                  //           SizedBox(width: 2,),
-                                  //           Text(
-                                  //             currentTenant.email.toString(),
-                                  //             style: TextStyle(color: color5,fontSize: 12),
-                                  //           )
-                                  //         ],
-                                  //       ),
-                                  //     ),
-                                  //     currentTenant.phone.toString() == "" ? SizedBox() : Container(
-                                  //       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                                  //       decoration: BoxDecoration(
-                                  //           borderRadius: BorderRadius.circular(5),
-                                  //           color: color1
-                                  //       ),
-                                  //       child: Row(
-                                  //         mainAxisSize: MainAxisSize.min,
-                                  //         children: [
-                                  //           Icon(CupertinoIcons.phone, color: color5,size:  13),
-                                  //           SizedBox(width: 2,),
-                                  //           Text(
-                                  //             currentTenant.phone.toString(),
-                                  //             style: TextStyle(color: color5,fontSize: 12),
-                                  //           )
-                                  //         ],
-                                  //       ),
-                                  //     )
-                                  //   ],
-                                  // ),
+
                                 ],
                               ),
                             ),
