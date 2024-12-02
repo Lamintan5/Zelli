@@ -21,9 +21,11 @@ class DialogPay extends StatefulWidget {
   final LeaseModel lease;
   final double amount;
   final String account;
+  final String cost;
+  final bool isMax;
   final Function reload;
   final MonthModel lastPaid;
-  const DialogPay({super.key, required this.unit, required this.amount, required this.entity, required this.account, required this.reload, required this.lastPaid, required this.lease});
+  const DialogPay({super.key, required this.unit, required this.amount, required this.entity, required this.account, required this.reload, required this.lastPaid, required this.lease, required this.cost, required this.isMax});
 
   @override
   State<DialogPay> createState() => _DialogPayState();
@@ -103,7 +105,7 @@ class _DialogPayState extends State<DialogPay> {
                         style: TextStyle(color: reverse)
                     ),
                     TextSpan(
-                        text: "amount of ",
+                        text: "payment amount of ",
                         style: TextStyle(color: secondaryColor,)
                     ),
                     TextSpan(
@@ -124,14 +126,13 @@ class _DialogPayState extends State<DialogPay> {
                 return 'Please enter a value';
               }
               double? amnt = double.tryParse(value);
-              String acnt = widget.account;
               if (amnt == null ) {
                 return 'Please enter a valid number ';
               }
               if (value.contains('.') && value.split('.')[1].length > 2) {
                 return 'Please enter a number with no more than 2 decimal places';
               }
-              if (amnt > widget.amount && acnt=="DEPOSIT") {
+              if(widget.isMax == true && amnt > widget.amount){
                 return 'Amount is more than ${TFormat().formatNumberWithCommas(widget.amount)}';
               }
               return null;

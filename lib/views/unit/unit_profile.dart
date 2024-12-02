@@ -151,8 +151,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     _prepayment = monthsList.where((test) => DateTime(test.year, test.month).isAfter(DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString())))).toList();
-    accrued=_accrue.fold(0.0, (previous, element) => previous + element.balance);
+    accrued = _accrue.fold(0.0, (previous, element) => previous + element.balance);
     prepaid = _prepayment.fold(0.0, (previous, element) => previous + element.amount);
+
     if(prepaid>0){
       if(prepaid<rent){
         percentage = (prepaid/rent);
@@ -261,7 +262,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
   void _listMonth() {
     // Set first rent date based on whether lease ID is empty
-    DateTime firstRentDate = unit.lid.toString().isEmpty
+    DateTime firstEnteredDate = unit.lid.toString().isEmpty && currentLease.lid.isEmpty
         ? DateTime.now()
         : DateTime.parse(currentLease.start.toString());
 
@@ -271,7 +272,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
         : DateTime.parse(_rent.last.time.toString());
 
     // Define start and end dates for generating the months list
-    startDate = DateTime(firstRentDate.year, firstRentDate.month, int.parse(entity.due.toString()));
+    startDate = DateTime(firstEnteredDate.year, firstEnteredDate.month, int.parse(entity.due.toString()));
     endDate = lastRentDate.isBefore(currentMonth)
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
         : DateTime(lastRentDate.year, lastRentDate.month, int.parse(entity.due.toString()));
@@ -744,18 +745,18 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           child: currentTenant.uid!=unit.tid.toString().split(",").first
                               ?RichText(
                               text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                        text: "This lease was terminated on ",
-                                        style: style
-                                    ),
-                                    TextSpan(
-                                        text: end.isEmpty? "" : DateFormat.yMMMEd().format(DateTime.parse(end)),
-                                        style: bold
-                                    )
-                                  ]
+                                      children: [
+                                        TextSpan(
+                                            text: "This lease was terminated on ",
+                                            style: style
+                                        ),
+                                        TextSpan(
+                                            text: end.isEmpty? "" : DateFormat.yMMMEd().format(DateTime.parse(end)),
+                                            style: bold
+                                        )
+                                      ]
+                                  )
                               )
-                          )
                               :unit.tid == ""
                               ? RichText(
                               textAlign: TextAlign.center,
@@ -803,7 +804,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                         ),
                                         WidgetSpan(
                                             child: InkWell(
-                                              onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance);},
+                                              onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance, "Fixed",true, lastPaid);},
                                               child: Text(
                                                   "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
                                                   style: activeBlue
@@ -821,7 +822,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                         ),
                                         WidgetSpan(
                                             child: InkWell(
-                                              onTap: (){},
+                                              onTap: (){
+                                                dialogRecordPayments(context, "RENT",accrued, "Fixed",false, lastPaid);
+                                              },
                                               child: Text(
                                                 "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
                                                 style: activeRed,
@@ -850,12 +853,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                             style: style
                                         ),
                                         WidgetSpan(
-                                            child: InkWell(
-                                              onTap: (){},
-                                              child: Text(
-                                                "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(prepaid)} ",
-                                                style: active,
-                                              ),
+                                            child: Text(
+                                              "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(prepaid)} ",
+                                              style: active,
                                             )
                                         ),
                                         TextSpan(
@@ -1642,7 +1642,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                     shape: CircleBorder(),
                     label: "Deposit",
                     onTap: (){
-                      dialogRecordPayments(context, "DEPOSIT", depoBalance);
+                      dialogRecordPayments(context, "DEPOSIT", depoBalance, "Fixed",true, lastPaid);
                     }
                 ),
               SpeedDialChild(
@@ -1650,13 +1650,16 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   shape: CircleBorder(),
                   label: "Rent",
                   onTap: (){
-                      dialogRecordPayments(context, "RENT", accrued);
+                      dialogRecordPayments(context, "RENT", accrued,  "Fixed",false,lastPaid);
                   }
               ),
               SpeedDialChild(
                 child: Icon(CupertinoIcons.lightbulb, size: 20,),
                   shape: CircleBorder(),
-                label: "Utilities"
+                label: "Utilities",
+                onTap: (){
+                  dialogUtil(context);
+                }
               ),
             ],
           ),
@@ -1896,7 +1899,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
       );
     });
   }
-  void dialogRecordPayments(BuildContext context,String account, double amount){
+  void dialogRecordPayments(BuildContext context,String account, double amount, String cost, bool ismax, MonthModel monthmodel){
     final reverse = Theme.of(context).brightness == Brightness.dark
         ? Colors.white
         : Colors.black;
@@ -1921,7 +1924,8 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   entity: entity,
                   account: account,
                   reload: _getData,
-                  lastPaid: lastPaid,
+                  lastPaid: monthmodel,
+                  cost: cost, isMax: ismax,
                 )
               ],
             ),
@@ -1980,7 +1984,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
               Padding(
                 padding: padding,
                 child: Text(
-                  'Please click the arrow button to view a comprehensive list of payments associated with each respective account.',
+                  'Please click the any item to view a comprehensive list of payments associated with each respective account.',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: secondaryColor),
                 ),
@@ -2011,7 +2015,13 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paidDeposit)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
                                   : depoBalance == 0
                                   ? Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(deposit)}", style: TextStyle(fontWeight: FontWeight.w600),)
-                                  : TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")),
+                                  : TextButton(
+                                      onPressed: (){
+                                        Navigator.pop(context);
+                                        dialogRecordPayments(context, "DEPOSIT", depoBalance,  "Fixed",true,month);
+                                      },
+                                      child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}")
+                                    ),
                               SizedBox(width: 10,),
                               Padding(
                                 padding: const EdgeInsets.all(5.0),
@@ -2044,7 +2054,12 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                   ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.amount)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
                                   : month.balance==0
                                   ?Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.amount)}", style: TextStyle(fontWeight: FontWeight.w600))
-                                  :TextButton(onPressed: (){}, child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.balance)}")),
+                                  :TextButton(
+                                  onPressed: (){
+                                    Navigator.pop(context);
+                                    dialogRecordPayments(context, "RENT", month.balance,  "Fixed",true, month);
+                                  },
+                                  child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(month.balance)}")),
                               SizedBox(width: 10),
                               Padding(
                                 padding: const EdgeInsets.all(5.0),
@@ -2063,7 +2078,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           UtilsModel utils = _utils[index];
                           UtilModel util = Data().utilList.firstWhere((element) => element.text == utils.text);
                           double amnt = utils.amount.isEmpty? 0.0 : double.parse(utils.amount);
-                          double paid = _periodPays.where((element) => element.type?.toUpperCase() == utils.text.toUpperCase()).fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount!));
+                          double paid = _pay.where((element) => element.type?.toUpperCase() == util.text.toUpperCase() 
+                              && DateTime.parse(element.time.toString()).year == month.year && DateTime.parse(element.time.toString()).month ==  month.month)
+                              .fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount!));
                           double balance = utils.cost == 'Variable'? 0.0 : double.parse(utils.amount) - paid;
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -2081,27 +2098,64 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                     Icon(util.icon),
                                     SizedBox(width: 20,),
                                     Expanded(child: Text(utils.text)),
-                                     unit.lid != currentLease.lid
-                                         ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
-                                         : balance <=0
-                                        ?utils.cost == 'Variable'
-                                        ? TextButton(
-                                            onPressed: (){},
-                                            child: Text('Variable Cost ● ${utils.period}',)
-                                        )
-                                        : Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}',
-                                       style: TextStyle(color: secondaryColor),)
-                                        :balance==amnt
+                                    unit.lid != currentLease.lid
+                                        ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}',
+                                          style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
+                                        : utils.cost == 'Variable'
+                                         ? TextButton(
+                                             onPressed: (){
+                                               Navigator.pop(context);
+                                               dialogRecordPayments(context, util.text, 0, utils.cost, false, month);
+                                             },
+                                             child: Text('VC ● ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)} ● ${utils.period}',)
+                                         ) : paid == amnt
+                                        ? Text(
+                                            '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}',
+                                            style: TextStyle(fontWeight: FontWeight.w600),
+                                          )
+                                        : balance==amnt
                                         ? TextButton(
                                         onPressed: (){
-
+                                          Navigator.pop(context);
+                                          dialogRecordPayments(context, util.text, double.parse(utils.amount), utils.cost, true, month);
                                         },
-                                        child: Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"))
+                                        child: Text(" ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"))
                                         :TextButton(
-                                        onPressed: (){
+                                          onPressed: (){
+                                            Navigator.pop(context);
+                                            dialogRecordPayments(context, util.text, balance, utils.cost, true, month);
+                                          },
+                                          child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
 
-                                        },
-                                        child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
+                                     // unit.lid != currentLease.lid
+                                     //     ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}', style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
+                                     //     : balance <=0
+                                     //    ?utils.cost == 'Variable'
+                                     //    ? TextButton(
+                                     //        onPressed: (){
+                                     //          Navigator.pop(context);
+                                     //          dialogRecordPayments(context, util.text, 0, utils.cost, false);
+                                     //        },
+                                     //        child: Text('Variable Cost ● ${utils.period}',)
+                                     //    )
+                                     //    : Text(
+                                     //      '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}',
+                                     //       style: TextStyle(color: secondaryColor),
+                                     //     )
+                                     //    : balance==amnt
+                                     //    ? TextButton(
+                                     //    onPressed: (){
+                                     //      Navigator.pop(context);
+                                     //      dialogRecordPayments(context, util.text, double.parse(utils.amount), utils.cost, true);
+                                     //    },
+                                     //    child: Text(" ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"))
+                                     //    :TextButton(
+                                     //    onPressed: (){
+                                     //
+                                     //    },
+                                     //    child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
+
+
                                     // TextButton(
                                     //     onPressed: (){},
                                     //     child: Text(
@@ -2197,36 +2251,64 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   ],
                 ),
               )
-                  : ListView.builder(
+                  :   ListView.builder(
                   shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: _utils.length,
                   itemBuilder: (context, index){
                     UtilsModel utils = _utils[index];
                     UtilModel util = Data().utilList.firstWhere((element) => element.text == utils.text);
+                    MonthModel month = MonthModel(year: currentMonth.year, monthName: "", month: currentMonth.month, amount: 0, balance: 0);
+                    double amnt = utils.amount.isEmpty? 0.0 : double.parse(utils.amount);
+                    double paid = _pay.where((element) => element.type?.toUpperCase() == util.text.toUpperCase()
+                        && DateTime.parse(element.time.toString()).year == month.year && DateTime.parse(element.time.toString()).month ==  month.month)
+                        .fold(0.0, (previousValue, element) => previousValue + double.parse(element.amount!));
+                    double balance = utils.cost == 'Variable'? 0.0 : double.parse(utils.amount) - paid;
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: InkWell(
-                        onTap: (){
-                          dialogRecordPayments(context, utils.text, double.parse(utils.amount));
-                        },
-                        borderRadius: BorderRadius.circular(5),
-                        hoverColor: color1,
-                        child: Container(
-                          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 4),
-                          child: Row(
-                            children: [
-                              SizedBox(width: 5,),
-                              Icon(util.icon),
-                              SizedBox(width: 20,),
-                              Expanded(child: Text(utils.text)),
-                              Text("${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}", style: TextStyle(color: secondaryColor),),
-                              SizedBox(width: 10,),
-                              Padding(
-                                padding: const EdgeInsets.all(5.0),
-                                child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
-                              )
-                            ],
-                          ),
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 5,),
+                            Icon(util.icon),
+                            SizedBox(width: 20,),
+                            Expanded(child: Text(utils.text)),
+                            unit.lid != currentLease.lid
+                                ? Text('${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}',
+                                style: TextStyle(color: secondaryColor, fontWeight: FontWeight.w600))
+                                : utils.cost == 'Variable'
+                                ? TextButton(
+                                onPressed: (){
+                                  Navigator.pop(context);
+                                  dialogRecordPayments(context, util.text, 0, utils.cost, false, month);
+                                },
+                                child: Text('VC ● ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)} ● ${utils.period}',)
+                            ) : paid == amnt
+                                ? Text(
+                              '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            )
+                                : balance==amnt
+                                ? TextButton(
+                                onPressed: (){
+                                  Navigator.pop(context);
+                                  dialogRecordPayments(context, util.text, double.parse(utils.amount), utils.cost, true, month);
+                                },
+                                child: Text(" ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"))
+                                :TextButton(
+                                onPressed: (){
+                                  Navigator.pop(context);
+                                  dialogRecordPayments(context, util.text, balance, utils.cost, true, month);
+                                },
+                                child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
+
+                            SizedBox(width: 10,),
+                            Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Icon(Icons.keyboard_arrow_right, color: secondaryColor,),
+                            ),
+                          ],
                         ),
                       ),
                     );
