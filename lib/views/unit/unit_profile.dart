@@ -261,104 +261,36 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   }
 
   void _listMonth() {
-    // Set first rent date based on whether lease ID is empty
     DateTime firstEnteredDate = unit.lid.toString().isEmpty && currentLease.lid.isEmpty
         ? DateTime.now()
         : DateTime.parse(currentLease.start.toString());
 
-    // Set last rent date based on existing rent records or due date
     DateTime lastRentDate = _rent.isEmpty
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
         : DateTime.parse(_rent.last.time.toString());
 
-    // Define start and end dates for generating the months list
     startDate = DateTime(firstEnteredDate.year, firstEnteredDate.month, int.parse(entity.due.toString()));
     endDate = lastRentDate.isBefore(currentMonth)
         ? DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString()))
         : DateTime(lastRentDate.year, lastRentDate.month, int.parse(entity.due.toString()));
 
-    // Generate list of months within the date range
-    monthsList = generateMonthsList(startDate, endDate);
+    List<ExcessMonth> excessMonthList = [];
+    monthsList = generateMonthsList(startDate, endDate, excessMonthList);
+
+    distributeExcessToMonths(excessMonthList);
   }
 
-  // List<MonthModel> generateMonthsLiasst(DateTime startDate, DateTime endDate) {
-  //   List<MonthModel> monthsList = [];
-  //
-  //   for (DateTime date = startDate;
-  //   date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
-  //   date = DateTime(date.year, date.month + 1, date.day)) {
-  //
-  //     double totalAmountPaid = 0;
-  //     double balance = 0;
-  //     print(DateFormat('MMM').format(date));
-  //     // Filter rent payments for the current month
-  //     var currentMonthRentPayments = _rent.where((test) {
-  //       DateTime paymentDate = DateTime.parse(test.time!.split(",").first);
-  //       return test.type == "RENT" &&
-  //           paymentDate.year == date.year &&
-  //           paymentDate.month == date.month;
-  //     }).toList();
-  //
-  //     // Calculate total amount paid for the current month
-  //     totalAmountPaid = currentMonthRentPayments.fold(
-  //       0.0,
-  //           (previous, test) => previous + double.parse(test.amount.toString()),
-  //     );
-  //
-  //     // Handle overpayment and balance calculation
-  //     while (totalAmountPaid > 0) {
-  //       double paymentForThisMonth = rent;
-  //       balance = 0;
-  //
-  //       if (totalAmountPaid < rent) {
-  //         paymentForThisMonth = totalAmountPaid;
-  //         balance = rent - totalAmountPaid;
-  //       }
-  //
-  //       String monthName = DateFormat('MMM').format(date);
-  //       print('Month $monthName: Paid \$${paymentForThisMonth.toStringAsFixed(2)}, Remaining balance: \$${balance.toStringAsFixed(2)}');
-  //       monthsList.add(MonthModel(
-  //         year: date.year,
-  //         monthName: monthName,
-  //         month: date.month,
-  //         amount: paymentForThisMonth,
-  //         balance: balance,
-  //       ));
-  //
-  //       totalAmountPaid -= paymentForThisMonth;
-  //
-  //       if (balance > 0) {
-  //         // If there's a balance, break the while loop, and continue with the same month in the for loop
-  //         break;
-  //       } else {
-  //         // If no balance, move to the next month within the while loop
-  //         date = DateTime(date.year, date.month + 1, date.day);
-  //       }
-  //     }
-  //
-  //     if (balance > 0) {
-  //       // If there's a balance, reset date to the current month to repeat in the next for loop iteration
-  //       date = DateTime(date.year, date.month - 1, date.day);
-  //     }
-  //     // If no balance, the for loop will naturally continue to the next month
-  //   }
-  //
-  //   return monthsList;
-  // }
-
-  List<MonthModel> generateMonthsList(DateTime startDate, DateTime endDate) {
+  List<MonthModel> generateMonthsList(DateTime startDate, DateTime endDate, List<ExcessMonth> excessMonthList) {
     List<MonthModel> monthList = [];
     double remainingBalance = 0.0;
 
-    // Loop through each month in the range
     for (DateTime date = startDate;
     date.isBefore(endDate) || date.isAtSameMomentAs(endDate);
-    date = DateTime(date.year, date.month + 1, 1) ) {
+    date = DateTime(date.year, date.month + 1, 1)) {
 
       double totalAmountPaid = 0.0;
       double monthlyBalance = rent;
 
-      // Filter payments relevant to the current month
       var currentMonthPayments = _rent.where((payment) {
         List<String> times = payment.time!.split(',');
         DateTime paymentStart = DateTime.parse(times.first);
@@ -369,29 +301,25 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
             (paymentStart.isBefore(date) && paymentEnd.isAfter(date));
       }).toList();
 
-      // Accumulate payments for the month
       for (var payment in currentMonthPayments) {
         double paymentAmount = double.parse(payment.amount!);
 
-        // Add previous balance to the first payment in the month
         if (date.month == DateTime.parse(payment.time!.split(',').first).month &&
             date.year == DateTime.parse(payment.time!.split(',').first).year) {
           paymentAmount += remainingBalance;
           remainingBalance = 0;
         }
 
-        // Apply payment amount to the monthly balance
         if (paymentAmount > monthlyBalance) {
-          remainingBalance = paymentAmount - monthlyBalance;
+          excessMonthList.add(ExcessMonth(amount: paymentAmount - monthlyBalance, time: date));
           totalAmountPaid += monthlyBalance;
-          break; // Stop adding once rent is fully paid
+          break;
         } else {
           totalAmountPaid += paymentAmount;
           monthlyBalance -= paymentAmount;
         }
       }
 
-      // Add month record to the list
       monthList.add(MonthModel(
         year: date.year,
         month: date.month,
@@ -403,6 +331,48 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
 
     return monthList;
   }
+
+  void distributeExcessToMonths(List<ExcessMonth> excessMonthList) {
+    for (var excess in excessMonthList) {
+      double remainingExcess = excess.amount;
+
+      for (var month in monthsList) {
+        if (month.amount < rent) {
+          double fillAmount = rent - month.amount;
+
+          if (remainingExcess >= fillAmount) {
+            month.amount += fillAmount;
+            month.balance -= fillAmount;  // Adjust the balance accordingly
+            remainingExcess -= fillAmount;
+          } else {
+            month.amount += remainingExcess;
+            month.balance -= remainingExcess;  // Adjust the balance accordingly
+            remainingExcess = 0;
+            break;
+          }
+        }
+      }
+
+      // Handle any remaining excess after filling existing months
+      while (remainingExcess > 0) {
+        DateTime lastDate = DateTime(monthsList.last.year, monthsList.last.month);
+        DateTime newMonthDate = DateTime(lastDate.year, lastDate.month + 1, 1);
+
+        double fillAmount = remainingExcess >= rent ? rent : remainingExcess;
+        monthsList.add(MonthModel(
+          year: newMonthDate.year,
+          month: newMonthDate.month,
+          monthName: DateFormat('MMM').format(newMonthDate),
+          amount: fillAmount,
+          balance: rent - fillAmount,  // Balance should be adjusted here as well
+        ));
+
+        remainingExcess -= fillAmount;
+      }
+    }
+  }
+
+
 
 
   @override
@@ -633,56 +603,56 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                             unit.tid=="" && currentTenant.uid==""
                                 ? SizedBox()
                                 : InkWell(
-                              onTap: (){
-                                Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
-                              },
-                              borderRadius: BorderRadius.circular(5),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Tooltip(
-                                    message: 'Click here to see all co-tenants',
-                                    child: Container(
-                                      width: 60,
-                                      height: 20,
-                                      child: Stack(
-                                        children: [
-                                          AnimatedPositioned(
-                                            left: _position1,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child:  UserProfile(image: image3,radius: 10, shadow: Colors.black54,),
-                                          ),
-                                          AnimatedPositioned(
-                                            left: _position2,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child: UserProfile(image: image2,radius: 10, shadow: Colors.black54,),
-                                          ),
-                                          AnimatedPositioned(
-                                            left: _position3,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
-                                          ),
-                                          currentLease.lid == unit.lid
-                                              ?_admin.contains(currentUser.uid) || unit.tid==currentUser.uid
-                                              ? AnimatedPositioned(
-                                            left: _position4,
-                                            duration: Duration(seconds: 1),
-                                            curve: Curves.easeInOut,
-                                            child: CircleAvatar(
-                                              radius: 10,
-                                              backgroundColor: reverse,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.add,
-                                                  size: 15,
-                                                  color: normal,
+                                    onTap: (){
+                                      Get.to(()=>CoTenants(unit: unit, lease: currentLease, entity: entity, reload: _getData,),transition: Transition.rightToLeft);
+                                    },
+                                    borderRadius: BorderRadius.circular(5),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Tooltip(
+                                          message: 'Click here to see all co-tenants',
+                                          child: Container(
+                                            width: 60,
+                                            height: 20,
+                                            child: Stack(
+                                              children: [
+                                                AnimatedPositioned(
+                                                  left: _position1,
+                                                  duration: Duration(seconds: 1),
+                                                  curve: Curves.easeInOut,
+                                                  child:  UserProfile(image: image3,radius: 10, shadow: Colors.black54,),
                                                 ),
-                                              ),
-                                            ),
-                                          )
+                                                AnimatedPositioned(
+                                                  left: _position2,
+                                                  duration: Duration(seconds: 1),
+                                                  curve: Curves.easeInOut,
+                                                  child: UserProfile(image: image2,radius: 10, shadow: Colors.black54,),
+                                                ),
+                                                AnimatedPositioned(
+                                                  left: _position3,
+                                                  duration: Duration(seconds: 1),
+                                                  curve: Curves.easeInOut,
+                                                  child: UserProfile(image: image1,radius: 10, shadow: Colors.black54,),
+                                                ),
+                                                currentLease.lid == unit.lid
+                                                    ?_admin.contains(currentUser.uid) || unit.tid==currentUser.uid
+                                                    ? AnimatedPositioned(
+                                                  left: _position4,
+                                                  duration: Duration(seconds: 1),
+                                                  curve: Curves.easeInOut,
+                                                  child: CircleAvatar(
+                                                    radius: 10,
+                                                    backgroundColor: reverse,
+                                                    child: Center(
+                                                      child: Icon(
+                                                        Icons.add,
+                                                        size: 15,
+                                                        color: normal,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
                                               : SizedBox()
                                               : SizedBox(),
                                         ],
@@ -2419,18 +2389,22 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     setState(() {
     });
   }
-  void changeMessage(MessModel messModel){
-  }
+  void changeMessage(MessModel messModel){}
   void _updatePay(String payid){
     print("Payment updating");
     _pay.firstWhere((pay) => pay.payid == payid).checked = "true";
     _current.firstWhere((pay) => pay.payid == payid).checked = "true";
     _getPayments();
   }
-  void _removePay(){
-  }
+  void _removePay(){}
   void _updateCount(){}
   void _changeMess(MessModel messModel){}
+}
+class ExcessMonth {
+  double amount;
+  DateTime time;
+
+  ExcessMonth({required this.amount, required this.time});
 }
 
 class buildButton extends StatelessWidget {
