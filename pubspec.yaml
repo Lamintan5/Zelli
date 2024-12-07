@@ -70,7 +70,8 @@ dependencies:
   flutter_speed_dial: ^7.0.0
   carousel_slider: ^5.0.0
   smooth_page_indicator: ^1.2.0+3
-
+  flutter_stripe: ^11.3.0
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
@@ -130,6 +131,13 @@ flutter:
     - assets/logo/ic_stat_onesignal_default.png
     - assets/logo/5logo_72.png
     - assets/logo/5logo_72_black.png
+    - assets/pay/cash.png
+    - assets/pay/master.png
+    - assets/pay/mpesa.png
+    - assets/pay/paypal.png
+    - assets/pay/strip.png
+    - assets/pay/visa.png
+    - assets/pay/card.png
     - assets/add/facebook.png
     - assets/add/google.png
     - assets/add/google_2.png
