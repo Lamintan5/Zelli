@@ -267,7 +267,7 @@ class _CreatePropertyState extends State<CreateProperty> {
                           // ),
                           //SizedBox(height: 20,),
                           Text('Payment Terms', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
-                          SizedBox(height: 10,),
+                          SizedBox(height: 5,),
                           Row(
                             children: [
                               Expanded(
@@ -421,6 +421,7 @@ class _CreatePropertyState extends State<CreateProperty> {
                               ),
                             ],
                           ),
+
                         ],
                       ),
                     ),
@@ -428,7 +429,7 @@ class _CreatePropertyState extends State<CreateProperty> {
                 ),
                 Row(children: [],),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+                  padding: EdgeInsets.all(10),
                   child: InkWell(
                     onTap: (){
                       if(due > late){
@@ -439,8 +440,9 @@ class _CreatePropertyState extends State<CreateProperty> {
                         }
                       }
                     },
+                    borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      width: 400,
+                      width: 450,
                       padding: EdgeInsets.symmetric(vertical: 15),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
