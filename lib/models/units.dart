@@ -5,6 +5,7 @@ class UnitModel {
   String? eid;
   String? tid;
   String? lid;
+  String? account;
   String? tenant;
   String? price;
   String? deposit;
@@ -17,7 +18,8 @@ class UnitModel {
   String? time;
   String? checked;
 
-  UnitModel({this.id,this.pid,this.eid,this.tid, this.lid,this.tenant, this.price, this.room, this.floor, this.prepaid, this.accrual, this.deposit , this.status ,this.title, this.time, this.checked = "false"});
+  UnitModel({this.id,this.pid,this.eid,this.tid, this.lid, this.account, this.tenant, this.price, this.room,
+    this.floor, this.prepaid, this.accrual, this.deposit , this.status ,this.title, this.time, this.checked = "false"});
   factory UnitModel.fromJson(Map<String, dynamic> json) {
     return UnitModel(
       id: json['id'] as String,
@@ -25,6 +27,7 @@ class UnitModel {
       eid: json['eid'] as String,
       tid: json['tid'] as String,
       lid: json['lid'] as String,
+      account: json['account'] as String,
       status: json['status'] as String,
       price: json['price'] as String,
       deposit: json['deposit'] as String,
@@ -42,6 +45,7 @@ class UnitModel {
       'pid': pid,
       'tid': tid,
       'lid': lid,
+      'account': account,
       'status': status,
       'price': price,
       'deposit': deposit,

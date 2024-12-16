@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:Zelli/models/data.dart';
+import 'package:Zelli/views/unit/activities/add_unit.dart';
 import 'package:Zelli/views/unit/unit_profile.dart';
 import 'package:Zelli/widgets/dialogs/dialog_title.dart';
 import 'package:flutter/cupertino.dart';
@@ -241,7 +242,7 @@ class _FloorUnitsState extends State<FloorUnits> {
       ),
       floatingActionButton: widget.entity.pid!.contains(currentUser.uid)? FloatingActionButton.extended(
           onPressed: (){
-            dialogAddUnit(context);
+            Get.to(() => AddUnit(entity: widget.entity, reload: _getData, floor: widget.floor),transition: Transition.rightToLeft);
           },
           elevation: 5,
           shape: RoundedRectangleBorder(

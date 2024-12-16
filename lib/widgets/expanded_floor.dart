@@ -19,6 +19,7 @@ import '../models/units.dart';
 import '../models/users.dart';
 import '../resources/services.dart';
 import '../utils/colors.dart';
+import '../views/unit/activities/add_unit.dart';
 import '../views/unit/floor_units.dart';
 import '../views/unit/unit_profile.dart';
 import 'dialogs/dialog_add_unit.dart';
@@ -126,7 +127,7 @@ class _ExpandFloorState extends State<ExpandFloor> {
           SizedBox(width: 10,),
           MaterialButton(
             onPressed: (){
-              dialogAddUnit(context);
+              Get.to(() => AddUnit(entity: widget.entity, reload: _getData, floor: widget.floor),transition: Transition.rightToLeft);
             },
             height: 0,minWidth: 0,
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -170,7 +171,7 @@ class _ExpandFloorState extends State<ExpandFloor> {
                     SizedBox(height: 10,),
                     MaterialButton(
                       onPressed: (){
-                        dialogAddUnit(context);
+                        Get.to(() => AddUnit(entity: widget.entity, reload: _getData, floor: widget.floor),transition: Transition.rightToLeft);
                       },
 
                       child: Text('Create'),color: Colors.blueAccent,),
@@ -283,7 +284,9 @@ class _ExpandFloorState extends State<ExpandFloor> {
                   tooltip: "View all units",
                   icon: Icon(CupertinoIcons.square_grid_2x2)),
               IconButton(
-                  onPressed: (){dialogAddUnit(context);},
+                  onPressed: (){
+                    Get.to(() => AddUnit(entity: widget.entity, reload: _getData, floor: widget.floor),transition: Transition.rightToLeft);
+                  },
                   tooltip: "Add unit",
                   icon: Icon(CupertinoIcons.add_circled)
               ),

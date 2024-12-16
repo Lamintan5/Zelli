@@ -10,6 +10,7 @@ import 'package:Zelli/views/property/activities/edit_property.dart';
 import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/property/activities/utilities.dart';
 import 'package:Zelli/views/property/activities/managers.dart';
+import 'package:Zelli/views/property/billing/billing.dart';
 import 'package:Zelli/views/property/tabs/prop_unit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -148,15 +149,11 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
       }
     });
 
-
-
-
     if (_managers.isNotEmpty) {
       image1 = _managers.length > 0 ? _managers[0].image.toString() : '';
       image2 = _managers.length > 1 ? _managers[1].image.toString() : '';
       image3 = _managers.length > 2 ? _managers[2].image.toString() : '';
     }
-
 
     Future.delayed(Duration(milliseconds: 100), () {
       setState(() {
@@ -166,9 +163,7 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
         _position4 = _managers.length == 0 ? 20 : _managers.length == 1 ? 30 : _managers.length == 2 || _managers.length == 3 || _managers.length > 3 ? 40 : 20.0;
       });
     });
-
   }
-
 
   @override
   void initState() {
@@ -749,7 +744,6 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-
                             // Managers
                             admin.contains(currentUser.uid) || entity.pid.toString().contains(currentUser.uid) || _unitList.any((test) => test.tid.toString().contains(currentUser.uid))
                                 ? RowButton(
@@ -852,7 +846,15 @@ class _PropertyViewState extends State<PropertyView>  with TickerProviderStateMi
                                   )
                                 : SizedBox(),
 
-
+                            // Billing
+                            admin.contains(currentUser.uid)
+                                ?  RowButton(
+                                    onTap:() {
+                                      Get.to(() => Billing(entity: entity),transition: Transition.rightToLeft);
+                                    },
+                                    icon :Icon(CupertinoIcons.creditcard), title:"Billing", subtitle:""
+                                )
+                                : SizedBox(),
 
                             !admin.contains(currentUser.uid) ? SizedBox() :RowButton(onTap:() {
                               Get.to(()=>Report(entity: widget.entity, unitid: '', tid: '', lid: '',), transition: Transition.rightToLeft);

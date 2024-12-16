@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 
 
 import '../api/crypto.dart';
+import '../models/billing.dart';
 import '../models/duties.dart';
 import '../models/entities.dart';
 import '../models/inventories.dart';
@@ -34,6 +35,7 @@ class Services{
   static var _PAY = HOST + 'payments.php';
   static var _STAR = HOST + 'star.php';
   static var _REVIEW = HOST + 'reviews.php';
+  static var _BILLING = HOST + 'billing.php';
 
   static const String _ADD  = 'ADD';
   static const String _REGISTER  = 'REGISTER';
@@ -53,6 +55,9 @@ class Services{
   static const String _UPDATE_DELETE  = 'UPDATE_DELETE';
   static const String _UPDATE_PID  = 'UPDATE_PID';
   static const String _UPDATE_ADMIN  = 'UPDATE_ADMIN';
+  static const String _UPDATE_ACCOUNT  = 'UPDATE_ACCOUNT';
+  static const String _UPDATE_ACCESS  = 'UPDATE_ACCESS';
+  static const String _REMOVE_ACCESS  = 'REMOVE_ACCESS';
   static const String _REMOVE_PID  = 'REMOVE_PID';
   static const String _REMOVE_COTID  = 'REMOVE_COTID';
   static const String _REMOVE_TID  = 'REMOVE_TID';
@@ -123,6 +128,11 @@ class Services{
   List<DutiesModel> dutyFromJson(String jsonString) {
     final data = json.decode(jsonString);
     return List<DutiesModel>.from(data.map((item)=>DutiesModel.fromJson(item)));
+  }
+  // Method to create the table Billing.
+  List<BillingModel> billingFromJson(String jsonString) {
+    final data = json.decode(jsonString);
+    return List<BillingModel>.from(data.map((item)=>BillingModel.fromJson(item)));
   }
 
 
@@ -285,6 +295,25 @@ class Services{
       map["eid"] = eid;
       map["duties"] = duties.join(',');
       final response = await http.post(Uri.parse(_DUTIES), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // ADD BILL
+  static Future<String> addBill(BillingModel bill) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _ADD;
+      map["bid"] = bill.bid;
+      map["pid"] = bill.pid;
+      map["eid"] = bill.eid;
+      map["bill"] = bill.bill;
+      map["businessno"] = bill.businessno;
+      map["accountno"] = bill.accountno;
+      map["type"] = bill.type;
+      map["account"] = bill.account;
+      final response = await http.post(Uri.parse(_BILLING), body: map);
       return response.body;
     } catch (e) {
       return 'error';
@@ -574,6 +603,32 @@ class Services{
       return <StarModel>[];
     }
   }
+  // GET MY BILLS
+  Future<List<BillingModel>> getMyBills(String uid)async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_MY;
+    map["uid"] = uid;
+    final response = await http.post(Uri.parse(_BILLING),body: map);
+    if(response.statusCode==200) {
+      List<BillingModel> bill = billingFromJson(response.body);
+      return bill;
+    } else {
+      return <BillingModel>[];
+    }
+  }
+  // GET CURRENT BILLS
+  Future<List<BillingModel>> getCurrentBills(String eid)async{
+    var map = new Map<String, dynamic>();
+    map["action"] = _GET_CURRENT;
+    map["eid"] = eid;
+    final response = await http.post(Uri.parse(_BILLING),body: map);
+    if(response.statusCode==200) {
+      List<BillingModel> bill = billingFromJson(response.body);
+      return bill;
+    } else {
+      return <BillingModel>[];
+    }
+  }
 
 
   // UPDATE USER TOKEN
@@ -742,6 +797,32 @@ class Services{
       return 'error';
     }
   }
+  // UPDATE BILLING ACCOUNT
+  static Future<String> updateAccess(String bid, String access) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _UPDATE_ACCESS;
+      map["bid"] = bid;
+      map["access"] = access;
+      final response = await http.post(Uri.parse(_BILLING), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // UPDATE BILLING ACCOUNT
+  static Future<String> removeAccess(String bid, String access) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _REMOVE_ACCESS;
+      map["bid"] = bid;
+      map["access"] = access;
+      final response = await http.post(Uri.parse(_BILLING), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
   // REMOVE PID
   static Future<String> removePid(String eid, String uid) async {
     try {
@@ -865,6 +946,23 @@ class Services{
       return 'error';
     }
   }
+  // UPDATE BILL
+  static Future<String> updateBill(String bid,String businessno, String accountno, String type, String account) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _UPDATE;
+      map["bid"] = bid;
+      map["businessno"] = businessno;
+      map["accountno"] = accountno;
+      map["account"] = account;
+      map["type"] = type;
+      final response = await http.post(Uri.parse(_BILLING), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+
 
    // DELETE ENTITY
   static Future<String> deleteEntity(String eid) async {
@@ -885,6 +983,18 @@ class Services{
       map["action"] = _DELETE;
       map["id"] = id;
       final response = await http.post(Uri.parse(_UNIT), body: map);
+      return response.body;
+    } catch (e) {
+      return 'error';
+    }
+  }
+  // DELETE UNIT
+  static Future<String> deleteBill(String bid) async {
+    try {
+      var map = new Map<String, dynamic>();
+      map["action"] = _DELETE;
+      map["bid"] = bid;
+      final response = await http.post(Uri.parse(_BILLING), body: map);
       return response.body;
     } catch (e) {
       return 'error';

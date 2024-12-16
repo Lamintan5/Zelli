@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:Zelli/widgets/dialogs/dialog_add_unit.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../main.dart';
@@ -10,6 +11,7 @@ import '../models/data.dart';
 import '../models/entities.dart';
 import '../models/units.dart';
 import '../utils/colors.dart';
+import '../views/unit/activities/add_unit.dart';
 import '../widgets/buttons/call_actions/double_call_action.dart';
 import '../widgets/cards/card_button.dart';
 import '../widgets/dialogs/dialog_edit_unit.dart';
@@ -136,7 +138,7 @@ class _CreateUnitsState extends State<CreateUnits> {
                       icon: Icon(Icons.add, color: screenBackgroundColor,size: 19,),
                       forecolor: screenBackgroundColor,
                       onTap: () {
-                        dialogAddUnit(context);
+                        Get.to(() => AddUnit(entity: widget.entity, reload: _getUnits, floor: widget.floor),transition: Transition.rightToLeft);
                       },
                     ),
                     CardButton(

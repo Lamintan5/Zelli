@@ -306,6 +306,7 @@ class _OptionsState extends State<Options> {
         preferences.remove('mythird');
         preferences.remove('mystars');
         preferences.remove('myduties');
+        preferences.remove('mybills');
         currentUser = UserModel(uid: "", email: "", phone: "", username: "", image: "", token: "", status: "", firstname: "", lastname: "", password: "", time: "", country: "");
         myEntity = [];
         notMyEntity = [];
@@ -320,6 +321,7 @@ class _OptionsState extends State<Options> {
         myThird = [];
         myStars = [];
         myDuties = [];
+        myBills = [];
         socketManager.chats.clear();
         socketManager.messages.clear();
         socketManager.notifications.clear();

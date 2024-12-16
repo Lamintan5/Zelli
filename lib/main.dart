@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:Zelli/auth/login.dart';
 import 'package:Zelli/resources/socket.dart';
+import 'package:Zelli/test/consts.dart';
+import 'package:Zelli/test/test_unit.dart';
 import 'package:Zelli/utils/colors.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +37,7 @@ List<String> myChats = [];
 List<String> myMess = [];
 List<String> myStars = [];
 List<String> myDuties = [];
+List<String> myBills = [];
 Map<String, dynamic> myRates = {};
 
 final customCacheManager = CacheManager(
@@ -45,6 +49,7 @@ final customCacheManager = CacheManager(
 
 Future<void> main()async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = stripePublishableKey;
   if(Platform.isMacOS || Platform.isWindows || Platform.isLinux){
 
   } else {
@@ -53,6 +58,7 @@ Future<void> main()async {
   Get.put(SocketManager());
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -93,6 +99,7 @@ class _MyAppState extends State<MyApp> {
     var obtainMyMess= sharedPreferences.getStringList('mymess');
     var obtainMyStars= sharedPreferences.getStringList('mystars');
     var obtainMyDuties= sharedPreferences.getStringList('myduties');
+    var obtainMyBills= sharedPreferences.getStringList('mybills');
 
 
     var obtainRates= sharedPreferences.getStringList('rates');
@@ -125,6 +132,7 @@ class _MyAppState extends State<MyApp> {
       myMess = obtainMyMess== null ? [] :obtainMyMess;
       myStars = obtainMyStars== null ? [] :obtainMyStars;
       myDuties = obtainMyDuties== null ? [] :obtainMyDuties;
+      myBills = obtainMyBills== null ? [] :obtainMyBills;
       // for (var item in (obtainRates ?? [])) {
       //   List<String> splitItem = item.split(': ');
       //   if (splitItem.length == 2) {
@@ -240,7 +248,6 @@ class _MyAppState extends State<MyApp> {
             },
           ),
         ),
-
       ),
       home: _loading
           ?FetchingData()

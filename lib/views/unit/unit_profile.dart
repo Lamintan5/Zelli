@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:Zelli/home/tabs/payments.dart';
 import 'package:Zelli/main.dart';
+import 'package:Zelli/models/billing.dart';
 import 'package:Zelli/models/entities.dart';
 import 'package:Zelli/models/payments.dart';
 import 'package:Zelli/models/users.dart';
@@ -11,6 +12,7 @@ import 'package:Zelli/views/unit/activities/co_tenants.dart';
 import 'package:Zelli/views/unit/activities/create_request.dart';
 import 'package:Zelli/views/unit/activities/lease.dart';
 import 'package:Zelli/views/unit/activities/terminate.dart';
+import 'package:Zelli/views/unit/activities/unit_billing.dart';
 import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,6 +29,7 @@ import 'package:liquid_progress_indicator_v2/liquid_progress_indicator.dart';
 import '../../home/actions/chat/message_screen.dart';
 import '../../home/actions/chat/web_chat.dart';
 import '../../home/tabs/report.dart';
+import '../../models/account.dart';
 import '../../models/charge.dart';
 import '../../models/data.dart';
 import '../../models/messages.dart';
@@ -83,6 +86,10 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   List<MonthModel> _prepayment = [];
   List<MonthModel> monthsList = [];
   List<LeaseModel> _leases = [];
+  List<BillingModel> _bills = [];
+  List<BillingModel> _newBills = [];
+  List<AccountModel> _accounts = [];
+
   List<String> _admin = [];
   List<String> _pids = [];
   List<String> _tids = [];
@@ -115,7 +122,9 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   bool _loading = false;
   bool isFilled = false;
   bool isMember = false;
+  bool isAdmin = false;
   bool isTenant = false;
+  bool isBilled = false;
 
   double _position1 = 20.0;
   double _position2 = 20.0;
@@ -148,6 +157,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _getUser();
     _getPayments();
     _listMonth();
+    _getBilling();
 
     _accrue = monthsList.where((test)=>test.balance!=0.0).toList();
     _prepayment = monthsList.where((test) => DateTime(test.year, test.month).isAfter(DateTime(currentMonth.year, currentMonth.month, int.parse(entity.due.toString())))).toList();
@@ -191,6 +201,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _admin = entity.admin.toString().split(",");
     _pids = entity.pid.toString().split(",");
     isMember = entity.pid.toString().split(",").contains(currentUser.uid);
+    isAdmin = entity.admin.toString().split(",").contains(currentUser.uid);
     isTenant = unit.tid.toString().contains(currentUser.uid);
   }
 
@@ -258,6 +269,68 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     _rent = currentLease.lid==""? [] : _pay.where((test) => test.lid == currentLease.lid && test.type ==  "RENT").toList();
     paidDeposit = _deposit.fold(0.0, (previous, element) => previous + double.parse(element.amount.toString()));
     depoBalance = deposit - paidDeposit;
+  }
+
+  _getBilling(){  
+    _bills = myBills.map((jsonString) => BillingModel.fromJson(json.decode(jsonString))).where((test) => test.eid ==widget.unit.eid).toList();
+    _bills.forEach((bill) {
+      // if (bill.type == 'Different') {
+      //   bill.accountno
+      //       .split('*')
+      //       .where((jsonString) => jsonString.isNotEmpty)
+      //       .map((jsonString) => AccountModel.fromJson(json.decode(jsonString)))
+      //       .forEach((account) {
+      //     // Check for duplicates before adding
+      //     if (!_accounts.any((existing) =>
+      //     existing.bid == account.bid &&
+      //         existing.uid == account.uid &&
+      //         existing.accountno == account.accountno &&
+      //         existing.account == account.account)) {
+      //       if(account.uid == unit.id){
+      //         _accounts.add(account);
+      //       }
+      //     }
+      //   });
+      // }
+      // else {
+      //   // Create AccountModel for single account
+      //   final account = AccountModel(
+      //     bid: bill.bid,
+      //     uid: unit.id!,
+      //     accountno: bill.accountno,
+      //     account: bill.account,
+      //   );
+      //
+      //   // Check for duplicates before adding
+      //   if (!_accounts.any((existing) =>
+      //   existing.bid == account.bid &&
+      //       existing.uid == account.uid &&
+      //       existing.accountno == account.accountno &&
+      //       existing.account == account.account)) {
+      //     _accounts.add(account);
+      //   }
+      // }
+      bill.access
+          .split('*')
+          .where((jsonString) => jsonString.isNotEmpty)
+          .map((jsonString) => AccountModel.fromJson(json.decode(jsonString)))
+          .forEach((account) {
+        // Check for duplicates before adding
+        if (!_accounts.any((existing) =>
+        existing.bid == account.bid &&
+            existing.uid == account.uid &&
+            existing.accountno == account.accountno &&
+            existing.account == account.account)) {
+          if(account.uid == unit.id){
+            _accounts.add(account);
+          }
+        }
+      });
+    });
+    isBilled = _accounts.any((test) => test.account.contains('Rent'))?true:false;
+    _accounts.forEach((e){
+      print(e.toJson());
+    });
   }
 
   void _listMonth() {
@@ -372,9 +445,6 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     }
   }
 
-
-
-
   @override
   void initState() {
     // TODO: implement initState
@@ -438,7 +508,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                 surfaceTintColor: Colors.transparent,
                 backgroundColor: normal,
                 pinned: true,
-                expandedHeight: 220,
+                expandedHeight: isAdmin? isBilled? 220 : 300 : 220,
                 toolbarHeight: 40,
                 title: Text(
                     entity.title.toString(),
@@ -667,6 +737,53 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                           ],
                         ),
                         SizedBox(height: 10),
+                        isAdmin ?
+                        isBilled
+                            ? SizedBox()
+                            : Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.14),
+                          ),
+                          child: Row(
+                              children: [
+                                Icon(CupertinoIcons.creditcard, color: Colors.red,),
+                                SizedBox(width: 10,),
+                                Expanded(
+                                  child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: 'This unit has not yet been configured with a payment gateway. Please set up a payment gateway to enable seamless transactions and efficient payment processing. ',
+                                            style: TextStyle(color: secondaryColor, fontSize: 13)
+                                          ),
+                                          WidgetSpan(
+                                              child: InkWell(
+                                                  onTap: (){
+                                                    Get.to(()=>UnitBilling(entity: entity, unit: unit, reload: _getData,), transition: Transition.rightToLeft);
+                                                  },
+                                                  child : Text("Get started.",
+                                                    style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.w800),
+                                                )
+                                              )
+                                          )
+                                        ]
+                                      )
+                                  ),
+                                ),
+                                InkWell(
+                                    onTap: (){
+                                      setState(() {
+                                        isBilled = true;
+                                      });
+                                    },
+                                    child: Icon(Icons.close, color: secondaryColor,)
+                                )
+                              ],
+                          ),
+                        )
+                            : SizedBox(),
                         Center(
                           child: currentTenant.uid!=unit.tid.toString().split(",").first
                               ?RichText(
@@ -1510,6 +1627,14 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                             Get.to(()=>Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid, from: 'unit',), transition: Transition.rightToLeft);
                           },
                           icon : LineIcon.wallet(), title: "Payments",subtitle: ""
+                      )
+                      : SizedBox(),
+
+                  isAdmin? RowButton(
+                      onTap: (){
+                            Get.to(()=>UnitBilling(entity: entity, unit: unit, reload: _getData,), transition: Transition.rightToLeft);
+                          },
+                          icon : Icon(CupertinoIcons.creditcard), title: "Billing",subtitle: ""
                       )
                       : SizedBox(),
 

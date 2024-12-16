@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:Zelli/main.dart';
+import 'package:Zelli/models/billing.dart';
 import 'package:Zelli/models/chats.dart';
 import 'package:Zelli/models/duties.dart';
 import 'package:Zelli/models/entities.dart';
@@ -39,6 +40,7 @@ class SocketManager extends GetxController  {
   List<UnitModel> _unit = [];
   List<UserModel> _user = [];
   List<PaymentsModel> _pay = [];
+  List<BillingModel> _bill = [];
 
   List<String?> _eidList = [];
   List<String?> _pidList = [];
@@ -64,6 +66,7 @@ class SocketManager extends GetxController  {
     _lease = await Services().getMyLeases(currentUser.uid);
     _notification = await Services().getMyNotif(currentUser.uid);
     _stars = await Services().getMyStars(currentUser.uid);
+    _bill = await Services().getMyBills(currentUser.uid);
 
 
     if (_lease.isNotEmpty) {
@@ -138,6 +141,13 @@ class SocketManager extends GetxController  {
       }
     }
 
+    for (var entity in List.from(_entity.where((test) => !test.pid.toString().contains(currentUser.uid)))) {
+      List<BillingModel> _newBills = [];
+      _newBills = await Services().getCurrentBills(entity.eid.toString());
+      await Data().addOrUpdateBillList(_newBills);
+    }
+
+
     // Update the data storage
     await Data().addOrUpdateEntity(_entity);
     await Data().addOrUpdateUnit(_unit);
@@ -147,6 +157,7 @@ class SocketManager extends GetxController  {
     await Data().addOrUpdateLease(_lease);
     await Data().addOrUpdateDutyList(_duties);
     await Data().addOrUpdateStarList(_stars);
+    await Data().addOrUpdateBillList(_bill);
     return false;
   }
 
