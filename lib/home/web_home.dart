@@ -537,7 +537,8 @@ class _WebHomeState extends State<WebHome> {
                                   )
                               ),
                             );
-                          } else {
+                          }
+                          else {
                             EntityModel entity = filteredList[index];
                             String image = entity.image!;
                             List<String> _managers = entity.pid!.split(",");
