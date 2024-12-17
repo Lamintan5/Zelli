@@ -11,6 +11,7 @@ class TextFieldInput extends StatelessWidget {
   final String? hintText;
   final TextAlign textAlign;
   final TextStyle? labelStyle;
+  final Function(String)? onChanged;
   final TextInputType textInputType;
   final int? maxLength;
   final int? maxLine;
@@ -24,6 +25,7 @@ class TextFieldInput extends StatelessWidget {
     this.hintText,
     this.maxLength,
     this.maxLine,
+    this.onChanged,
     this.textAlign = TextAlign.start,
     this.textInputType = TextInputType.text,
     this.labelText, this.srfIcon, this.labelStyle, this.validator,
@@ -49,6 +51,7 @@ class TextFieldInput extends StatelessWidget {
       maxLength: maxLength==null?null:maxLength,
       maxLengthEnforcement: MaxLengthEnforcement.enforced,
       maxLines: maxLine==null?1:maxLine,
+      onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(color: secondaryColor),
