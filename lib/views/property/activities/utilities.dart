@@ -30,30 +30,34 @@ class _UtilitiesState extends State<Utilities> {
   List<UtilsModel> _utilities = [];
   List<UtilsModel> _oldUtils = [];
   List<String> _utilString = [];
+
+  late EntityModel entity;
+
   bool _loading = false;
+
+  _getData(){
+    entity = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList().firstWhere((test) => test.eid == widget.entity.eid);
+    _utilString = entity.utilities.toString().split("&");
+    _utilities = _utilString.map((jsonString) {
+      if (jsonString.isNotEmpty) {
+        return UtilsModel.fromJson(json.decode(jsonString));
+      } else {
+        return UtilsModel(text: '', period: '', amount: "", checked: "", cost: '');
+      }
+    }).toList();
+    widget.entity.utilities.toString().split("&").forEach((e){
+      print(e);
+    });
+    setState(() {
+
+    });
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _utilString = widget.entity.utilities.toString().split("&");
-    _utilities = _utilString.map((jsonString) {
-      if (jsonString.isNotEmpty) {
-        return UtilsModel.fromJson(json.decode(jsonString));
-      } else {
-        // Handle empty jsonString (if needed)
-        return UtilsModel(text: '', period: '', amount: "", checked: "", cost: '');
-      }
-    }).toList();
-    _oldUtils = _utilString.map((jsonString) {
-      if (jsonString.isNotEmpty) {
-        return UtilsModel.fromJson(json.decode(jsonString));
-      } else {
-        // Handle empty jsonString (if needed)
-        return UtilsModel(text: '', period: '', amount: "", checked: "", cost: '');
-      }
-    }).toList();
-    areUtilsEqual(_oldUtils, _utilities);
+    _getData();
   }
 
 
@@ -90,7 +94,8 @@ class _UtilitiesState extends State<Utilities> {
                             Get.to(()=>UtilScreen(
                               util: util,
                               utils: utils,
-                              addUtil: addUtil,
+                              addUtil: addUtil, entity: widget.entity,
+                              reload: _getData,
                               // removeUtil: removeUtil,
                               // utils: _utilities,
                             ),
@@ -179,24 +184,6 @@ class _UtilitiesState extends State<Utilities> {
                     }),
               ),
             ),
-            areUtilsEqual(_oldUtils, _utilities)
-                ? SizedBox()
-                : InkWell(
-                  onTap: (){
-                    _updateUtils();
-                  },
-                  child: Container(
-                    width: 450,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: CupertinoColors.activeBlue,
-                    ),
-                    child: Center(child: _loading
-                        ? SizedBox(width: 15,height: 15, child: CircularProgressIndicator(color: Colors.black,strokeWidth: 2,))
-                        : Text("UPDATE", style: TextStyle(color: Colors.black),)),
-                  ),
-                ),
             SizedBox(height: 5,),
           ],
         ),
