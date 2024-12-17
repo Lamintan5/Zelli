@@ -48,7 +48,7 @@ class Services{
   static const String _GET_ALL  = 'GET_ALL';
   static const String _GET_BY_ENTITY  = 'GET_BY_ENTITY';
   static const String _UPDATE  = 'UPDATE';
-a  static const String _ADD_UTIL  = 'ADD_UTIL';
+  static const String _ADD_UTIL  = 'ADD_UTIL';
   static const String _UPDATE_PASS  = 'UPDATE_PASS';
   static const String _UPDATE_DETAILS  = 'UPDATE_DETAILS';
   static const String _UPDATE_TOKEN  = 'UPDATE_TOKEN';
