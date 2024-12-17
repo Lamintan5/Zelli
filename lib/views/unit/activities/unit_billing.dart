@@ -64,9 +64,6 @@ class _UnitBillingState extends State<UnitBilling> {
         }
       });
     });
-    _allBills.forEach((e){
-      print(e.toJson());
-    });
     setState(() {
     });
   }
@@ -104,7 +101,7 @@ class _UnitBillingState extends State<UnitBilling> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Payment Methods", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),),
+            Text("${_allBills.length} Payment Methods", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),),
             Expanded(
                 child: ListView.builder(
                     itemCount: _accounts.length + 1,
@@ -118,8 +115,10 @@ class _UnitBillingState extends State<UnitBilling> {
                         );
                       } else {
                         AccountModel account = _accounts[index];
-                        BillingModel bill = _bills.firstWhere((test) => test.bid == account.bid);
+                        BillingModel bill = _allBills.firstWhere((test) => test.bid == account.bid);
+
                         var crd = billCard.firstWhere((test) => test.title == bill.bill, orElse: () => GateWayModel(title: "", logo: ''));
+
                         return ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading:  Image.asset(
@@ -167,8 +166,11 @@ class _UnitBillingState extends State<UnitBilling> {
         ? Colors.white10
         : Colors.black12;
     final size = MediaQuery.of(context).size;
-    _allBills = _allBills.where((test) => test.account.contains('Rent')).toList();
-    _allBills.removeWhere((bill) => _accounts.any((acc) => bill.accountno.contains(acc.accountno) && bill.type == 'Same'));
+
+    List<BillingModel> _list = _allBills.where((bill) {
+      return !_bills.any((existingBill) =>  _accounts.any((acc) => bill.accountno.contains(acc.accountno) && bill.type == 'Same'));
+    }).toList();
+
 
     showModalBottomSheet(
         shape: RoundedRectangleBorder(
@@ -187,7 +189,7 @@ class _UnitBillingState extends State<UnitBilling> {
         ),
         context: context,
         builder: (context) {
-          return _allBills.isEmpty
+          return _list.isEmpty
               ? Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
@@ -232,9 +234,9 @@ class _UnitBillingState extends State<UnitBilling> {
                   Expanded(
                     child: ListView.builder(
                         padding: EdgeInsets.symmetric(horizontal: 8),
-                        itemCount: _allBills.length,
+                        itemCount: _list.length,
                         itemBuilder: (context, index){
-                          BillingModel bill = _allBills[index];
+                          BillingModel bill = _list[index];
                           var crd = billCard.firstWhere((test) => test.title == bill.bill, orElse: () => GateWayModel(title: "", logo: ''));
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 5.0),
@@ -246,9 +248,19 @@ class _UnitBillingState extends State<UnitBilling> {
                               contentPadding: EdgeInsets.zero,
                               leading: Image.asset(width: 30, height: 30, crd.logo),
                               title: Text(bill.businessno),
-                              subtitle: bill.type=='Different'
-                                  ? Text('Different account for different units', style: TextStyle(color: secondaryColor),)
-                                  : Text(bill.accountno, style: TextStyle(color: secondaryColor),),
+                              subtitle: Wrap(
+                                runSpacing: 2,spacing: 2,
+                                children: bill.account.split(',').map((account){
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: color1,
+                                      borderRadius: BorderRadius.circular(5)
+                                    ),
+                                    child: Text(account, style: TextStyle(color: secondaryColor),),
+                                  );
+                                }).toList(),
+                              ),
                               trailing: Icon(Icons.keyboard_arrow_right_outlined),
                             ),
                           );
