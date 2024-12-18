@@ -101,7 +101,7 @@ class _UnitBillingState extends State<UnitBilling> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("${_allBills.length} Payment Methods", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),),
+            Text("Payment Methods", style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),),
             Expanded(
                 child: ListView.builder(
                     itemCount: _accounts.length + 1,
