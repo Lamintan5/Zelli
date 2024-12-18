@@ -61,7 +61,6 @@ class _PayScreenState extends State<PayScreen> {
   bool isMax = false;
 
   _getData(){
-    paid = amount;
     balance = amount - paid;
 
     _bills = myBills
@@ -114,6 +113,7 @@ class _PayScreenState extends State<PayScreen> {
     cost = widget.cost;
     isMax = widget.isMax;
     lastPaid = widget.lastPaid;
+    paid = amount;
     _getData();
   }
 
@@ -156,7 +156,7 @@ class _PayScreenState extends State<PayScreen> {
                               Container(
                                 margin: EdgeInsets.all(3),
                                 child: Text(
-                                  '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}',
+                                  '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}',
                                   style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900),
                                 ),
                               ),
@@ -286,7 +286,7 @@ class _PayScreenState extends State<PayScreen> {
                 width: 450,
                 padding: EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
-                  color: _accounts.isEmpty
+                  color: _accounts.isEmpty || paid == 0
                       ?CupertinoColors.activeBlue.withOpacity(0.4)
                       :CupertinoColors.activeBlue,
                   borderRadius: BorderRadius.circular(5)
@@ -320,7 +320,7 @@ class _PayScreenState extends State<PayScreen> {
   void dialogAddPaid(BuildContext context){
     final  _key = GlobalKey<FormState>();
     TextEditingController _paid = TextEditingController();
-    _paid.text = amount.toString();
+    _paid.text = paid == 0? amount.toString() : paid.toString();
     showDialog(
         context: context,
         builder: (context) => Dialog(
@@ -349,7 +349,7 @@ class _PayScreenState extends State<PayScreen> {
                           return 'Please enter a value';
                         }
                         double? amnt = double.tryParse(value);
-                        if (amnt == null ) {
+                        if (amnt == null || amnt <= 0) {
                           return 'Please enter a valid number ';
                         }
                         if (value.contains('.') && value.split('.')[1].length > 2) {
@@ -363,6 +363,15 @@ class _PayScreenState extends State<PayScreen> {
                     ),
                     DoubleCallAction(
                         action: (){
+                          final form = _key.currentState!;
+                          if(form.validate()){
+                            Navigator.pop(context);
+                            setState(() {
+                              paid = double.parse(_paid.text);
+                              balance = amount - paid;
+                            });
+
+                          }
                     })
                   ],
                 )
