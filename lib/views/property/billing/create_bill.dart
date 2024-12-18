@@ -369,7 +369,6 @@ class _CreateBillState extends State<CreateBill> {
                           return null;
                         },
                       )
-
                           : null,
                       onChanged: (value){
                         setState(() {
