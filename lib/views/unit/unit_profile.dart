@@ -11,6 +11,7 @@ import 'package:Zelli/views/property/activities/leases.dart';
 import 'package:Zelli/views/unit/activities/co_tenants.dart';
 import 'package:Zelli/views/unit/activities/create_request.dart';
 import 'package:Zelli/views/unit/activities/lease.dart';
+import 'package:Zelli/views/unit/activities/pay_screen.dart';
 import 'package:Zelli/views/unit/activities/terminate.dart';
 import 'package:Zelli/views/unit/activities/unit_billing.dart';
 import 'package:Zelli/widgets/dialogs/unit_dialogs/dialog_pay.dart';
@@ -39,6 +40,7 @@ import '../../models/units.dart';
 import '../../models/util.dart';
 import '../../models/utils.dart';
 import '../../resources/services.dart';
+import '../../test/test_unit.dart';
 import '../../utils/colors.dart';
 import '../../widgets/buttons/bottom_call_buttons.dart';
 import '../../widgets/buttons/call_actions/double_call_action.dart';
@@ -124,6 +126,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
   bool isMember = false;
   bool isAdmin = false;
   bool isTenant = false;
+  bool isCoTenant = false;
   bool isBilled = false;
 
   double _position1 = 20.0;
@@ -203,6 +206,7 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
     isMember = entity.pid.toString().split(",").contains(currentUser.uid);
     isAdmin = entity.admin.toString().split(",").contains(currentUser.uid);
     isTenant = unit.tid.toString().contains(currentUser.uid);
+    isCoTenant = currentLease.ctid.toString().contains(currentUser.uid);
   }
 
   _getUser(){
@@ -1678,41 +1682,69 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
               child: Icon(CupertinoIcons.add),
             )
           : SpeedDial(
-            backgroundColor: CupertinoColors.activeBlue,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            icon: CupertinoIcons.money_dollar,
-            overlayOpacity: 0.7,
-            animationDuration: Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            tooltip: "Payments",
-            spaceBetweenChildren: 10,
-            children: [
-              if(paidDeposit < deposit)
+              backgroundColor: CupertinoColors.activeBlue,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              icon: CupertinoIcons.money_dollar,
+              overlayOpacity: 0.7,
+              curve: Curves.easeInOut,
+              tooltip: "Payments",
+              spaceBetweenChildren: 10,
+              children: [
+                if(paidDeposit < deposit)
+                  SpeedDialChild(
+                      child: Icon(CupertinoIcons.lock, size: 20,),
+                      shape: CircleBorder(),
+                      label: "Deposit",
+                      onTap: (){
+                        if(isCoTenant){
+                          Get.to(() => PayScreen(
+                              entity: entity,
+                              unit: unit,
+                              reload: _getData,
+                              lease: currentLease,
+                              amount: depoBalance,
+                              account: "DEPOSIT",
+                              cost: "Fixed",
+                              isMax: true,
+                              lastPaid: lastPaid
+                          ), transition: Transition.rightToLeft);
+                        } else {
+                          dialogRecordPayments(context, "DEPOSIT", depoBalance, "Fixed",true, lastPaid);
+                        }
+                      }
+                  ),
                 SpeedDialChild(
-                    child: Icon(CupertinoIcons.lock, size: 20,),
+                    child: Icon(CupertinoIcons.home, size: 20,),
                     shape: CircleBorder(),
-                    label: "Deposit",
+                    label: "Rent",
                     onTap: (){
-                      dialogRecordPayments(context, "DEPOSIT", depoBalance, "Fixed",true, lastPaid);
+
+                        if(isCoTenant){
+                          Get.to(() => PayScreen(
+                              entity: entity,
+                              unit: unit,
+                              reload: _getData,
+                              lease: currentLease,
+                              amount: accrued,
+                              account: "RENT",
+                              cost: "Fixed",
+                              isMax: false,
+                              lastPaid: lastPaid
+                          ), transition: Transition.rightToLeft);
+                        } else {
+                          dialogRecordPayments(context, "RENT", accrued,  "Fixed",false,lastPaid);
+                        }
                     }
                 ),
-              SpeedDialChild(
-                  child: Icon(CupertinoIcons.home, size: 20,),
-                  shape: CircleBorder(),
-                  label: "Rent",
+                SpeedDialChild(
+                  child: Icon(CupertinoIcons.lightbulb, size: 20,),
+                    shape: CircleBorder(),
+                  label: "Utilities",
                   onTap: (){
-                      dialogRecordPayments(context, "RENT", accrued,  "Fixed",false,lastPaid);
+                    dialogUtil(context);
                   }
-              ),
-              SpeedDialChild(
-                child: Icon(CupertinoIcons.lightbulb, size: 20,),
-                  shape: CircleBorder(),
-                label: "Utilities",
-                onTap: (){
-                  dialogUtil(context);
-                }
-              ),
-            ],
+                ),
+              ],
           ),
     );
   }
@@ -2332,9 +2364,24 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ? TextButton(
                                 onPressed: (){
                                   Navigator.pop(context);
-                                  dialogRecordPayments(context, util.text, 0, utils.cost, false, month);
+                                  if(isCoTenant){
+                                    Get.to(() => PayScreen(
+                                        entity: entity,
+                                        unit: unit,
+                                        reload: _getData,
+                                        lease: currentLease,
+                                        amount: 0,
+                                        account: util.text,
+                                        cost: utils.cost,
+                                        isMax: false,
+                                        lastPaid: month
+                                    ), transition: Transition.rightToLeft);
+                                  } else {
+                                    dialogRecordPayments(context, util.text, 0, utils.cost, false, month);
+                                  }
+
                                 },
-                                child: Text('VC ● ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)} ● ${utils.period}',)
+                                child: Text('VC ● ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}',)
                             ) : paid == amnt
                                 ? Text(
                               '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}',
@@ -2344,16 +2391,45 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                 ? TextButton(
                                 onPressed: (){
                                   Navigator.pop(context);
-                                  dialogRecordPayments(context, util.text, double.parse(utils.amount), utils.cost, true, month);
+                                  if(isCoTenant){
+                                    Get.to(() => PayScreen(
+                                        entity: entity,
+                                        unit: unit,
+                                        reload: _getData,
+                                        lease: currentLease,
+                                        amount: double.parse(utils.amount),
+                                        account: util.text,
+                                        cost: utils.cost,
+                                        isMax: true,
+                                        lastPaid: month
+                                    ), transition: Transition.rightToLeft);
+                                  } else {
+                                    dialogRecordPayments(context, util.text, double.parse(utils.amount), utils.cost, true, month);
+                                  }
+
                                 },
                                 child: Text(" ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(utils.amount))} ● ${utils.period}"))
                                 :TextButton(
                                 onPressed: (){
                                   Navigator.pop(context);
-                                  dialogRecordPayments(context, util.text, balance, utils.cost, true, month);
+                                  if(isCoTenant){
+                                    Get.to(() => PayScreen(
+                                        entity: entity,
+                                        unit: unit,
+                                        reload: _getData,
+                                        lease: currentLease,
+                                        amount: balance,
+                                        account: util.text,
+                                        cost: utils.cost,
+                                        isMax: true,
+                                        lastPaid: month
+                                    ), transition: Transition.rightToLeft);
+                                  } else {
+                                    dialogRecordPayments(context, util.text, balance, utils.cost, true, month);
+                                  }
+
                                 },
                                 child: Text("Balance ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}")),
-
                             SizedBox(width: 10,),
                             Padding(
                               padding: const EdgeInsets.all(5.0),
