@@ -212,6 +212,7 @@ class SocketManager extends GetxController  {
           notif['text'],
       );
     });
+
     _socket.on("disconnect", (_) {
       if(currentUser.uid!=""){
         print("Disconnected. Reconnecting : ${DateTime.now().toString().substring(10, 16)}");
