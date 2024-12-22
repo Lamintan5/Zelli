@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:Zelli/api/mpesa-api.dart';
+import 'package:Zelli/api/mpesa-api.dart';
 import 'package:Zelli/main.dart';
 import 'package:Zelli/widgets/buttons/call_actions/double_call_action.dart';
 import 'package:Zelli/widgets/dialogs/dialog_title.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,6 +39,10 @@ class PayScreen extends StatefulWidget {
 }
 
 class _PayScreenState extends State<PayScreen> {
+  Country _country = CountryParser.parseCountryCode(deviceModel.country == null? 'US' : deviceModel.country.toString());
+  TextEditingController _phone = TextEditingController();
+  MpesaApiService _apiService = MpesaApiService();
+
   List<BillingModel> _bills = [];
   List<AccountModel> _accounts = [];
   List<GateWayModel> billCard = [
@@ -44,11 +51,13 @@ class _PayScreenState extends State<PayScreen> {
     GateWayModel(title: "CashApp", logo: 'assets/pay/cash.png'),
     GateWayModel(title: "Mpesa", logo: 'assets/pay/mpesa.png'),
   ];
+  List<String> _expans = [];
 
   late EntityModel entity;
   late UnitModel unit;
   late LeaseModel lease;
   late MonthModel lastPaid;
+  late BillingModel selectedBill;
 
   double amount = 0.0;
   double balance = 0.0;
@@ -57,8 +66,12 @@ class _PayScreenState extends State<PayScreen> {
   String accountType = "";
   String cost = "";
   String selectedAccount = "";
+  String _accessToken = "";
+  int _expiresIn = 0;
 
   bool isMax = false;
+  bool _loading = false;
+  bool _prompted = false;
 
   _getData(){
     balance = amount - paid;
@@ -91,6 +104,7 @@ class _PayScreenState extends State<PayScreen> {
             _accounts.add(account);
             if (_accounts.isNotEmpty && i == 0) {
               selectedAccount = bill.type == 'Different' ? account.accountno : bill.accountno;
+              selectedBill = bill;
             }
           }
         }
@@ -100,6 +114,28 @@ class _PayScreenState extends State<PayScreen> {
 
     });
   }
+
+  void _fetchAccessToken() async {
+    try {
+      final response = await _apiService.getAccessToken();
+      setState(() {
+        if (response['success'] == true) {
+          // Successfully fetched the token
+          _accessToken = response['data']['access_token'];
+          _expiresIn = int.parse(response['data']['expires_in']);
+        } else {
+          // Handle error from the API
+          _accessToken = "Error: ${response['error']}";
+        }
+      });
+    } catch (e) {
+      // Handle any exceptions
+      setState(() {
+        _accessToken = "Exception occurred: $e";
+      });
+    }
+  }
+
 
   @override
   void initState() {
@@ -115,17 +151,21 @@ class _PayScreenState extends State<PayScreen> {
     lastPaid = widget.lastPaid;
     paid = amount;
     _getData();
+    _fetchAccessToken();
   }
 
   @override
   Widget build(BuildContext context) {
+    final reverse =  Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     final color1 =  Theme.of(context).brightness == Brightness.dark
         ? Colors.white10
         : Colors.black12;
     final cardColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.grey[900]
         : Colors.white;
-    final heading = TextStyle(fontSize: 18, fontWeight: FontWeight.w700);
+    final heading = TextStyle(fontSize: 15, fontWeight: FontWeight.w500);
     final padding = EdgeInsets.symmetric(vertical: 8, horizontal: 10);
     return Scaffold(
       appBar: AppBar(
@@ -191,12 +231,44 @@ class _PayScreenState extends State<PayScreen> {
                           child: Padding(
                             padding: padding,
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Basic Information", style: heading,),
-                                horizontalItems("Lease ID", lease.lid.split("-").first.toUpperCase()),
-                                horizontalItems("Property", entity.title.toString().split("-").first),
-                                horizontalItems("Unit", unit.title.toString()),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      if(_expans.contains("Basic")){
+                                        _expans.remove("Basic");
+                                      } else {
+                                        _expans.add("Basic");
+                                      }
+                                    });
+                                  },
+                                  hoverColor: color1,
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Basic Information", style: heading,),
+                                      AnimatedRotation(
+                                        duration: Duration(milliseconds: 500),
+                                        turns: _expans.contains("Basic") ? 0.5 : 0.0,
+                                        child: Icon(Icons.keyboard_arrow_down),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                AnimatedSize(
+                                  duration: Duration(milliseconds: 500),
+                                  alignment: Alignment.topCenter,
+                                  curve: Curves.easeInOut,
+                                  child: _expans.contains("Basic")?  Column(
+                                    children: [
+                                      horizontalItems("Lease ID", lease.lid.split("-").first.toUpperCase()),
+                                      horizontalItems("Property", entity.title.toString().split("-").first),
+                                      horizontalItems("Unit", unit.title.toString()),
+                                    ],
+                                  ) : SizedBox(),
+                                ),
+
                               ],
                             ),
                           ),
@@ -213,23 +285,55 @@ class _PayScreenState extends State<PayScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Payment Details", style: heading,),
-                                horizontalItems("Remitter", currentUser.username!),
-                                horizontalItems("Account", accountType.toUpperCase()),
-                                horizontalItems("Amount Due", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}'),
-                                horizontalItems("Balance", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}'),
-                                horizontalItems("Amount Paid", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}'),
+                                InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      if(_expans.contains("Payment")){
+                                        _expans.remove("Payment");
+                                      } else {
+                                        _expans.add("Payment");
+                                      }
+                                    });
+                                  },
+                                  hoverColor: color1,
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text("Payment Details", style: heading,),
+                                      AnimatedRotation(
+                                        duration: Duration(milliseconds: 500),
+                                        turns: _expans.contains("Payment") ? 0.5 : 0.0,
+                                        child: Icon(Icons.keyboard_arrow_down),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                AnimatedSize(
+                                  duration: Duration(milliseconds: 500),
+                                  alignment: Alignment.topCenter,
+                                  curve: Curves.easeInOut,
+                                  child:_expans.contains("Payment")?  Column(
+                                    children: [
+                                      horizontalItems("Remitter", currentUser.username!),
+                                      horizontalItems("Account", accountType.toUpperCase()),
+                                      horizontalItems("Amount Due", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}'),
+                                      horizontalItems("Balance", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(balance)}'),
+                                      horizontalItems("Amount Paid", '${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(paid)}'),
+                                    ],
+                                  ) : SizedBox(),
+                                ),
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(height: 10,),
+                        SizedBox(height: 30,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Text(
                                 '  Payment Method',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                              style: heading,
                             ),
                           ],
                         ),
@@ -260,7 +364,7 @@ class _PayScreenState extends State<PayScreen> {
                                       height: 30,
                                     ),
                                     title: Text(bill.businessno),
-                                    subtitle: Text(accno),
+                                    subtitle: Text(accno, style: TextStyle(color: secondaryColor),),
                                     trailing: CupertinoCheckbox(
                                         shape: CircleBorder(),
                                         checkColor: Colors.black,
@@ -268,11 +372,13 @@ class _PayScreenState extends State<PayScreen> {
                                         onChanged: (value){
                                           setState(() {
                                             selectedAccount = accno;
+                                            selectedBill = bill;
                                           });
                                     }),
                                     onTap: (){
                                       setState(() {
                                         selectedAccount = accno;
+                                        selectedBill = bill;
                                       });
                                     },
                                   );
@@ -282,29 +388,156 @@ class _PayScreenState extends State<PayScreen> {
                     ),
                   )
               ),
-              Container(
-                width: 450,
-                padding: EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: _accounts.isEmpty || paid == 0
-                      ?CupertinoColors.activeBlue.withOpacity(0.4)
-                      :CupertinoColors.activeBlue,
-                  borderRadius: BorderRadius.circular(5)
-                ),
-                child: Center(
-                  child: Text(
-                    "Pay",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                  ),
-                ),
+              _prompted
+                  ? Container(
+                      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                      margin: EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.activeGreen.withOpacity(0.1)
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.dialpad, color: CupertinoColors.activeGreen,),
+                          SizedBox(width: 10,),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Success",
+                                    style: TextStyle(color: CupertinoColors.activeGreen, fontSize: 18, fontWeight: FontWeight.w600)),
+                                RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: 'A prompt has been successfully sent to ',
+                                            style: TextStyle(color: CupertinoColors.activeGreen)
+                                        ),
+                                        TextSpan(
+                                          text: '+${_country.phoneCode + _phone.text}. ',
+                                            style: TextStyle(color: CupertinoColors.activeGreen,fontWeight: FontWeight.w600)
+                                        ),
+                                        TextSpan(
+                                          text: "Kindly enter your PIN to complete the transaction.",
+                                          style: TextStyle(color: CupertinoColors.activeGreen)
+                                        )
+                                      ]
+                                    )
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 10,),
+                          SizedBox(width: 20,height: 20,
+                            child: CircularProgressIndicator(
+                              color: CupertinoColors.activeGreen,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  : InkWell(
+                    onTap: (){
+                      if(selectedBill.bill=="Mpesa"){
+                        dialogAddPhone(context);
+                      } else {
 
-              )
+                      }
+
+                    },
+                    borderRadius: BorderRadius.circular(5),
+                    child: Container(
+                      width: 450,
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: _accounts.isEmpty || paid == 0
+                            ?CupertinoColors.activeBlue.withOpacity(0.4)
+                            :CupertinoColors.activeBlue,
+                        borderRadius: BorderRadius.circular(5)
+                      ),
+                      child: Center(
+                        child: _loading
+                            ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.black,strokeWidth: 3,))
+                            : Text(
+                                "Pay",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                              ),
+                      ),
+
+                    ),
+                  )
             ],
           ),
         ),
       ),
     );
   }
+
+  void _registerMpesaUrl(String accessToken) async {
+    final mpesaService = MpesaApiService();
+    String shortCode = '';
+    shortCode = selectedBill.businessno;
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      final response = await mpesaService.registerUrl(accessToken, shortCode);
+      if (response['success'] == true) {
+        print("URL registration successful: ${response['data']}");
+        initiateStkPush(accessToken, shortCode);
+      } else {
+        setState(() {
+          _loading = false;
+        });
+        print("URL registration failed: ${response['error']}");
+      }
+    } catch (e) {
+      setState(() {
+        _loading = true;
+      });
+      print("Exception occurred: $e");
+    }
+  }
+
+  void initiateStkPush(String accessToken, String businessShortCode) async {
+    final mpesaService = MpesaApiService();
+
+    try {
+      final response = await mpesaService.stkPush(
+        accessToken: accessToken,
+        businessShortCode: businessShortCode,
+        amount: paid.toStringAsFixed(0),
+        phoneNumber: _country.phoneCode+_phone.text,
+        accountReference: selectedAccount,
+      );
+
+      if (response['success'] == true) {
+        setState(() {
+          _prompted = true;
+          _loading = false;
+        });
+        print("STK Push initiated successfully: ${response['data']}");
+      } else {
+        setState(() {
+          _loading = false;
+        });
+        print("STK Push failed: ${response['error']}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('${response['details']['errorMessage']}'),
+            showCloseIcon: true,
+          )
+        );
+
+      }
+    } catch (e) {
+      print("Exception occurred during STK Push: $e");
+    }
+  }
+
+
   Widget horizontalItems(String title, String value){
     return Container(
       margin: EdgeInsets.only(top: 5),
@@ -317,6 +550,7 @@ class _PayScreenState extends State<PayScreen> {
       ),
     );
   }
+
   void dialogAddPaid(BuildContext context){
     final  _key = GlobalKey<FormState>();
     TextEditingController _paid = TextEditingController();
@@ -379,5 +613,122 @@ class _PayScreenState extends State<PayScreen> {
           ),
         )
     );
+  }
+  void dialogAddPhone(BuildContext context){
+    final  _phoneKey = GlobalKey<FormState>();
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white10
+        : Colors.black12;
+    showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          alignment: Alignment.center,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)
+          ),
+          child: Container(
+            width: 450,
+            padding: EdgeInsets.all(8),
+            child: Form(
+                key: _phoneKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DialogTitle(title: 'P H O N E'),
+                    Text(
+                      "Please provide the phone number you would like to use for this payment.",
+                      style: TextStyle(color: secondaryColor),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 5,),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          onTap: _showPicker,
+                          child: Container(
+                            width: 60, height: 48,
+                            decoration: BoxDecoration(
+                              color: color1,
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                  width: 1, color: color1
+                              ),
+                            ),
+                            child: Center(
+                                child: Text("+${_country.phoneCode}")
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 5,),
+                        Expanded(
+                          child: TextFieldInput(
+                            textEditingController: _phone,
+                            labelText: "Phone",
+                            maxLength: 9,
+                            textInputType: TextInputType.phone,
+                            validator: (value){
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a phone number.';
+                              }
+                              if (RegExp(r'^[0-9+]+$').hasMatch(value)) {
+                                return null; // Valid input (contains only digits)
+                              } else {
+                                return 'Please enter a valid phone number';
+                              }
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                    DoubleCallAction(
+                        action: (){
+                          final form = _phoneKey.currentState!;
+                          if(form.validate()){
+                            Navigator.pop(context);
+                            _registerMpesaUrl(_accessToken);
+                          }
+                        })
+                  ],
+                )
+            ),
+          ),
+        )
+    );
+  }
+
+  void _showPicker(){
+    final dilogbg = Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey[900]
+        : Colors.white;
+    final color1 = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white10
+        : Colors.black12;
+    final inputBorder = OutlineInputBorder(
+        borderSide: Divider.createBorderSide(context, color: color1,)
+    );
+    showCountryPicker(
+        context: context,
+        countryListTheme: CountryListThemeData(
+            textStyle: TextStyle(fontWeight: FontWeight.w400),
+            bottomSheetHeight: MediaQuery.of(context).size.height / 2,
+            backgroundColor: dilogbg,
+            borderRadius: BorderRadius.circular(10),
+            inputDecoration:  InputDecoration(
+              hintText: "🔎 Search for your country here",
+              hintStyle: TextStyle(color: secondaryColor),
+              border: inputBorder,
+              isDense: true,
+              fillColor: color1,
+              contentPadding: const EdgeInsets.all(10),
+
+            )
+        ),
+        onSelect: (country){
+          setState(() {
+            this._country = country;
+          });
+        });
   }
 }
