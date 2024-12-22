@@ -93,6 +93,7 @@ class MpesaApiService {
     required String amount,
     required String phoneNumber,
     required String accountReference,
+    required Map<String, dynamic> paymodel,
   }) async {
     try {
       final body = jsonEncode({
@@ -101,6 +102,7 @@ class MpesaApiService {
         'Amount': amount,
         'PhoneNumber': phoneNumber,
         'AccountReference': accountReference,
+        'paymodel':paymodel
       });
 
       // Make a POST request
