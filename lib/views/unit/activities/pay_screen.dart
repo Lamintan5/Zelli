@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:Zelli/api/mpesa-api.dart';
 import 'package:Zelli/api/mpesa-api.dart';
 import 'package:Zelli/main.dart';
+import 'package:Zelli/resources/socket.dart';
 import 'package:Zelli/widgets/buttons/call_actions/double_call_action.dart';
 import 'package:Zelli/widgets/dialogs/dialog_title.dart';
 import 'package:Zelli/widgets/text/text_format.dart';
@@ -14,10 +15,12 @@ import 'package:line_icons/line_icon.dart';
 
 import '../../../models/account.dart';
 import '../../../models/billing.dart';
+import '../../../models/data.dart';
 import '../../../models/entities.dart';
 import '../../../models/gateway.dart';
 import '../../../models/lease.dart';
 import '../../../models/month_model.dart';
+import '../../../models/payments.dart';
 import '../../../models/units.dart';
 import '../../../utils/colors.dart';
 import '../../../widgets/text/text_filed_input.dart';
@@ -56,8 +59,9 @@ class _PayScreenState extends State<PayScreen> {
   late EntityModel entity;
   late UnitModel unit;
   late LeaseModel lease;
-  late MonthModel lastPaid;
+  late MonthModel month;
   late BillingModel selectedBill;
+  late PaymentsModel paymodel;
 
   double amount = 0.0;
   double balance = 0.0;
@@ -67,11 +71,14 @@ class _PayScreenState extends State<PayScreen> {
   String cost = "";
   String selectedAccount = "";
   String _accessToken = "";
+  String _payStatus = "";
   int _expiresIn = 0;
 
   bool isMax = false;
   bool _loading = false;
   bool _prompted = false;
+
+  SocketManager _socket = SocketManager();
 
   _getData(){
     balance = amount - paid;
@@ -136,6 +143,44 @@ class _PayScreenState extends State<PayScreen> {
     }
   }
 
+  void _listenToSocketEvents() {
+    final socket = SocketManager().socket;
+    socket.on('pay', (pay) async {
+      if (!mounted) return;
+      print('Event received: $pay');
+      if (pay['accessToken'] == _accessToken) {
+        if (pay['status'] == "Success") {
+          paymodel.payid == pay['payid'];
+          bool isSuccess = await Data().addPayment(paymodel, widget.reload);
+          if (isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Payment was recorded successfully✔️'),
+                showCloseIcon: true,
+              ),
+            );
+            Navigator.pop(context);
+          } else {
+            setState(() {
+              _prompted = false;
+            });
+          }
+        } else {
+          setState(() {
+            _prompted = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(pay['resultDesc']),
+              showCloseIcon: true,
+            ),
+          );
+        }
+      }
+    });
+  }
+
+
 
   @override
   void initState() {
@@ -148,10 +193,36 @@ class _PayScreenState extends State<PayScreen> {
     accountType = widget.account;
     cost = widget.cost;
     isMax = widget.isMax;
-    lastPaid = widget.lastPaid;
+
+
+    month = MonthModel.copy(widget.lastPaid);
+    if(widget.account=="RENT"){
+      if(widget.amount == 0){
+        amount = double.parse(widget.lease.rent.toString());
+        if (month.month == 12) {
+          month.year += 1;
+          month.month = 1;
+        } else {
+          month.month += 1;
+        }
+      } else {
+        amount = widget.amount;
+      }
+    } else {
+      amount = widget.amount;
+    }
     paid = amount;
+    _listenToSocketEvents();
     _getData();
     _fetchAccessToken();
+  }
+
+  @override
+  void dispose() {
+    final socket = SocketManager().socket;
+
+    socket.off('pay');
+    super.dispose();
   }
 
   @override
@@ -165,6 +236,11 @@ class _PayScreenState extends State<PayScreen> {
     final cardColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.grey[900]
         : Colors.white;
+    final statusColor = _payStatus==""
+        ? CupertinoColors.activeBlue
+        : _payStatus=="Success"
+        ? CupertinoColors.activeGreen
+        : CupertinoColors.destructiveRed;
     final heading = TextStyle(fontSize: 15, fontWeight: FontWeight.w500);
     final padding = EdgeInsets.symmetric(vertical: 8, horizontal: 10);
     return Scaffold(
@@ -391,34 +467,41 @@ class _PayScreenState extends State<PayScreen> {
               _prompted
                   ? Container(
                       padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-                      margin: EdgeInsets.only(bottom: 10),
+                      margin: EdgeInsets.only(bottom: 5),
                       decoration: BoxDecoration(
-                        color: CupertinoColors.activeGreen.withOpacity(0.1)
+                        color: _payStatus==""
+                            ? CupertinoColors.activeBlue.withOpacity(0.1)
+                            : _payStatus=="Success"
+                            ? CupertinoColors.activeGreen.withOpacity(0.1)
+                            : CupertinoColors.destructiveRed.withOpacity(0.1)
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.dialpad, color: CupertinoColors.activeGreen,),
+                          Icon(Icons.dialpad, color: statusColor,),
                           SizedBox(width: 10,),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("Success",
-                                    style: TextStyle(color: CupertinoColors.activeGreen, fontSize: 18, fontWeight: FontWeight.w600)),
+                                Text(
+                                    _payStatus==""
+                                        ? "Prompted"
+                                        : _payStatus,
+                                    style: TextStyle(color: statusColor, fontSize: 18, fontWeight: FontWeight.w600)),
                                 RichText(
                                     text: TextSpan(
                                       children: [
                                         TextSpan(
                                           text: 'A prompt has been successfully sent to ',
-                                            style: TextStyle(color: CupertinoColors.activeGreen)
+                                            style: TextStyle(color: statusColor)
                                         ),
                                         TextSpan(
                                           text: '+${_country.phoneCode + _phone.text}. ',
-                                            style: TextStyle(color: CupertinoColors.activeGreen,fontWeight: FontWeight.w600)
+                                            style: TextStyle(color: statusColor,fontWeight: FontWeight.w600)
                                         ),
                                         TextSpan(
                                           text: "Kindly enter your PIN to complete the transaction.",
-                                          style: TextStyle(color: CupertinoColors.activeGreen)
+                                          style: TextStyle(color: statusColor)
                                         )
                                       ]
                                     )
@@ -427,18 +510,30 @@ class _PayScreenState extends State<PayScreen> {
                             ),
                           ),
                           SizedBox(width: 10,),
-                          SizedBox(width: 20,height: 20,
-                            child: CircularProgressIndicator(
-                              color: CupertinoColors.activeGreen,
-                              strokeWidth: 3,
-                            ),
-                          )
+                          _payStatus==""
+                              ? SizedBox(
+                                width: 20,height: 20,
+                                child: CircularProgressIndicator(
+                                  color: statusColor,
+                                  strokeWidth: 3,
+                                ),
+                              )
+                              : InkWell(
+                                  onTap: (){
+                                    setState(() {
+                                      _prompted = false;
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(5),
+                                  splashColor: statusColor,
+                                  child: Icon(Icons.close, color: statusColor,)
+                                )
                         ],
                       ),
                     )
                   : InkWell(
                     onTap: (){
-                      if(selectedBill.bill=="Mpesa"){
+                      if(selectedBill.bill=="Mpesa" && _accessToken.isNotEmpty){
                         dialogAddPhone(context);
                       } else {
 
@@ -504,6 +599,24 @@ class _PayScreenState extends State<PayScreen> {
   void initiateStkPush(String accessToken, String businessShortCode) async {
     final mpesaService = MpesaApiService();
 
+    paymodel = PaymentsModel(
+      payid: "",
+      pid: widget.entity.pid,
+      admin: widget.entity.admin,
+      tid: widget.unit.tid,
+      lid:  widget.unit.lid,
+      eid: widget.entity.eid,
+      uid: widget.unit.id,
+      payerid: currentUser.uid,
+      amount: paid.toString(),
+      balance: widget.account == "DEPOSIT"? (widget.amount -  paid).toString() : balance.toString(),
+      method: selectedBill.bill,
+      type: widget.account,
+      time: DateTime(month.year, month.month).toString(),
+      current: DateTime.now().toString(),
+      checked: "true",
+    );
+
     try {
       final response = await mpesaService.stkPush(
         accessToken: accessToken,
@@ -511,6 +624,7 @@ class _PayScreenState extends State<PayScreen> {
         amount: paid.toStringAsFixed(0),
         phoneNumber: _country.phoneCode+_phone.text,
         accountReference: selectedAccount,
+        paymodel:paymodel.toJson()
       );
 
       if (response['success'] == true) {
@@ -536,7 +650,6 @@ class _PayScreenState extends State<PayScreen> {
       print("Exception occurred during STK Push: $e");
     }
   }
-
 
   Widget horizontalItems(String title, String value){
     return Container(
