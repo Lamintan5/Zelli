@@ -851,7 +851,24 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                         ),
                                         WidgetSpan(
                                             child: InkWell(
-                                              onTap: (){ dialogRecordPayments(context, "DEPOSIT",depoBalance, "Fixed",true, lastPaid);},
+                                              onTap: (){
+
+                                                if(isCoTenant){
+                                                  Get.to(() => PayScreen(
+                                                      entity: entity,
+                                                      unit: unit,
+                                                      reload: _getData,
+                                                      lease: currentLease,
+                                                      amount: depoBalance,
+                                                      account: "DEPOSIT",
+                                                      cost: "Fixed",
+                                                      isMax: true,
+                                                      lastPaid: lastPaid
+                                                  ), transition: Transition.rightToLeft);
+                                                } else {
+                                                  dialogRecordPayments(context, "DEPOSIT",depoBalance, "Fixed",true, lastPaid);
+                                                }
+                                                },
                                               child: Text(
                                                   "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(depoBalance)}",
                                                   style: activeBlue
@@ -870,7 +887,22 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                                         WidgetSpan(
                                             child: InkWell(
                                               onTap: (){
-                                                dialogRecordPayments(context, "RENT",accrued, "Fixed",false, lastPaid);
+
+                                                if(isCoTenant){
+                                                  Get.to(() => PayScreen(
+                                                      entity: entity,
+                                                      unit: unit,
+                                                      reload: _getData,
+                                                      lease: currentLease,
+                                                      amount: accrued,
+                                                      account: "RENT",
+                                                      cost: "Fixed",
+                                                      isMax: false,
+                                                      lastPaid: lastPaid
+                                                  ), transition: Transition.rightToLeft);
+                                                } else {
+                                                  dialogRecordPayments(context, "RENT",accrued, "Fixed",false, lastPaid);
+                                                }
                                               },
                                               child: Text(
                                                 "${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(accrued)} ",
@@ -937,43 +969,43 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                   preferredSize: Size.fromHeight(40),
                   child: currentTenant.uid==""
                       ? Row(
-                    children: [
-                      SizedBox(width: 10,),
-                      Icon(CupertinoIcons.doc_text, size: 20,),
-                      Text(
-                        '  Leases' ,
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w400),
-                      ),
-                    ],
-                  )
+                        children: [
+                          SizedBox(width: 10,),
+                          Icon(CupertinoIcons.doc_text, size: 20,),
+                          Text(
+                            '  Leases' ,
+                            style: TextStyle(
+                                fontSize: 15, fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      )
                       : Container(
-                    width: 500,
-                    height: 30,
-                    margin: EdgeInsets.only(left: 10, bottom: 0),
-                    child: TabBar(
-                      controller: _tabController,
-                      labelColor: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                      indicatorWeight: 3,
-                      labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
-                      unselectedLabelStyle: const TextStyle(fontSize: 15),
-                      labelPadding:  EdgeInsets.zero,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      indicatorPadding: const EdgeInsets.symmetric(horizontal: 10,),
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                      splashBorderRadius: const BorderRadius.all(Radius.circular(10)),
-                      tabs: const [
-                        Tab(text: 'Rent',),
-                        Tab(text: 'Periods',),
-                        Tab(text: 'Payments'),
-                      ],
-                    ),
-                  ),
+                        width: 500,
+                        height: 30,
+                        margin: EdgeInsets.only(left: 10, bottom: 0),
+                        child: TabBar(
+                          controller: _tabController,
+                          labelColor: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                          indicatorWeight: 3,
+                          labelStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
+                          unselectedLabelStyle: const TextStyle(fontSize: 15),
+                          labelPadding:  EdgeInsets.zero,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicatorPadding: const EdgeInsets.symmetric(horizontal: 10,),
+                          unselectedLabelColor: Colors.grey,
+                          indicatorColor: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white
+                              : Colors.black,
+                          splashBorderRadius: const BorderRadius.all(Radius.circular(10)),
+                          tabs: const [
+                            Tab(text: 'Rent',),
+                            Tab(text: 'Periods',),
+                            Tab(text: 'Payments'),
+                          ],
+                        ),
+                      ),
                 ),
               ),
               SliverToBoxAdapter(
