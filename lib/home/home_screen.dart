@@ -62,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: SizedBox(
         child: PageView(
-          physics: NeverScrollableScrollPhysics(),
           controller: pageController,
           onPageChanged: onPageChanged,
           children: homeScreenItems,
