@@ -1284,270 +1284,191 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                       ),
                     )
                     : Container(
-                  height: MediaQuery.of(context).size.height - 35,
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        Column(
-                          children: [
-                            Expanded(
-                              child: SizedBox(width: width,
-                                child: GroupedListView(
-                                  physics: BouncingScrollPhysics(),
-                                  order: GroupedListOrder.DESC,
-                                  elements: monthsList,
-                                  groupBy: (months) => DateTime(
-                                      months.year
-                                  ),
-                                  groupHeaderBuilder: (MonthModel months) {
-                                    final year = months.year.toString();
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Divider(
-                                              thickness: 0.5,
-                                              height: 0.5,
-                                              color: reverse,
+                        height: MediaQuery.of(context).size.height - 35,
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: TabBarView(
+                            controller: _tabController,
+                            children: [
+                              Column(
+                                children: [
+                                  Expanded(
+                                    child: SizedBox(width: width,
+                                      child: GroupedListView(
+                                        physics: BouncingScrollPhysics(),
+                                        order: GroupedListOrder.DESC,
+                                        elements: monthsList,
+                                        groupBy: (months) => DateTime(
+                                            months.year
+                                        ),
+                                        groupHeaderBuilder: (MonthModel months) {
+                                          final year = months.year.toString();
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Divider(
+                                                    thickness: 0.5,
+                                                    height: 0.5,
+                                                    color: reverse,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                                  decoration: BoxDecoration(
+                                                    color: color2,
+                                                    borderRadius: BorderRadius.circular(5),
+                                                  ),
+                                                  child: Text(
+                                                    year,
+                                                    style: TextStyle(fontSize: 10),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Divider(
+                                                    thickness: 0.5,
+                                                    height: 0.5,
+                                                    color: reverse,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                            decoration: BoxDecoration(
-                                              color: color2,
-                                              borderRadius: BorderRadius.circular(5),
-                                            ),
-                                            child: Text(
-                                              year,
-                                              style: TextStyle(fontSize: 10),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Divider(
-                                              thickness: 0.5,
-                                              height: 0.5,
-                                              color: reverse,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  indexedItemBuilder : (BuildContext context, MonthModel month, int index) {
-                                    var amount = double.parse(month.amount.toString());
-                                    var balance = double.parse(month.amount.toString());
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 5.0,),
-                                      child: InkWell(
-                                        onTap: (){
-                                          Get.to(() => Payments(entity: entity, unit: unit, tid: "", lid: lid, month: month.month.toString(),year: month.year.toString(), type: "RENT", from: 'unit',), transition: Transition.rightToLeft);
+                                          );
                                         },
-                                        borderRadius: BorderRadius.circular(5),
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-                                          decoration: BoxDecoration(
-                                              color: color1,
-                                              borderRadius: BorderRadius.circular(5)
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                amount == 0
-                                                    ? CupertinoIcons.circle
-                                                    : amount < rent
-                                                    ? CupertinoIcons.circle_lefthalf_fill
-                                                    :CupertinoIcons.check_mark_circled,
-                                                size: 20,
-                                                color: amount == rent && amount != 0? Colors.green :secondaryColor,
-                                              ),
-                                              SizedBox(width: 10,),
-                                              Text(
-                                                TFormat().toCamelCase(DateFormat.MMMM().format(DateTime(month.year, month.month))),
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w600,fontSize: 15,
-                                                  color: amount < rent ? secondaryColor : reverse
+                                        indexedItemBuilder : (BuildContext context, MonthModel month, int index) {
+                                          var amount = double.parse(month.amount.toString());
+                                          var balance = double.parse(month.amount.toString());
+                                          return Padding(
+                                            padding: const EdgeInsets.only(bottom: 5.0,),
+                                            child: InkWell(
+                                              onTap: (){
+                                                Get.to(() => Payments(entity: entity, unit: unit, tid: "", lid: lid, month: month.month.toString(),year: month.year.toString(), type: "RENT", from: 'unit',), transition: Transition.rightToLeft);
+                                              },
+                                              borderRadius: BorderRadius.circular(5),
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                    color: color1,
+                                                    borderRadius: BorderRadius.circular(5)
+                                                ),
+                                                child: Row(
+                                                  children: [
+                                                    Icon(
+                                                      amount == 0
+                                                          ? CupertinoIcons.circle
+                                                          : amount < rent
+                                                          ? CupertinoIcons.circle_lefthalf_fill
+                                                          :CupertinoIcons.check_mark_circled,
+                                                      size: 20,
+                                                      color: amount == rent && amount != 0? Colors.green :secondaryColor,
+                                                    ),
+                                                    SizedBox(width: 10,),
+                                                    Text(
+                                                      TFormat().toCamelCase(DateFormat.MMMM().format(DateTime(month.year, month.month))),
+                                                      style: TextStyle(
+                                                          fontWeight: FontWeight.w600,fontSize: 15,
+                                                        color: amount < rent ? secondaryColor : reverse
+                                                      ),
+                                                    ),
+                                                    Expanded(child: SizedBox()),
+                                                    Column(
+                                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                                      children: [
+                                                        Text(
+                                                          '${amount<=0?"":"+"}${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}',
+                                                          style: TextStyle(
+                                                              fontSize: 15,
+                                                              fontWeight: FontWeight.w700,
+                                                              color: amount<=0?secondaryColor:CupertinoColors.activeBlue
+                                                          ),
+                                                        ),
+                                                        amount < rent && rent - amount != rent
+                                                            ? Text("Balance : ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(widget.unit.price!) - amount)}",
+                                                              style: TextStyle(color: secondaryColor),)
+                                                            : SizedBox()
+                                                      ],
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                              Expanded(child: SizedBox()),
-                                              Column(
-                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                            ),
+                                          );
+                                        },
+
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Container(
+                                    width: 800,
+                                    child: GridView.builder(
+                                        shrinkWrap: true,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        gridDelegate:  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                            maxCrossAxisExtent: 120,
+                                            childAspectRatio: 3 / 2,
+                                            crossAxisSpacing: 1,
+                                            mainAxisSpacing: 1
+                                        ),
+                                        itemCount: monthsList.length,
+                                        itemBuilder: (context, index){
+                                          MonthModel monthModel = monthsList[index];
+                                          var percent = (monthModel.amount/rent);
+                                          return InkWell(
+                                            onTap: (){
+                                              dialogActivities(context, monthModel, index);
+                                            },
+                                            borderRadius: BorderRadius.circular(10),
+                                            splashColor: CupertinoColors.activeBlue,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: color1,
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child:Column(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    '${amount<=0?"":"+"}${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(amount)}',
+                                                    monthModel.monthName.toString(),
                                                     style: TextStyle(
-                                                        fontSize: 15,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: amount<=0?secondaryColor:CupertinoColors.activeBlue
+                                                      fontWeight: FontWeight.w500,
+                                                      fontSize: 14,
                                                     ),
                                                   ),
-                                                  amount < rent && rent - amount != rent
-                                                      ? Text("Balance : ${TFormat().getCurrency()}${TFormat().formatNumberWithCommas(double.parse(widget.unit.price!) - amount)}",
-                                                        style: TextStyle(color: secondaryColor),)
-                                                      : SizedBox()
+                                                  Text(monthModel.year.toString(),
+                                                    style: TextStyle(color: secondaryColor),
+                                                  ),
+                                                  SizedBox(height: 2,),
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                                    child: LinearPercentIndicator(
+                                                      animation: true,
+                                                      lineHeight: 5.0,
+                                                      animationDuration: 2000,
+                                                      percent: percent,
+                                                      barRadius: Radius.circular(50),
+                                                      linearStrokeCap: LinearStrokeCap.roundAll,
+                                                      progressColor: CupertinoColors.activeBlue,
+                                                      backgroundColor: color1,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Container(
-                              width: 800,
-                              child: GridView.builder(
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate:  const SliverGridDelegateWithMaxCrossAxisExtent(
-                                      maxCrossAxisExtent: 120,
-                                      childAspectRatio: 3 / 2,
-                                      crossAxisSpacing: 1,
-                                      mainAxisSpacing: 1
+                                            ),
+                                          );
+                                        }),
                                   ),
-                                  itemCount: monthsList.length,
-                                  itemBuilder: (context, index){
-                                    MonthModel monthModel = monthsList[index];
-                                    var percent = (monthModel.amount/rent);
-                                    return InkWell(
-                                      onTap: (){
-                                        dialogActivities(context, monthModel, index);
-                                      },
-                                      borderRadius: BorderRadius.circular(10),
-                                      splashColor: CupertinoColors.activeBlue,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: color1,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child:Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              monthModel.monthName.toString(),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            Text(monthModel.year.toString(),
-                                              style: TextStyle(color: secondaryColor),
-                                            ),
-                                            SizedBox(height: 2,),
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                              child: LinearPercentIndicator(
-                                                animation: true,
-                                                lineHeight: 5.0,
-                                                animationDuration: 2000,
-                                                percent: percent,
-                                                barRadius: Radius.circular(50),
-                                                linearStrokeCap: LinearStrokeCap.roundAll,
-                                                progressColor: CupertinoColors.activeBlue,
-                                                backgroundColor: color1,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            SizedBox(height: 10,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("Payments", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
-                                InkWell(
-                                    onTap: (){},
-                                    borderRadius: BorderRadius.circular(5),
-                                    hoverColor: color1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(5.0),
-                                      child: Icon(Icons.filter_list),
-                                    )
-                                )
-                              ],
-                            ),
-                            Expanded(
-                              child: SizedBox(width: 500,
-                                child: GroupedListView(
-                                  physics: BouncingScrollPhysics(),
-                                  order: GroupedListOrder.DESC,
-                                  elements: _current,
-                                  groupBy: (_filterpay) => DateTime(
-                                    DateTime.parse(_filterpay.current.toString()).year,
-                                    DateTime.parse(_filterpay.current.toString()).month,
-                                    DateTime.parse(_filterpay.current.toString()).day,
-                                  ),
-                                  groupHeaderBuilder: (PaymentsModel payment) {
-                                    final now = DateTime.now();
-                                    final today = DateTime(now.year, now.month, now.day);
-                                    final yesterday = today.subtract(Duration(days: 1));
-                                    final time = DateTime.parse(payment.current.toString());
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Divider(
-                                              thickness: 0.5,
-                                              height: 0.5,
-                                              color: reverse,
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                            decoration: BoxDecoration(
-                                              color: color2,
-                                              borderRadius: BorderRadius.circular(5),
-                                            ),
-                                            child: Text(
-                                              time.year == now.year && time.month == now.month && time.day == now.day
-                                                  ? 'Today'
-                                                  : time.year == yesterday.year && time.month == yesterday.month && time.day == yesterday.day
-                                                  ? 'Yesterday'
-                                                  : DateFormat.yMMMd().format(time),
-                                              style: TextStyle(fontSize: 10),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Divider(
-                                              thickness: 0.5,
-                                              height: 0.5,
-                                              color: reverse,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                  indexedItemBuilder : (BuildContext context, PaymentsModel payment, int index) {
-                                    return ItemPay(payments: payment, removePay: _removePay, from: 'Unit', entity: entity,unit:unit ,);
-                                  },
-                                ),
+                                ],
                               ),
-                            )
-                          ],
+                              Payments(entity: entity, unit: unit, tid: "", lid: currentLease.lid, from: '',)
+                            ]
                         ),
-                      ]
-                  ),
-                ),
+                      ),
               )
             ],
           )
