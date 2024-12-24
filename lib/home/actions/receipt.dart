@@ -266,7 +266,7 @@ class _ReceiptState extends State<Receipt> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(remitter.username.toString(), style: TextStyle(fontWeight: FontWeight.w500),),
-                                  Text("${remitter.firstname.toString()}${remitter.lastname.toString()}", style: TextStyle(color: secondaryColor),),
+                                  Text("${remitter.firstname.toString()} ${remitter.lastname.toString()}", style: TextStyle(color: secondaryColor),),
                                 ],
                               ),
                             ),
