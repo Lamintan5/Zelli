@@ -46,7 +46,6 @@ class _PaymentsState extends State<Payments> {
   List<UserModel> _user = [];
   List<UnitModel> _unit = [];
 
-  bool _isAdmin = false;
 
   _getData(){
     _enty = myEntity.map((jsonString) => EntityModel.fromJson(json.decode(jsonString))).toList();
@@ -184,7 +183,7 @@ class _PaymentsState extends State<Payments> {
                           ? currentUser
                           : _user.firstWhere((element) => element.uid == payment.tid.toString().split(",").first,
                           orElse: () => UserModel(uid: "", image: "", username: "N/A"));
-                      _isAdmin = entity.admin.toString().contains(currentUser.uid);
+                      bool _isAdmin = entity.admin.toString().contains(currentUser.uid);
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Slidable(
