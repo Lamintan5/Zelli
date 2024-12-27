@@ -485,7 +485,7 @@ class _BillScreenState extends State<BillScreen> {
         widget.reload();
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Account was not updated please try again"),
+              content: Text("Account was updated successfully"),
               showCloseIcon: true,
             )
         );
