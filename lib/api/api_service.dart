@@ -69,7 +69,7 @@ class APIService {
   }
 
   Future<void> getUserData(String onesignalId) async {
-    print("Started, Started, Started, Started, Started, Started, Started, Started, Started, Started, ");
+    print("Started");
     String url = 'https://api.onesignal.com/apps/41db0b95-b70f-44a5-a5bf-ad849c74352e/users/by/onesignal_id/$onesignalId';
     Map<String, String> headers = {
       'Authorization': 'Basic 41db0b95-b70f-44a5-a5bf-ad849c74352e',
