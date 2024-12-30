@@ -72,6 +72,7 @@ class _PayScreenState extends State<PayScreen> {
   String selectedAccount = "";
   String _accessToken = "";
   String _payStatus = "";
+
   int _expiresIn = 0;
 
   bool isMax = false;
