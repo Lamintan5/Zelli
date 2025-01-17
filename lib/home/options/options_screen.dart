@@ -278,6 +278,7 @@ class _OptionsState extends State<Options> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
     await Services.updateToken(currentUser.uid, "").then((response){
+
       if(response=="success"){
         setState(() {
           _loading = false;
