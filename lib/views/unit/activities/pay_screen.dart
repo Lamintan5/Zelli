@@ -228,9 +228,6 @@ class _PayScreenState extends State<PayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final reverse =  Theme.of(context).brightness == Brightness.dark
-        ? Colors.white
-        : Colors.black;
     final color1 =  Theme.of(context).brightness == Brightness.dark
         ? Colors.white10
         : Colors.black12;
