@@ -175,28 +175,28 @@ class _MyAppState extends State<MyApp> {
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
-              if (states.contains(MaterialState.hovered)) {
-                return CupertinoColors.activeBlue.withOpacity(0.9); // Color when the scrollbar is hovered
-              }
-              if (states.contains(MaterialState.focused)) {
-                return CupertinoColors.activeBlue; // Color when the scrollbar is focused
-              }
-              return CupertinoColors.activeBlue.withOpacity(0.5); // Default color
+                if (states.contains(MaterialState.hovered)) {
+                  return CupertinoColors.activeBlue.withOpacity(0.9);
+                }
+                if (states.contains(MaterialState.focused)) {
+                  return CupertinoColors.activeBlue;
+                }
+                return CupertinoColors.activeBlue.withOpacity(0.5);
             },
           ),
           thickness: MaterialStateProperty.resolveWith<double?>(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
-                return 7.0; // Thickness when the scrollbar is hovered
+                return 7.0;
               }
               if (states.contains(MaterialState.dragged)) {
-                return 7.0; // Thickness when the scrollbar is being dragged
+                return 7.0;
               }
-              return 5; // Default thickness
+              return 5;
             },
           ),
         ),
-        tabBarTheme: TabBarTheme( dividerColor: Colors.transparent,)
+        tabBarTheme: TabBarTheme( dividerColor: Colors.transparent)
       ),
       darkTheme: ThemeData.light(useMaterial3: true,).copyWith(
           dialogBackgroundColor: Colors.grey[900],
@@ -228,23 +228,23 @@ class _MyAppState extends State<MyApp> {
           thumbColor: MaterialStateProperty.resolveWith<Color?>(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
-                return CupertinoColors.activeBlue.withOpacity(0.9); // Color when the scrollbar is hovered
+                return CupertinoColors.activeBlue.withOpacity(0.9);
               }
               if (states.contains(MaterialState.focused)) {
-                return CupertinoColors.activeBlue; // Color when the scrollbar is focused
+                return CupertinoColors.activeBlue;
               }
-              return CupertinoColors.activeBlue.withOpacity(0.5); // Default color
+              return CupertinoColors.activeBlue.withOpacity(0.5);
             },
           ),
           thickness: MaterialStateProperty.resolveWith<double?>(
                 (Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
-                return 7.0; // Thickness when the scrollbar is hovered
+                return 7.0;
               }
               if (states.contains(MaterialState.dragged)) {
-                return 7.0; // Thickness when the scrollbar is being dragged
+                return 7.0;
               }
-              return 5; // Default thickness
+              return 5;
             },
           ),
         ),
