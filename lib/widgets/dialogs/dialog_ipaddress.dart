@@ -47,26 +47,20 @@ class _DialogIpaddressState extends State<DialogIpaddress> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          DialogTitle(title: "I P A D D R E S S"),
+          DialogTitle(title: "D O M A I N"),
           Text(
-            "Please enter your server IPv4 address here.",
+            "Please enter your servers domain here.",
             textAlign: TextAlign.center,
             style: TextStyle(color: secondaryColor),
           ),
           SizedBox(height: 10,),
           TextFieldInput(
             textEditingController: _ipController,
-            labelText: "Ip Address",
-            maxLength: 13,
-            textInputType: TextInputType.number,
+            labelText: "Domain",
+            textInputType: TextInputType.text,
             validator: (value){
               if (value == null || value.isEmpty) {
                 return 'Please enter an ipp address.';
-              }
-              if (RegExp(r'^[0-9+]+$').hasMatch(value)) {
-                return null; // Valid input (contains only digits)
-              } else {
-                return 'Please enter a valid phone number';
               }
             },
           ),
