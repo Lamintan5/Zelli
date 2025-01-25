@@ -123,7 +123,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
         "",deviceModel.id.toString(),user.country.toString()).then((response) async{
           print(response);
       final String responseString = await response.stream.bytesToString();
-
+      print('Response ${response}');
       if (responseString.contains('Exists')) {
         setState(() {
           _loading = false;
