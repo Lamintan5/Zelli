@@ -23,7 +23,7 @@ import '../models/users.dart';
 
 
 class Services{
-  static String HOST = "http://${domain}/Zelli/";
+  static String HOST = "https://zelli.studio5ive.org/";
 
   static var _USERS = HOST + 'users.php';
   static var _ENTITY = HOST + 'entity.php';
