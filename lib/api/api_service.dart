@@ -9,9 +9,10 @@ import 'login_response.dart';
 
 class APIService {
   static var client  = http.Client();
+  static String HOST = "zelli.studio5ive.org";
 
   static Future<LogInResponseModel> otpLogin (String email) async {
-    var url = Uri.http(Config.apiURL, "/api/otp-login");
+    var url = Uri.https(HOST, "/api/otp-login");
     var response = await client.post(
         url,
         headers: {'Content-type':"application/json"},
@@ -23,7 +24,7 @@ class APIService {
   }
 
   static Future<LogInResponseModel> verifyOTP (String email, String otpHash, String otpCode) async {
-    var url = Uri.http(Config.apiURL, "/api/otp-verify");
+    var url = Uri.https(HOST, "/api/otp-verify");
     var response = await client.post(
         url,
         headers: {'Content-type':"application/json"},
@@ -40,7 +41,7 @@ class APIService {
     Map<String, String> requestHeaders = {
       'Content-Type' : 'application/json'
     };
-    var url = Uri.http(Config.apiURL, Config.otpLoginAPI);
+    var url = Uri.https(HOST, Config.otpLoginAPI);
     var response = await client.post(url, headers: requestHeaders,
       body: jsonEncode(
         {
@@ -55,7 +56,7 @@ class APIService {
     Map<String, String> requestHeaders = {
       'Content-Type' : 'application/json'
     };
-    var url = Uri.http(Config.apiURL, Config.otpVerifyAPI);
+    var url = Uri.https(HOST, Config.otpVerifyAPI);
     var response = await client.post(url, headers: requestHeaders,
       body: jsonEncode(
         {
