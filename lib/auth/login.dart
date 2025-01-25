@@ -194,13 +194,9 @@ class _LogInState extends State<LogIn> {
               child: Column(
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       RowLogo(text: 'Login Account',),
-                      IconButton(
-                          onPressed: (){dialogIpAddress(context);},
-                          icon: Icon((Icons.settings))
-                      )
                     ],
                   ),
                   Expanded(
