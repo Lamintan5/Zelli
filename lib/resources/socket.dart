@@ -162,9 +162,9 @@ class SocketManager extends GetxController  {
   }
 
   void connect() {
-    _socket = IO.io("http://$domain:5000", <String, dynamic>{
+    _socket = IO.io('https://more-crow-hardly.ngrok-free.app', <String, dynamic>{
       "transports": ["websocket"],
-      "autoConnect": false,
+      "autoConnect": true,
     });
     _socket.connect();
     _socket.on("connect", (data) {
