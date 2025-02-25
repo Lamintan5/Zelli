@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:Zelli/auth/login.dart';
 import 'package:Zelli/resources/socket.dart';
 import 'package:Zelli/test/consts.dart';
-import 'package:Zelli/test/test_unit.dart';
 import 'package:Zelli/utils/colors.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';

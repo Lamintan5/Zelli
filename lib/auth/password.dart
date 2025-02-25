@@ -23,6 +23,7 @@ import '../resources/socket.dart';
 import '../utils/colors.dart';
 import '../widgets/dialogs/dialog_user_info.dart';
 import '../widgets/text/text_filed_input.dart';
+import '../widgets/text/text_format.dart';
 
 class PasswordScreen extends StatefulWidget {
   final GoogleSignInAccount user;
@@ -52,7 +53,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
         user.lastname!,
         user.email!,
         user.phone!,
-        _repass.text.toString(),
+        TFormat().encryptText(_repass.text.trim().toString(), user.uid),
         user.image =="" || user.image!.contains("https://")? null : File(user.image!),
         user.image.toString(),
         "",deviceModel.id.toString(),deviceModel.country.toString()).then((response) async{
@@ -94,7 +95,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
         sharedPreferences.setString('image', user.image.toString());
         sharedPreferences.setString('phone', user.phone.toString());
         sharedPreferences.setString('token', deviceModel.id.toString());
-        sharedPreferences.setString('password',  md5.convert(utf8.encode(_repass.text.trim().toString())).toString());
+        sharedPreferences.setString('password',  TFormat().encryptText(_repass.text.trim().toString(), user.uid));
         sharedPreferences.setString('country', deviceModel.country.toString());
         currentUser = UserModel(
           uid: user.uid.toString(),
@@ -105,7 +106,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
           phone: user.phone.toString(),
           image: user.image.toString(),
           token: deviceModel.id.toString(),
-          password: _repass.text,
+          password: TFormat().encryptText(_repass.text.trim().toString(), user.uid),
           status: user.status,
           country: deviceModel.country.toString()
         );

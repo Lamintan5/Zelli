@@ -21,6 +21,7 @@ import '../../resources/services.dart';
 import '../../utils/colors.dart';
 import '../../widgets/dialogs/dialog_title.dart';
 import '../../widgets/text/text_filed_input.dart';
+import '../../widgets/text/text_format.dart';
 
 class EditProfile extends StatefulWidget {
   final Function reload;
@@ -358,8 +359,10 @@ class _EditProfileState extends State<EditProfile> {
                         labelText: "Password",
                         isPass: true,
                         validator: (value){
-                          if(md5.convert(utf8.encode(value!)).toString()!= currentUser.password){
-                            return "Please enter the correct password";
+                          if(value!.isNotEmpty){
+                            if(TFormat().encryptText(value, currentUser.uid) != currentUser.password){
+                              return "Please enter the correct password";
+                            }
                           }
                         },
                       ),

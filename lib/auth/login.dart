@@ -21,6 +21,7 @@ import '../widgets/dialogs/dialog_ipaddress.dart';
 import '../widgets/logo/row_logo.dart';
 import '../widgets/text/emailTextFormWidget.dart';
 import '../widgets/text/text_filed_input.dart';
+import '../widgets/text/text_format.dart';
 
 class LogIn extends StatefulWidget {
   const LogIn({super.key});
@@ -33,7 +34,7 @@ class _LogInState extends State<LogIn> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   List<UserModel> _user = [];
-  late UserModel userModel;
+  UserModel user = UserModel(uid: "");
   List<UserModel> fltUsrs = [];
   bool obsecure = true;
   bool select = false;
@@ -45,99 +46,104 @@ class _LogInState extends State<LogIn> {
   String token = '';
   List<String> tokens = [];
 
-
-  _getUser()async{
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-    setState(() {
-      _isLoading = true;
-    });
-    _user = await Services().getUser(email==""?_emailController.text.trim().toString():email);
-    userModel = _user.first;
-    token = Platform.isAndroid || Platform.isIOS ? deviceModel.id! : "";
-    tokens = userModel.token.toString().split(",");
-    tokens.add(token);
-    tokens.remove("");
-    await Services.updateToken(userModel.uid, tokens.join(",")).then((value){
-      print("Token : $token, ${value}");
-    });
-    await Services.updateToken(userModel.uid, token);
-    sharedPreferences.setString('uid', userModel.uid.toString());
-    sharedPreferences.setString('username', userModel.username.toString());
-    sharedPreferences.setString('first', userModel.firstname.toString());
-    sharedPreferences.setString('last', userModel.lastname.toString());
-    sharedPreferences.setString('image', userModel.image.toString());
-    sharedPreferences.setString('email', userModel.email.toString());
-    sharedPreferences.setString('phone', userModel.phone.toString());
-    sharedPreferences.setString('status', userModel.status.toString());
-    sharedPreferences.setString('token', token);
-    sharedPreferences.setString('password', userModel.password.toString());
-    sharedPreferences.setString('country', userModel.country.toString());
-    currentUser = UserModel(
-      uid: userModel.uid.toString(),
-      firstname: userModel.firstname,
-      lastname: userModel.lastname,
-      username: userModel.username,
-      email: userModel.email.toString(),
-      phone: userModel.phone.toString(),
-      image: userModel.image.toString(),
-      password: userModel.password.toString(),
-      status: userModel.status,
-      token:  token,
-      country: userModel.country
-    );
-    await SocketManager().getDetails();
-    Get.snackbar(
-        'Authentication',
-        'User account logged in successfully',
-        shouldIconPulse: true,
-        icon: Icon(Icons.check, color: Colors.green),
-        maxWidth: 500
-    );
-    Get.offAll(()=>Platform.isAndroid || Platform.isIOS
-        ? HomeScreen()
-        : WebHome(), transition: Transition.fadeIn);      _isLoading = false;
-  }
   _loginUser()async{
-
     setState(() {
       _isLoading = true;
     });
-    var response;
-    if (email == "") {
-      response = await Services.loginUsers(_emailController.text.trim().toString(), _passwordController.text.trim().toString());
-    } else {
-      response = await Services.loginUserWithEmail(email);
-    }
-    print("Response $response");
-    if(response.contains('Success')){
-      _getUser();
-    }
-    else if(response.contains('Error')){
-      Get.snackbar(
+
+    try{
+      _user = await Services().getUser(email == "" ? _emailController.text.trim().toString() : email);
+      if (_user.isEmpty) {
+        throw Exception("User not found");
+      }
+
+      user = _user.first;
+
+      var response;
+      if (email == "") {
+        response = await Services.loginUsers(_emailController.text.trim().toString(), TFormat().encryptText(_passwordController.text.trim().toString(), user.uid));
+      } else {
+        response = await Services.loginUserWithEmail(email);
+      }
+      if (response.contains('Success')) {
+        final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        token = Platform.isAndroid || Platform.isIOS ? deviceModel.id! : "";
+        tokens = user.token.toString().split(",");
+        tokens.add(token);
+        tokens.remove("");
+
+        await Services.updateToken(user.uid, tokens.join(","));
+
+        sharedPreferences.setString('uid', user.uid.toString());
+        sharedPreferences.setString('username', user.username.toString());
+        sharedPreferences.setString('first', user.firstname.toString());
+        sharedPreferences.setString('last', user.lastname.toString());
+        sharedPreferences.setString('image', user.image.toString());
+        sharedPreferences.setString('email', user.email.toString());
+        sharedPreferences.setString('phone', user.phone.toString());
+        sharedPreferences.setString('status', user.status.toString());
+        sharedPreferences.setString('token', token);
+        sharedPreferences.setString('password', user.password.toString());
+        sharedPreferences.setString('country', user.country.toString());
+        currentUser = UserModel(
+            uid: user.uid.toString(),
+            firstname: user.firstname,
+            lastname: user.lastname,
+            username: user.username,
+            email: user.email.toString(),
+            phone: user.phone.toString(),
+            image: user.image.toString(),
+            password: user.password.toString(),
+            status: user.status,
+            token:  token,
+            country: user.country
+        );
+        await SocketManager().getDetails().then((value){
+          if(value==false){
+            Get.snackbar(
+                'Authentication',
+                'User account logged in successfully',
+                shouldIconPulse: true,
+                icon: Icon(Icons.check, color: Colors.green),
+                maxWidth: 500
+            );
+            Get.offAll(()=>Platform.isAndroid || Platform.isIOS
+                ? HomeScreen()
+                : WebHome(), transition: Transition.fadeIn);
+          }
+        });
+      }  else if (response.contains('Error')) {
+        Get.snackbar(
           'Authentication',
-          'Invalid credentials. Please check you email or password',
+          'Invalid credentials. Please check your email or password',
           shouldIconPulse: true,
           icon: Icon(Icons.close, color: Colors.red),
-          maxWidth: 500
-      );
-      setState(() {
-        _isLoading = false;
-      });
-    }
-    else {
+          maxWidth: 500,
+        );
+      } else {
+        Get.snackbar(
+          'Authentication',
+          'mmhmm, 🤔 seems like something went wrong. Please try again.',
+          shouldIconPulse: true,
+          maxWidth: 500,
+          icon: Icon(Icons.close, color: Colors.red),
+        );
+      }
+    } catch (e){
       Get.snackbar(
-        'Authentication',
-        'mmhmm, 🤔 seems like something went wrong. Please try again.',
+        'Error',
+        'An error occurred: ${e.toString()}',
         shouldIconPulse: true,
-        maxWidth: 500,
         icon: Icon(Icons.close, color: Colors.red),
+        maxWidth: 500,
       );
+    } finally {
       setState(() {
         _isLoading = false;
       });
     }
   }
+
   void checkid() {
     email = "";
     if(_emailController.text.isEmpty) {

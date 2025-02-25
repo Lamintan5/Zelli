@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/colors.dart';
 import '../../widgets/text/text_filed_input.dart';
+import '../../widgets/text/text_format.dart';
 
 class ChangePass extends StatefulWidget {
   const ChangePass({super.key});
@@ -135,7 +136,7 @@ class _ChangePassState extends State<ChangePass> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter current password.';
                             }
-                            if (md5.convert(utf8.encode(value)).toString()!= currentUser.password) {
+                            if (TFormat().encryptText(value, currentUser.uid)!= currentUser.password) {
                               return 'Please enter the correct password.';
                             }
                           },

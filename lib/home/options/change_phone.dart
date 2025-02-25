@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../utils/colors.dart';
 import '../../widgets/text/text_filed_input.dart';
+import '../../widgets/text/text_format.dart';
 
 
 class ChangePhone extends StatefulWidget {
@@ -103,7 +104,7 @@ class _ChangePhoneState extends State<ChangePhone> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a password.';
                               }
-                              if (md5.convert(utf8.encode(value!)).toString()!= currentUser.password) {
+                              if (TFormat().encryptText(value, currentUser.uid)!= currentUser.password) {
                                 return 'Please Enter the correct password';
                               }
                               return null;

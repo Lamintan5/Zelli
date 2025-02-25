@@ -24,6 +24,7 @@ import '../widgets/dialogs/dialog_title.dart';
 import '../widgets/logo/row_logo.dart';
 import '../widgets/text/emailTextFormWidget.dart';
 import '../widgets/text/text_filed_input.dart';
+import '../widgets/text/text_format.dart';
 import 'camera.dart';
 import 'login.dart';
 
@@ -138,7 +139,7 @@ class _SignUpState extends State<SignUp> {
       lastname: _secondName.text.trim().toString(),
       email: _emailController.text.trim().toString(),
       phone: "+"+ _country.phoneCode+_phoneController.text.trim().toString(),
-      password:  md5.convert(utf8.encode(_passwordController.text.trim().toString())).toString(),
+      password:  TFormat().encryptText(_passwordController.text.trim().toString(), id),
       image: _image!=null?_image!.path:imageUrl,
       status: "",
       token: deviceModel.token.toString(),

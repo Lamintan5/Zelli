@@ -1,7 +1,9 @@
-
 import 'package:Zelli/main.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
 
 class TFormat{
   Country _country = CountryParser.parseCountryCode('US');
@@ -43,6 +45,21 @@ class TFormat{
   String formatNumberWithCommas(double number) {
     final formatter = NumberFormat('#,###');
     return formatter.format(number);
+  }
+
+  String encryptText(String text, String id){
+    final aesKey = encrypt.Key.fromUtf8(sha256.convert(utf8.encode(id)).toString().substring(0, 32));
+    final iv = encrypt.IV.allZerosOfLength(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(aesKey));
+    final encryptedText = encrypter.encrypt(text, iv: iv).base64;
+    return encryptedText;
+  }
+  // Decryption
+  String decryptField(String encryptedText, String eid) {
+    final aesKey = encrypt.Key.fromUtf8(sha256.convert(utf8.encode(eid)).toString().substring(0, 32));
+    final iv = encrypt.IV.allZerosOfLength(16);
+    final encrypter = encrypt.Encrypter(encrypt.AES(aesKey));
+    return encrypter.decrypt64(encryptedText, iv: iv);
   }
 
   String getCurrency() {
