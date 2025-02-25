@@ -51,7 +51,7 @@ class _ItemNotifState extends State<ItemNotif> {
   List<NotifModel> _notifications = [];
   List<String> uidList = [];
 
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   NotifModel notifModel = NotifModel(nid: "");
 
   _getDetails()async{

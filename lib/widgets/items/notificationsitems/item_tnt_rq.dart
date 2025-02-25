@@ -50,7 +50,7 @@ class _ItemTntRqState extends State<ItemTntRq> {
 
   bool _loading = false;
 
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   NotifModel notifModel = NotifModel(nid: "");
 
   _getDetails()async{

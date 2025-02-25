@@ -46,7 +46,7 @@ class _ItemReqState extends State<ItemReq> {
   List<UserModel> _user = [];
   List<String> uidList = [];
 
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   bool _loading = false;
 
   _getData(){

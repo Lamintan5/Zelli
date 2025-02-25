@@ -54,7 +54,7 @@ class _ItemReqTntState extends State<ItemReqTnt> {
   List<String> uidList = [];
 
   NotifModel notifModel = NotifModel(nid: "");
-  bool _isExpanded = false;
+  bool _isExpanded = true;
 
   _getDetails()async{
     _getData();

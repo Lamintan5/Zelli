@@ -47,7 +47,7 @@ class _ItemTerminateState extends State<ItemTerminate> {
   UserModel sender = UserModel(uid: "", username: "", image: "");
   UserModel receiver = UserModel(uid: "", username: "", image: "");
 
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   bool _loading = false;
 
   _getDetails()async{
