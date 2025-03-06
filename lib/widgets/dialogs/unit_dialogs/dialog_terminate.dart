@@ -164,7 +164,7 @@ class _DialogTerminateState extends State<DialogTerminate> {
       "text":"${widget.unit.id.toString()},${_dateTime},${widget.unit.title.toString()}",
       "title": widget.entity.title,
       "token": _tokens,
-      "profile": "${Services.HOST}logos/LEGO_logo.svg.png",
+      "profile": widget.entity.image!.isEmpty? "" : "${Services.HOST}logos/${widget.entity.image}",
     });
   }
 

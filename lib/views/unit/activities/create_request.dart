@@ -330,7 +330,7 @@ class _CreateRequestState extends State<CreateRequest> {
       "text":text,
       "title": widget.entity.title,
       "token": _tokens,
-      "profile": "${Services.HOST}logos/${currentUser.image}",
+      "profile": widget.entity.image!.isEmpty? "" : "${Services.HOST}logos/${widget.entity.image}",
       "path": _image==null?"":path,
     });
   }

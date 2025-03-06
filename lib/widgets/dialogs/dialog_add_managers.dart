@@ -120,7 +120,7 @@ class _DialogAddManagersState extends State<DialogAddManagers> {
       "text":"",
       "title": widget.entity.title,
       "token": user.token.toString().split(","),
-      "profile": "${Services.HOST}logos/LEGO_logo.svg.png",
+      "profile": widget.entity.image!.isEmpty? "" : "${Services.HOST}logos/${widget.entity.image}",
     });
   }
 

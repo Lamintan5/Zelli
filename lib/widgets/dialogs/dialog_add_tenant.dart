@@ -134,7 +134,7 @@ class _DialogAddTenantState extends State<DialogAddTenant> {
       "text":"${widget.unit.id.toString()},${widget.unit.title.toString()}",
       "title": widget.entity.title,
       "token": user.token.toString().split(","),
-      "profile": "${Services.HOST}logos/LEGO_logo.svg.png",
+      "profile": widget.entity.image!.isEmpty? "" : "${Services.HOST}logos/${widget.entity.image}",
     });
   }
 
