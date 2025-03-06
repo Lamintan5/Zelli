@@ -14,6 +14,7 @@ import '../../../resources/services.dart';
 import '../../../utils/colors.dart';
 import '../../../widgets/dialogs/dialog_title.dart';
 import '../../../widgets/text/text_filed_input.dart';
+import '../../../widgets/text/text_format.dart';
 
 class EditProperty extends StatefulWidget {
   final EntityModel entity;
@@ -547,7 +548,10 @@ class _EditPropertyState extends State<EditProperty> {
                       labelText: "Password",
                       isPass: true,
                       validator: (value){
-                        if(md5.convert(utf8.encode(value!)).toString()!= currentUser.password){
+                        if(value == null || value.isEmpty){
+                          return "Please enter your password";
+                        }
+                        if(TFormat().encryptText(value, currentUser.uid) != currentUser.password){
                           return "Please enter the correct password";
                         }
                       },
