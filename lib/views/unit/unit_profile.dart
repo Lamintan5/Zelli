@@ -744,49 +744,53 @@ class _UnitProfileState extends State<UnitProfile> with TickerProviderStateMixin
                         isAdmin ?
                         isBilled
                             ? SizedBox()
-                            : Container(
-                          margin: EdgeInsets.only(bottom: 10),
-                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withOpacity(0.14),
-                          ),
-                          child: Row(
-                              children: [
-                                Icon(CupertinoIcons.creditcard, color: Colors.red,),
-                                SizedBox(width: 10,),
-                                Expanded(
-                                  child: RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(
-                                            text: 'This unit has not yet been configured with a payment gateway. Please set up a payment gateway to enable seamless transactions and efficient payment processing. ',
-                                            style: TextStyle(color: secondaryColor, fontSize: 13)
-                                          ),
-                                          WidgetSpan(
-                                              child: InkWell(
-                                                  onTap: (){
-                                                    Get.to(()=>UnitBilling(entity: entity, unit: unit, reload: _getData,), transition: Transition.rightToLeft);
-                                                  },
-                                                  child : Text("Get started.",
-                                                    style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.w800),
-                                                )
-                                              )
-                                          )
-                                        ]
-                                      )
-                                  ),
+                            : Center(
+                              child: Container(
+                                  width: 500,
+                                  margin: EdgeInsets.only(bottom: 10),
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                                  decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.14),
+                                      borderRadius: BorderRadius.circular(5)
                                 ),
-                                InkWell(
-                                    onTap: (){
-                                      setState(() {
-                                        isBilled = true;
-                                      });
-                                    },
-                                    child: Icon(Icons.close, color: secondaryColor,)
-                                )
-                              ],
-                          ),
-                        )
+                                  child: Row(
+                                  children: [
+                                    Icon(CupertinoIcons.creditcard, color: Colors.red,),
+                                    SizedBox(width: 10,),
+                                    Expanded(
+                                      child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'This unit has not yet been configured with a payment gateway. Please set up a payment gateway to enable seamless transactions and efficient payment processing. ',
+                                                style: TextStyle(color: secondaryColor, fontSize: 13)
+                                              ),
+                                              WidgetSpan(
+                                                  child: InkWell(
+                                                      onTap: (){
+                                                        Get.to(()=>UnitBilling(entity: entity, unit: unit, reload: _getData,), transition: Transition.rightToLeft);
+                                                      },
+                                                      child : Text("Get started.",
+                                                        style: TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.w800),
+                                                    )
+                                                  )
+                                              )
+                                            ]
+                                          )
+                                      ),
+                                    ),
+                                    InkWell(
+                                        onTap: (){
+                                          setState(() {
+                                            isBilled = true;
+                                          });
+                                        },
+                                        child: Icon(Icons.close, color: secondaryColor,)
+                                    )
+                                  ],
+                                  ),
+                              ),
+                            )
                             : SizedBox(),
                         Center(
                           child: currentTenant.uid!=unit.tid.toString().split(",").first

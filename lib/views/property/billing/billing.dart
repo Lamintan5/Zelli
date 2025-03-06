@@ -51,109 +51,117 @@ class _BillingState extends State<Billing> {
     final color1 = Theme.of(context).brightness == Brightness.dark
         ? Colors.white10
         : Colors.black12;
+    final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         title: Text("Billing"),
       ),
       body:  _bills.isNotEmpty
-          ? Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("    Payment methods", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _bills.length + 1,
-                  itemBuilder: (context, index) {
-                    // Check if this is the "Add payment method" item
-                    if (index == _bills.length) {
-                      return TextButton(
-                        onPressed: () {
-                          dialogAddBilling(context);
-                        },
-                        child: Text("Add payment method"),
-                      );
-                    } else {
-                      // Safely access the list item
-                      BillingModel bill = _bills[index];
-                      var crd = billCard.firstWhere((test) => test.title == bill.bill, orElse: () => GateWayModel(title: "", logo: ''));
-
-                      // Handle if `crd` is null
-                      if (crd == null) {
-                        return ListTile(
-                          title: Text("Unknown Bill"),
-                          subtitle: Text("No details available"),
-                        );
-                      }
-
-                      List<AccountModel> accnts = bill.type == 'Different' && bill.accountno.isNotEmpty
-                          ?  bill.accountno.split('*').map((jsonString) {
-                            if (jsonString.isNotEmpty) {
-                              return AccountModel.fromJson(json.decode(jsonString));
+          ? Center(
+            child: Container(
+                    width: 700,
+              margin: EdgeInsets.symmetric(horizontal:5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Payment methods", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: _bills.length + 1,
+                          itemBuilder: (context, index) {
+                            // Check if this is the "Add payment method" item
+                            if (index == _bills.length) {
+                              return TextButton(
+                                onPressed: () {
+                                  dialogAddBilling(context);
+                                },
+                                child: Text("Add payment method"),
+                              );
                             } else {
-                              // Handle empty jsonString (if needed)
-                              return AccountModel(bid: '', uid: '', accountno: '', account: '');
+                              // Safely access the list item
+                              BillingModel bill = _bills[index];
+                              var crd = billCard.firstWhere((test) => test.title == bill.bill, orElse: () => GateWayModel(title: "", logo: ''));
+
+                              // Handle if `crd` is null
+                              if (crd == null) {
+                                return ListTile(
+                                  title: Text("Unknown Bill"),
+                                  subtitle: Text("No details available"),
+                                );
+                              }
+
+                              List<AccountModel> accnts = bill.type == 'Different' && bill.accountno.isNotEmpty
+                                  ?  bill.accountno.split('*').map((jsonString) {
+                                    if (jsonString.isNotEmpty) {
+                                      return AccountModel.fromJson(json.decode(jsonString));
+                                    } else {
+                                      // Handle empty jsonString (if needed)
+                                      return AccountModel(bid: '', uid: '', accountno: '', account: '');
+                                    }
+                                  }).toList()
+                                  : [];
+
+                              print(accnts.map((e) => e.toJson()));
+
+                              return ListTile(
+                                onTap: () {
+                                  Get.to(
+                                        () => BillScreen(
+                                      card: crd,
+                                      bill: bill,
+                                      reload: _getData,
+                                      removeBill: _removeBill,
+                                          entity: widget.entity,
+                                    ),
+                                    transition: Transition.rightToLeft,
+                                  );
+                                },
+                                leading: Image.asset(
+                                  crd.logo,
+                                  width: 30,
+                                  height: 30,
+                                ),
+                                title: Text(bill.businessno),
+                                subtitle: bill.account.isNotEmpty && bill.type == 'Different'
+                                    ? Wrap(
+                                  runSpacing: 2,spacing: 5,
+                                     children: bill.account.split(",").map((account){
+                                       return Container(
+                                         padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                         decoration: BoxDecoration(
+                                           borderRadius: BorderRadius.circular(5),
+                                           color: color1
+                                         ),
+                                         child: Text(account, style: TextStyle(color: secondaryColor),),
+                                       );
+                                     }).toList(),
+                                    )
+                                    : Text(
+                                      bill.type == 'Different'
+                                          ? "Different accounts for different units"
+                                          : bill.accountno,
+                                      style: TextStyle(color: secondaryColor),
+                                    ),
+                                trailing: bill.checked == "REMOVED"
+                                    ? Icon(
+                                        CupertinoIcons.delete,
+                                        color: Colors.red,
+                                      )
+                                    : Icon(
+                                        Icons.keyboard_arrow_right_outlined,
+                                        color: secondaryColor,
+                                      ),
+                              );
                             }
-                          }).toList()
-                          : [];
-
-                      print(accnts.map((e) => e.toJson()));
-
-                      return ListTile(
-                        onTap: () {
-                          Get.to(
-                                () => BillScreen(
-                              card: crd,
-                              bill: bill,
-                              reload: _getData,
-                              removeBill: _removeBill,
-                                  entity: widget.entity,
-                            ),
-                            transition: Transition.rightToLeft,
-                          );
-                        },
-                        leading: Image.asset(
-                          crd.logo,
-                          width: 30,
-                          height: 30,
-                        ),
-                        title: Text(bill.businessno),
-                        subtitle: bill.account.isNotEmpty && bill.type == 'Different'
-                            ? Wrap(
-                          runSpacing: 2,spacing: 5,
-                             children: bill.account.split(",").map((account){
-                               return Container(
-                                 padding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                                 decoration: BoxDecoration(
-                                   borderRadius: BorderRadius.circular(5),
-                                   color: color1
-                                 ),
-                                 child: Text(account, style: TextStyle(color: secondaryColor),),
-                               );
-                             }).toList(),
-                            )
-                            : Text(
-                              bill.type == 'Different'
-                                  ? "Different accounts for different units"
-                                  : bill.accountno,
-                              style: TextStyle(color: secondaryColor),
-                            ),
-                        trailing: bill.checked == "REMOVED"
-                            ? Icon(
-                                CupertinoIcons.delete,
-                                color: Colors.red,
-                              )
-                            : Icon(
-                                Icons.keyboard_arrow_right_outlined,
-                                color: secondaryColor,
-                              ),
-                      );
-                    }
-                  },
-                )
-              ),
-            ],
+                          },
+                        )
+                      ),
+                    ],
+                  ),
+            ),
           )
-          : Padding(
+          : Container(
+            width: size.width,
             padding: const EdgeInsets.all(8.0),
             child: Column(
               mainAxisSize: MainAxisSize.max,

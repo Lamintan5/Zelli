@@ -109,76 +109,78 @@ class _CreateBillState extends State<CreateBill> {
             )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: card.title == "Mpesa"
-            ? Column(
-          children: [
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                child: CarouselSlider(
-                  carouselController: controller,
-                  items: [
-                    // payTypeCard(),
-                    setUpCard(),
-                    completeCard(),
-                  ],
-                  options: CarouselOptions(
-                      scrollPhysics: NeverScrollableScrollPhysics(),
-                      initialPage: 0,
-                      enlargeFactor: 0.5,
-                      autoPlay: false,
-                      viewportFraction: 1,
-                      enableInfiniteScroll: false,
-                      enlargeCenterPage: true,
-                      height: size.height/2,
-                      enlargeStrategy: CenterPageEnlargeStrategy.height,
-                      autoPlayAnimationDuration: const Duration(seconds: 2),
-                      onPageChanged: (index, reason) {
-                        setState(() {
-                          activeIndex = index;
-                        });
-                      }),
-                ),
-              ),
-            ),
-            Wrap(
-              runSpacing: 5,
-              spacing: 5,
-              children: bills.map((bill){
-                return Container(
-                  padding: EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: color1
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                          onTap: (){
-                            bills.remove(bill);
-                            setState(() {
-
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(20),
-                          child: Icon(Icons.cancel, color: color5,)
+      body: Center(
+        child: Container(
+          width: 700,
+          padding: const EdgeInsets.all(8.0),
+          child: card.title == "Mpesa"
+              ? Column(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: CarouselSlider(
+                        carouselController: controller,
+                        items: [
+                          // payTypeCard(),
+                          setUpCard(),
+                          completeCard(),
+                        ],
+                        options: CarouselOptions(
+                            scrollPhysics: NeverScrollableScrollPhysics(),
+                            initialPage: 0,
+                            enlargeFactor: 0.5,
+                            autoPlay: false,
+                            viewportFraction: 1,
+                            enableInfiniteScroll: false,
+                            enlargeCenterPage: true,
+                            height: size.height/2,
+                            enlargeStrategy: CenterPageEnlargeStrategy.height,
+                            autoPlayAnimationDuration: const Duration(seconds: 2),
+                            onPageChanged: (index, reason) {
+                              setState(() {
+                                activeIndex = index;
+                              });
+                            }),
                       ),
-                      SizedBox(width: 5,),
-                      Text(bill.businessno),
-                      SizedBox(width: 5,),
-                    ],
+                    ),
                   ),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 30,),
-            buildIndicator(),
-          ],
-        )
-            : SizedBox(),
+                  Wrap(
+                    runSpacing: 5,
+                    spacing: 5,
+                    children: bills.map((bill){
+                      return Container(
+                        padding: EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: color1
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                                onTap: (){
+                                  bills.remove(bill);
+                                  setState(() {
+
+                                  });
+                                },
+                                borderRadius: BorderRadius.circular(20),
+                                child: Icon(Icons.cancel, color: color5,)
+                            ),
+                            SizedBox(width: 5,),
+                            Text(bill.businessno),
+                            SizedBox(width: 5,),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(height: 30,),
+                  buildIndicator(),
+                ],
+              ) : SizedBox(),
+        ),
       ),
     );
   }

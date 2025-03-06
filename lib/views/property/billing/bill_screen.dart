@@ -153,309 +153,312 @@ class _BillScreenState extends State<BillScreen> {
           })
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _edit
-            ? Form(
-              key: key,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    children: [
-                      SizedBox(height: 30,),
-                      Text(
-                        "Update Pay Bill Detail",
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 10,),
-                      TextFieldInput(
-                        textEditingController: _busno,
-                        labelText: "Business Number",
-                        textInputType: TextInputType.number,
-                        validator: (value){
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter business number.';
-                          }
-                          if (RegExp(r'^[0-9+]+$').hasMatch(value)) {
-                            return null; // Valid input (contains only digits)
-                          } else {
-                            return 'Please enter a valid business number';
-                          }
-                        },
-                      ),
-                      SizedBox(height: 5,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text("  Account types"),
-                        ],
-                      ),
-                      SizedBox(height: 5,),
-                      ..._paybilloptions.map((option){
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: RadioListTile(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                              dense: true,
-                              value: option,
-                              groupValue: _selectedOption,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              title: Text(option, style: TextStyle(fontSize: 15, color: secondaryColor)),
-                              tileColor: color1,
-                              subtitle: option == 'One account for all units' && _selectedOption == 'One account for all units'
-                                  ? TextFormField(
-                                controller: _accno,
-                                keyboardType: TextInputType.text,
-                                decoration: InputDecoration(
-                                  label: Text("Account Number"),
-                                  fillColor: color1,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(5)
-                                    ),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                                  filled: true,
-                                  isDense: true,
+      body: Center(
+        child: Container(
+          width: 700,
+          padding: const EdgeInsets.all(8.0),
+          child: _edit
+              ? Form(
+                key: key,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                    child: Column(
+                      children: [
+                        SizedBox(height: 30,),
+                        Text(
+                          "Update Pay Bill Detail",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10,),
+                        TextFieldInput(
+                          textEditingController: _busno,
+                          labelText: "Business Number",
+                          textInputType: TextInputType.number,
+                          validator: (value){
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter business number.';
+                            }
+                            if (RegExp(r'^[0-9+]+$').hasMatch(value)) {
+                              return null; // Valid input (contains only digits)
+                            } else {
+                              return 'Please enter a valid business number';
+                            }
+                          },
+                        ),
+                        SizedBox(height: 5,),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text("  Account types"),
+                          ],
+                        ),
+                        SizedBox(height: 5,),
+                        ..._paybilloptions.map((option){
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: RadioListTile(
+                                contentPadding: EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                                dense: true,
+                                value: option,
+                                groupValue: _selectedOption,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
-                                validator: (value){
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter account number.';
-                                  }
-                                  if (RegExp(r'^[0-9+]+$').hasMatch(value)) {
-                                    return null; // Valid input (contains only digits)
-                                  } else {
-                                    return 'Please enter a valid account number';
-                                  }
-                                },
-                              ) : null,
-                              onChanged: (value){
-                                setState(() {
-                                  _selectedOption = value;
-                                });
-                              }
+                                title: Text(option, style: TextStyle(fontSize: 15, color: secondaryColor)),
+                                tileColor: color1,
+                                subtitle: option == 'One account for all units' && _selectedOption == 'One account for all units'
+                                    ? TextFormField(
+                                  controller: _accno,
+                                  keyboardType: TextInputType.text,
+                                  decoration: InputDecoration(
+                                    label: Text("Account Number"),
+                                    fillColor: color1,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(5)
+                                      ),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                                    filled: true,
+                                    isDense: true,
+                                  ),
+                                  validator: (value){
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter account number.';
+                                    }
+                                    if (RegExp(r'^[0-9+]+$').hasMatch(value)) {
+                                      return null; // Valid input (contains only digits)
+                                    } else {
+                                      return 'Please enter a valid account number';
+                                    }
+                                  },
+                                ) : null,
+                                onChanged: (value){
+                                  setState(() {
+                                    _selectedOption = value;
+                                  });
+                                }
+                            ),
+                          );
+                        }).toList(),
+                        SizedBox(height: 10,),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: color1
                           ),
-                        );
-                      }).toList(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('<<Click on any item to select>>', style: TextStyle(color: secondaryColor),),
+                                ],
+                              ),
+                              SizedBox(height: 5,),
+                              Wrap(
+                                spacing: 5,runSpacing: 5,
+                                children: _utils.map((account){
+                                  return InkWell(
+                                      borderRadius: BorderRadius.circular(10),
+                                    splashColor: CupertinoColors.activeBlue,
+                                    onTap: (){
+                                        setState(() {
+                                          if(account.checked=='true'){
+                                            account.checked = 'false';
+                                          } else {
+                                            account.checked = 'true';
+                                          }
+                                        });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+                                      decoration: BoxDecoration(
+                                          color: account.checked == 'true'? CupertinoColors.activeBlue.withOpacity(0.2) : color1,
+                                          borderRadius: BorderRadius.circular(10)
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            account.checked == 'true'? CupertinoIcons.check_mark_circled : CupertinoIcons.circle,
+                                            size: 15,
+                                            color: account.checked == 'true'? CupertinoColors.activeBlue : secondaryColor,
+                                          ),
+                                          SizedBox(width: 2,),
+                                          Text(account.text,
+                                              style: TextStyle(
+                                                  color: account.checked == 'true'? CupertinoColors.activeBlue : secondaryColor)
+                                          ),
+                                          SizedBox(width: 2,),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20,),
+                        InkWell(
+                          onTap: (){
+                            final form = key.currentState!;
+                            if(form.validate()) {
+                              _update();
+                            }
+                          },
+                          child: Container(
+                            width: 450,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                color: CupertinoColors.activeBlue
+                            ),
+                            child: Center(
+                                child: _editing
+                                    ? SizedBox(
+                                        width: 15, height: 15,
+                                        child: CircularProgressIndicator(color: Colors.black,strokeWidth: 2,)
+                                      )
+                                    : Text(
+                                        "Update", style: TextStyle(
+                                          fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black
+                                        ),
+                                      )
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                            onPressed: (){
+                              setState(() {
+                                _edit = false;
+                                _busno.text = bill.businessno;
+                                _accno.text = bill.accountno;
+                                _selectedOption = bill.type;
+                              });
+                            },
+                            child: Text("Cancel")
+                        )
+                      ],
+                    ),
+                  )
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5),
+                          color: color1
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Business No",
+                              style: TextStyle(color: secondaryColor),
+                            ),
+                            Text(bill.businessno),
+                          ],
+                        ),
+                      ),
                       SizedBox(height: 10,),
                       Container(
                         width: double.infinity,
-                        padding: EdgeInsets.all(10),
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(5),
                             color: color1
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                        child:bill.type == "Different"
+                            ? Text(
+                              "Different accounts for different units",
+                              style: TextStyle(color: secondaryColor),
+                            )
+                            : Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('<<Click on any item to select>>', style: TextStyle(color: secondaryColor),),
+                                Text(
+                                  "Account no",
+                                  style: TextStyle(color: secondaryColor),
+                                ),
+                                Text(bill.accountno),
                               ],
                             ),
-                            SizedBox(height: 5,),
-                            Wrap(
-                              spacing: 5,runSpacing: 5,
-                              children: _utils.map((account){
-                                return InkWell(
-                                    borderRadius: BorderRadius.circular(10),
-                                  splashColor: CupertinoColors.activeBlue,
-                                  onTap: (){
-                                      setState(() {
-                                        if(account.checked=='true'){
-                                          account.checked = 'false';
-                                        } else {
-                                          account.checked = 'true';
-                                        }
-                                      });
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
-                                    decoration: BoxDecoration(
-                                        color: account.checked == 'true'? CupertinoColors.activeBlue.withOpacity(0.2) : color1,
-                                        borderRadius: BorderRadius.circular(10)
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          account.checked == 'true'? CupertinoIcons.check_mark_circled : CupertinoIcons.circle,
-                                          size: 15,
-                                          color: account.checked == 'true'? CupertinoColors.activeBlue : secondaryColor,
-                                        ),
-                                        SizedBox(width: 2,),
-                                        Text(account.text,
-                                            style: TextStyle(
-                                                color: account.checked == 'true'? CupertinoColors.activeBlue : secondaryColor)
-                                        ),
-                                        SizedBox(width: 2,),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                      ),
+                      SizedBox(height: 10,),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: color1
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Created on",
+                              style: TextStyle(color: secondaryColor),
                             ),
+                            Text(DateFormat.yMMMEd().format(DateTime.parse(bill.time))),
                           ],
                         ),
                       ),
-                      SizedBox(height: 20,),
-                      InkWell(
-                        onTap: (){
-                          final form = key.currentState!;
-                          if(form.validate()) {
-                            _update();
-                          }
-                        },
-                        child: Container(
-                          width: 450,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: CupertinoColors.activeBlue
-                          ),
-                          child: Center(
-                              child: _editing
-                                  ? SizedBox(
-                                      width: 15, height: 15,
-                                      child: CircularProgressIndicator(color: Colors.black,strokeWidth: 2,)
-                                    )
-                                  : Text(
-                                      "Update", style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black
-                                      ),
-                                    )
-                          ),
+                      SizedBox(height: 5,),
+                      Text("  Account types"),
+                      SizedBox(height: 5,),
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: color1
+                        ),
+                        child: _utils.where((test) => test.checked == 'true').toList().isEmpty
+                            ?  Text('No account type added', style: TextStyle(color: secondaryColor),)
+                            :  Wrap(
+                          spacing: 5,runSpacing: 5,
+                          children: _utils.where((test) => test.checked == 'true').map((account){
+                            return Container(
+                              padding: EdgeInsets.symmetric(vertical: 3, horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: color1,
+                                borderRadius: BorderRadius.circular(5)
+                              ),
+                              child: Text(account.text, style: TextStyle(color: secondaryColor)),
+                            );
+                          }).toList(),
                         ),
                       ),
-                      TextButton(
-                          onPressed: (){
-                            setState(() {
-                              _edit = false;
-                              _busno.text = bill.businessno;
-                              _accno.text = bill.accountno;
-                              _selectedOption = bill.type;
-                            });
-                          },
-                          child: Text("Cancel")
-                      )
-                    ],
-                  ),
-                )
-            : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: color1
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Business No",
-                            style: TextStyle(color: secondaryColor),
-                          ),
-                          Text(bill.businessno),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 10,),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: color1
-                      ),
-                      child:bill.type == "Different"
-                          ? Text(
-                            "Different accounts for different units",
-                            style: TextStyle(color: secondaryColor),
-                          )
-                          : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Account no",
-                                style: TextStyle(color: secondaryColor),
-                              ),
-                              Text(bill.accountno),
-                            ],
-                          ),
-                    ),
-                    SizedBox(height: 10,),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: color1
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Created on",
-                            style: TextStyle(color: secondaryColor),
-                          ),
-                          Text(DateFormat.yMMMEd().format(DateTime.parse(bill.time))),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 5,),
-                    Text("  Account types"),
-                    SizedBox(height: 5,),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: color1
-                      ),
-                      child: _utils.where((test) => test.checked == 'true').toList().isEmpty
-                          ?  Text('No account type added', style: TextStyle(color: secondaryColor),)
-                          :  Wrap(
-                        spacing: 5,runSpacing: 5,
-                        children: _utils.where((test) => test.checked == 'true').map((account){
-                          return Container(
-                            padding: EdgeInsets.symmetric(vertical: 3, horizontal: 8),
-                            decoration: BoxDecoration(
-                              color: color1,
-                              borderRadius: BorderRadius.circular(5)
+                      Expanded(child: SizedBox()),
+                      Container(
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: CupertinoColors.activeGreen.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(CupertinoIcons.checkmark_shield_fill, color: CupertinoColors.activeGreen,size: 50,),
+                            SizedBox(width: 10,),
+                            Expanded(
+                                child: Text('We adhere entirely to the data security standards of the payment card industry.')
                             ),
-                            child: Text(account.text, style: TextStyle(color: secondaryColor)),
-                          );
-                        }).toList(),
+                            SizedBox(width: 10,),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(child: SizedBox()),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          color: CupertinoColors.activeGreen.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10)
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(CupertinoIcons.checkmark_shield_fill, color: CupertinoColors.activeGreen,size: 50,),
-                          SizedBox(width: 10,),
-                          Expanded(
-                              child: Text('We adhere entirely to the data security standards of the payment card industry.')
-                          ),
-                          SizedBox(width: 10,),
-                        ],
-                      ),
-                    ),
-                  ],
-            ),
+                    ],
+              ),
+        ),
       ),
     );
   }
