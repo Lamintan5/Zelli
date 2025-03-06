@@ -100,7 +100,8 @@ class _UtilScreenState extends State<UtilScreen> {
         child: Column(
           children: [
             Expanded(
-                child: Padding(
+                child: Container(
+                  width: 500,
                   padding: const EdgeInsets.all(8.0),
                   child: SingleChildScrollView(
                     child: Column(
@@ -240,7 +241,8 @@ class _UtilScreenState extends State<UtilScreen> {
                   ),
                 ),
               ),
-            )
+            ),
+            Row()
           ],
         ),
       ),

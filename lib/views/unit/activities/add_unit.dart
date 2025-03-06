@@ -189,9 +189,12 @@ class _AddUnitState extends State<AddUnit> {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         key: formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
-              child: Padding(
+              child: Container(
+                width:500,
                 padding: const EdgeInsets.all(8.0),
                 child: SingleChildScrollView(
                   physics: BouncingScrollPhysics(),
@@ -338,11 +341,15 @@ class _AddUnitState extends State<AddUnit> {
                         },
                       ),
                       SizedBox(height: 30,),
-                      Text(
+                      _bills.isEmpty
+                          ? SizedBox()
+                          : Text(
                         "Payment Method",
                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
                       ),
-                      ListView.builder(
+                      _bills.isEmpty
+                          ? SizedBox()
+                          : ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
                           itemCount: _bills.length,
@@ -431,6 +438,7 @@ class _AddUnitState extends State<AddUnit> {
                 ),
               ),
             ),
+            Row(),
           ],
         ),
       ),
