@@ -295,6 +295,7 @@ class SocketManager extends GetxController  {
         text: text,
         message: message,
         actions: actions,
+        image: "",
         type: type,
         seen: "",
         deleted: "",

@@ -628,6 +628,9 @@ class _ItemReqTntState extends State<ItemReqTnt> {
                   uid: notifModel.text.toString(),
                   rent: unitmodel.price,
                   deposit: unitmodel.deposit,
+                  deduct: '0.0',
+                  refund: '0.0',
+                  balance: '0.0',
                   start: DateTime.now().toString(),
                   end: "",
                   checked: "true"
