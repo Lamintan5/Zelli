@@ -19,6 +19,7 @@ import '../models/stars.dart';
 import '../models/lease.dart';
 import '../models/units.dart';
 import '../models/users.dart';
+import '../widgets/text/text_format.dart';
 
 
 
@@ -673,7 +674,7 @@ class Services{
       var map = new Map<String, dynamic>();
       map["action"] = _UPDATE_PASS;
       map["uid"] = uid;
-      map["password"] = password;
+      map["password"] = TFormat().encryptText(password, uid);
       final response = await http.post(Uri.parse(_USERS), body: map);
       return response.body;
     } catch (e) {

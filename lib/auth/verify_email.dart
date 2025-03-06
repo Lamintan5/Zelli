@@ -18,6 +18,7 @@ import '../models/users.dart';
 import '../resources/services.dart';
 import '../resources/socket.dart';
 import '../utils/colors.dart';
+import '../widgets/text/text_format.dart';
 import '../widgets/time_counter.dart';
 
 class VerifyEmail extends StatefulWidget {
@@ -159,7 +160,7 @@ class _VerifyEmailState extends State<VerifyEmail> {
         sharedPreferences.setString('image', user.image.toString());
         sharedPreferences.setString('phone', user.phone.toString());
         sharedPreferences.setString('token', deviceModel.id.toString());
-        sharedPreferences.setString('password', md5.convert(utf8.encode(user.password.toString())).toString());
+        sharedPreferences.setString('password', user.password.toString());
         sharedPreferences.setString('country', user.country.toString());
         currentUser = UserModel(
           uid: user.uid.toString(),
@@ -273,8 +274,19 @@ class _VerifyEmailState extends State<VerifyEmail> {
                           height: 20,
                         ),
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            Container(
+                              padding: EdgeInsets.all(20),
+                              margin: EdgeInsets.fromLTRB(0, 30, 0, 10),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                      width: 1, color: secondaryColor
+                                  )
+                              ),
+                              child: Icon(Icons.dialpad),
+                            ),
                             Text(
                               "Verify Email",
                               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
